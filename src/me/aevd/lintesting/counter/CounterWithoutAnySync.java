@@ -1,4 +1,4 @@
-package me.aevd.lintesting;
+package me.aevd.lintesting.counter;
 
 public class CounterWithoutAnySync implements Counter {
     private int c;
