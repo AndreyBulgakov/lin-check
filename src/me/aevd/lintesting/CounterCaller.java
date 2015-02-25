@@ -1,5 +1,8 @@
 package me.aevd.lintesting;
 
+import me.aevd.lintesting.counter.Counter;
+import me.aevd.lintesting.util.Result;
+
 public class CounterCaller {
     Counter counter;
 
@@ -7,13 +10,20 @@ public class CounterCaller {
         this.counter = counter;
     }
 
+    public void setCounter(Counter counter) {
+        this.counter = counter;
+    }
+
     /*
         0 - incrementAndGet()
     */
-    int call(int method) {
+    Result call(int method) {
+        Result res = new Result();
+
         if (method == 0) {
-            return counter.incrementAndGet();
+            Integer value = counter.incrementAndGet();
+            res.setValue(value);
         }
-        return -1;
+        return res;
     }
 }

@@ -1,11 +1,21 @@
 package me.aevd.lintesting;
 
+import me.aevd.lintesting.counter.CounterSynchronized;
+import me.aevd.lintesting.transfer.Accounts;
+import me.aevd.lintesting.transfer.AccountsSynchronized;
+
 public class Main {
     public static void main(String[] args) {
-        Counter counter = new CounterWithoutAnySync();
-        CounterCaller caller = new CounterCaller(counter);
-        System.out.println(caller.call(0));
-        System.out.println(caller.call(-1));
-        System.out.println(caller.call(0));
+
+//        CounterTester tester = new CounterTester();
+//        AccountsTester tester = new AccountsTester();
+//
+//        tester.test();
+
+
+        Test test = new Test();
+
+
     }
 }
+
