@@ -3,12 +3,14 @@ package me.aevd.lintesting;
 
 import me.aevd.lintesting.transfer.Accounts;
 import me.aevd.lintesting.transfer.AccountsSynchronized;
+import me.aevd.lintesting.util.Actor;
 import me.aevd.lintesting.util.Caller;
 import me.aevd.lintesting.util.Result;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.Random;
 
 public class AccountsCaller implements Caller {
     Accounts accounts;
@@ -60,5 +62,30 @@ public class AccountsCaller implements Caller {
             res.setVoid();
         }
         return res;
+    }
+
+
+    public Actor[][] generateActors(int numThreads) {
+        Random random = new Random();
+
+        Actor[][] actors = new Actor[numThreads][];
+        int ind = 0;
+        for (int i = 0; i < numThreads; i++) {
+            int cnt = random.nextInt(2) + 1;
+            actors[i] = new Actor[cnt];
+            for (int j = 0; j < cnt; j++) {
+                int t = random.nextInt(3);
+                if (t == 0) {
+                    actors[i][j] = new Actor(ind++, 0, random.nextInt(2));
+                } else if (t == 1) {
+//                        actors[i][j] = new Actor(ind++, 1, random.nextInt(2), random.nextInt(10));
+                    j--;
+                } else if (t == 2) {
+                    actors[i][j] = new Actor(ind++, 2, random.nextInt(2), random.nextInt(2), random.nextInt(10));
+                }
+            }
+        }
+
+        return actors;
     }
 }

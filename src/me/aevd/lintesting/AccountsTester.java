@@ -74,52 +74,16 @@ public class AccountsTester {
         for (int iter = 0; iter < COUNT_ITER; iter++) {
             Thread[] threads = new Thread[COUNT_THREADS];
 
-
-            Actor[][] actors = new Actor[COUNT_THREADS][];
-            int ind = 0;
+            Actor[][] actors = caller.generateActors(COUNT_THREADS);
             int countActors = 0;
-            for (int i = 0; i < COUNT_THREADS; i++) {
-                int cnt = random.nextInt(2) + 1;
-//                if (i == 0) {
-//                    cnt = 10;
-//                }
-                countActors += cnt;
-                actors[i] = new Actor[cnt];
-                for (int j = 0; j < cnt; j++) {
-                    int t = random.nextInt(3);
-                    if (t == 0) {
-                        actors[i][j] = new Actor(ind++, 0, random.nextInt(2));
-                    } else if (t == 1) {
-//                        actors[i][j] = new Actor(ind++, 1, random.nextInt(2), random.nextInt(10));
-                        j--;
-                    } else if (t == 2) {
-                        actors[i][j] = new Actor(ind++, 2, random.nextInt(2), random.nextInt(2), random.nextInt(10));
-                    }
-                }
+            for (Actor[] actor : actors) {
+                countActors += actor.length;
             }
-    /*
-        0 - getAmount(id)
-        1 - setAmount(id, value)
-        2 - transfer(from, to, value)
-    */
-
-//            actors = new Actor[2][];
-//            countActors = 3;
-//            actors[0] = new Actor[2];
-//            actors[0][0] = new Actor(0, 0, 0);
-//            actors[0][1] = new Actor(1, 0, 1);
-//
-//            actors[1] = new Actor[1];
-//            actors[1][0] = new Actor(2, 2, 0, 1, 5);
-
 
             for (int i = 0; i < actors.length; i++) {
                 System.out.println(Arrays.asList(actors[i]));
             }
             System.out.println();
-//            if (true) {
-//                continue;
-//            }
 
 
             Actor[][] perms = genPermutations(actors, countActors);
