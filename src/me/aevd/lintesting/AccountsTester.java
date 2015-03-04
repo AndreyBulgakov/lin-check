@@ -17,8 +17,8 @@ public class AccountsTester {
     int COUNT_ITER = 1000;
     int COUNT_THREADS = 3;
 
-    public AccountsTester() {
-        caller = new AccountsCaller(AccountsSynchronized.class);
+    public AccountsTester(Caller caller) {
+        this.caller = caller;
     }
 
     private void genHelper(List<Actor[]> result, Actor[] out, int countUsed, int countActors, Actor[][] actors, int[] inds) {
