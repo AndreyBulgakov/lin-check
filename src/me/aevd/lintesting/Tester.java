@@ -1,6 +1,5 @@
 package me.aevd.lintesting;
 
-import me.aevd.lintesting.transfer.AccountsSynchronized;
 import me.aevd.lintesting.util.Actor;
 import me.aevd.lintesting.util.Caller;
 import me.aevd.lintesting.util.Result;
@@ -12,16 +11,16 @@ import java.util.Random;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
-public class AccountsTester {
+public class Tester {
     Caller caller;
     int COUNT_ITER = 1000;
     int COUNT_THREADS = 3;
 
-    public AccountsTester(Caller caller) {
+    public Tester(Caller caller) {
         this.caller = caller;
     }
 
-    private void genHelper(List<Actor[]> result, Actor[] out, int countUsed, int countActors, Actor[][] actors, int[] inds) {
+    private void genPermutationsHelper(List<Actor[]> result, Actor[] out, int countUsed, int countActors, Actor[][] actors, int[] inds) {
         if (countActors == countUsed) {
             result.add(out.clone());
         } else {
@@ -32,7 +31,7 @@ public class AccountsTester {
                     out[countUsed] = call;
                     countUsed++;
 
-                    genHelper(result, out, countUsed, countActors, actors, inds);
+                    genPermutationsHelper(result, out, countUsed, countActors, actors, inds);
 
                     countUsed--;
                     inds[i]--;
@@ -45,13 +44,20 @@ public class AccountsTester {
         Actor[] out = new Actor[countActors];
         int[] inds = new int[COUNT_THREADS];
         List<Actor[]> perms = new ArrayList<>();
-        genHelper(perms, out, 0, countActors, actors, inds);
+        genPermutationsHelper(perms, out, 0, countActors, actors, inds);
 
         return perms.toArray(new Actor[perms.size()][]);
     }
 
-    private Result[][] linearExecution(Actor[][] perms) {
-        final Result[][] results = new Result[perms.length][];
+    private Result[][] executeLinear(Actor[][] actors, int countActors) {
+        Actor[][] perms = genPermutations(actors, countActors);
+        // print all possible executions
+//        for (int i = 0; i < perms.length; i++) {
+//            System.out.println(Arrays.asList(perms[i]));
+//        }
+//        System.out.println();
+
+        Result[][] results = new Result[perms.length][];
 
         for (int i = 0; i < perms.length; i++) {
             Actor[] localActors = perms[i];
@@ -72,6 +78,7 @@ public class AccountsTester {
         Random random = new Random();
 
         for (int iter = 0; iter < COUNT_ITER; iter++) {
+            System.out.println("iter = " + iter);
             Thread[] threads = new Thread[COUNT_THREADS];
 
             Actor[][] actors = caller.generateActors(COUNT_THREADS);
@@ -80,39 +87,28 @@ public class AccountsTester {
                 countActors += actor.length;
             }
 
+            System.out.println("Thread configuration:");
             for (int i = 0; i < actors.length; i++) {
                 System.out.println(Arrays.asList(actors[i]));
             }
             System.out.println();
 
+            Result[][] linearResults = executeLinear(actors, countActors);
+            // print linear results
+//            System.out.println();
+//            for (int i = 0; i < linearResults.length; i++) {
+//                System.out.println(Arrays.asList(linearResults[i]));
+//            }
+//            System.out.println();
 
-            Actor[][] perms = genPermutations(actors, countActors);
-
-            for (int i = 0; i < perms.length; i++) {
-                System.out.println(Arrays.asList(perms[i]));
-            }
-            System.out.println();
-
-
-            Result[][] lin = linearExecution(perms);
-            System.out.println();
-            for (int i = 0; i < lin.length; i++) {
-                System.out.println(Arrays.asList(lin[i]));
-            }
-            System.out.println();
-
-            int[] countLin = new int[lin.length];
-
-
+            int[] cntLinear = new int[linearResults.length];
 
             boolean errorFound = false;
+            System.out.println("Progress:");
+            System.out.printf("[%d] ", 10000);
             for (int threads_num = 0; threads_num < 10000; threads_num++) {
                 if (threads_num % 1000 == 0) {
-                    System.out.printf("%d : ", threads_num);
-                    for (int i = 0; i < countLin.length; i++) {
-                        System.out.printf("%d ", countLin[i]);
-                    }
-                    System.out.println();
+                    System.out.printf("%d ", threads_num);
                 }
                 final Result[] results = new Result[countActors];
                 caller.reload();
@@ -150,26 +146,27 @@ public class AccountsTester {
                 }
 
                 boolean correct = false;
-                for (int i = 0; i < lin.length; i++) {
-                    if (Arrays.equals(lin[i], results)) {
+                for (int i = 0; i < linearResults.length; i++) {
+                    if (Arrays.equals(linearResults[i], results)) {
                         correct = true;
-                        countLin[i]++;
+                        cntLinear[i]++;
                         break;
                     }
                 }
-                if (correct) {
-//                System.out.println("ok");
-                } else {
-                    System.out.println("error!");
+                if (!correct) {
+                    System.out.println();
+                    System.out.println("Error. Unexpected result:");
                     System.out.println(Arrays.asList(results));
                     errorFound = true;
                     break;
                 }
-//                System.out.println(Arrays.asList(results));
             }
-            for (int i = 0; i < countLin.length; i++) {
-                System.out.printf("%d ", countLin[i]);
+            System.out.println();
+            System.out.printf("Histogram: ");
+            for (int i = 0; i < cntLinear.length; i++) {
+                System.out.printf("%d ", cntLinear[i]);
             }
+            System.out.println();
             System.out.println();
             if (errorFound) {
                 break;

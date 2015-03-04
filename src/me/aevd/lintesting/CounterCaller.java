@@ -3,6 +3,7 @@ package me.aevd.lintesting;
 import me.aevd.lintesting.counter.Counter;
 import me.aevd.lintesting.util.Result;
 
+// TODO use main Tester class
 public class CounterCaller {
     Counter counter;
 

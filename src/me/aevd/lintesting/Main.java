@@ -1,13 +1,12 @@
 package me.aevd.lintesting;
 
-import me.aevd.lintesting.counter.CounterSynchronized;
-import me.aevd.lintesting.transfer.Accounts;
 import me.aevd.lintesting.transfer.AccountsSynchronized;
+import me.aevd.lintesting.util.Caller;
 
 public class Main {
     public static void main(String[] args) {
-        AccountsCaller caller = new AccountsCaller(AccountsSynchronized.class);
-        AccountsTester tester = new AccountsTester(caller);
+        Caller caller = new AccountsCaller(AccountsSynchronized.class);
+        Tester tester = new Tester(caller);
         tester.test();
     }
 }
