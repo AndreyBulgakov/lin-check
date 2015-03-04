@@ -3,13 +3,14 @@ package me.aevd.lintesting;
 
 import me.aevd.lintesting.transfer.Accounts;
 import me.aevd.lintesting.transfer.AccountsSynchronized;
+import me.aevd.lintesting.util.Caller;
 import me.aevd.lintesting.util.Result;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 
-public class AccountsCaller {
+public class AccountsCaller implements Caller {
     Accounts accounts;
 
     Class objClass;
@@ -39,7 +40,7 @@ public class AccountsCaller {
         1 - setAmount(id, value)
         2 - transfer(from, to, value)
     */
-    Result call(int method, Object... args) {
+    public Result call(int method, Object... args) {
         Result res = new Result();
 
         if (method == 0) {

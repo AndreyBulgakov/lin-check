@@ -2,6 +2,7 @@ package me.aevd.lintesting;
 
 import me.aevd.lintesting.transfer.AccountsSynchronized;
 import me.aevd.lintesting.util.Actor;
+import me.aevd.lintesting.util.Caller;
 import me.aevd.lintesting.util.Result;
 
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
 public class AccountsTester {
-    AccountsCaller caller;
+    Caller caller;
     int COUNT_ITER = 1000;
     int COUNT_THREADS = 3;
 
