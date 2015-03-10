@@ -8,13 +8,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.*;
 
 public class Tester {
     Caller caller;
     int COUNT_ITER = 1000;
-    int COUNT_THREADS = 3;
+    int COUNT_THREADS = 2;
 
     public Tester(Caller caller) {
         this.caller = caller;
@@ -52,10 +51,10 @@ public class Tester {
     private Result[][] executeLinear(Actor[][] actors, int countActors) {
         Actor[][] perms = genPermutations(actors, countActors);
         // print all possible executions
-//        for (int i = 0; i < perms.length; i++) {
-//            System.out.println(Arrays.asList(perms[i]));
-//        }
-//        System.out.println();
+        for (int i = 0; i < perms.length; i++) {
+            System.out.println(Arrays.asList(perms[i]));
+        }
+        System.out.println();
 
         Result[][] results = new Result[perms.length][];
 
@@ -75,7 +74,10 @@ public class Tester {
     }
 
     public void test() {
-        Random random = new Random();
+        final Random random = new Random();
+
+        ExecutorService pool = Executors.newFixedThreadPool(COUNT_THREADS);
+        final CyclicBarrier barrier = new CyclicBarrier(COUNT_THREADS);
 
         for (int iter = 0; iter < COUNT_ITER; iter++) {
             System.out.println("iter = " + iter);
@@ -95,27 +97,27 @@ public class Tester {
 
             Result[][] linearResults = executeLinear(actors, countActors);
             // print linear results
-//            System.out.println();
-//            for (int i = 0; i < linearResults.length; i++) {
-//                System.out.println(Arrays.asList(linearResults[i]));
-//            }
-//            System.out.println();
+            System.out.println();
+            for (int i = 0; i < linearResults.length; i++) {
+                System.out.println(Arrays.asList(linearResults[i]));
+            }
+            System.out.println();
 
             int[] cntLinear = new int[linearResults.length];
 
             boolean errorFound = false;
             System.out.println("Progress:");
-            System.out.printf("[%d] ", 10000);
-            for (int threads_num = 0; threads_num < 10000; threads_num++) {
-                if (threads_num % 1000 == 0) {
+            System.out.printf("[%d] ", 100000);
+            for (int threads_num = 0; threads_num < 100000; threads_num++) {
+                if (threads_num % 10000 == 0) {
                     System.out.printf("%d ", threads_num);
                 }
                 final Result[] results = new Result[countActors];
                 caller.reload();
-                final CyclicBarrier barrier = new CyclicBarrier(COUNT_THREADS);
+                List<Future<?>> futures = new ArrayList<>();
                 for (int i = 0; i < COUNT_THREADS; i++) {
                     final Actor[] threadActors = actors[i];
-                    threads[i] = new Thread(new Runnable() {
+                    Runnable r = new Runnable() {
                         @Override
                         public void run() {
                             try {
@@ -129,21 +131,22 @@ public class Tester {
                                 results[actor.ind] = caller.call(actor.method, actor.args);
                             }
                         }
-                    });
+                    };
+
+                    futures.add(pool.submit(r));
                 }
 
-                for (Thread thread : threads) {
-                    thread.start();
-                }
-
-
-                for (Thread thread : threads) {
+                for (Future<?> future : futures) {
                     try {
-                        thread.join();
+                        future.get();
                     } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } catch (ExecutionException e) {
                         e.printStackTrace();
                     }
                 }
+                barrier.reset();
+
 
                 boolean correct = false;
                 for (int i = 0; i < linearResults.length; i++) {
@@ -172,6 +175,7 @@ public class Tester {
                 break;
             }
         }
+        pool.shutdown();
         System.out.println("finish");
     }
 }
