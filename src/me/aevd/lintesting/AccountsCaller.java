@@ -77,11 +77,14 @@ public class AccountsCaller implements Caller {
                 int t = random.nextInt(3);
                 if (t == 0) {
                     actors[i][j] = new Actor(ind++, 0, random.nextInt(2));
+                    actors[i][j].methodName = "get";
                 } else if (t == 1) {
-//                        actors[i][j] = new Actor(ind++, 1, random.nextInt(2), random.nextInt(10));
-                    j--;
+                    actors[i][j] = new Actor(ind++, 1, random.nextInt(2), random.nextInt(10));
+                    actors[i][j].methodName = "set";
+//                    j--;
                 } else if (t == 2) {
                     actors[i][j] = new Actor(ind++, 2, random.nextInt(2), random.nextInt(2), random.nextInt(10));
+                    actors[i][j].methodName = "transfer";
                 }
             }
         }

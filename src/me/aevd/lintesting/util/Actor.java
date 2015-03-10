@@ -6,6 +6,7 @@ public class Actor {
     public int ind;
     public int method;
     public Object[] args;
+    public String methodName;
 
     public Actor(int method, int ind) {
         this.method = method;
@@ -20,9 +21,9 @@ public class Actor {
 
     @Override
     public String toString() {
-        return "Actor" + ind +
-                "{" + method +
-                " (" + Arrays.toString(args) +
-                ")}";
+        return "Actor-" + ind +
+                "{ " + methodName +
+                "(" + Arrays.toString(args) +
+                ") }";
     }
 }
