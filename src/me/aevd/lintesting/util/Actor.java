@@ -8,7 +8,7 @@ public class Actor {
     public Object[] args;
     public String methodName;
 
-    public Actor(int method, int ind) {
+    public Actor(int ind, int method) {
         this.method = method;
         this.ind = ind;
     }
