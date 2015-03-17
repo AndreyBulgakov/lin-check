@@ -7,7 +7,7 @@ public class Main {
     public static void main(String[] args) {
         Caller caller = new AccountsCaller(AccountsSynchronized.class);
         Tester tester = new Tester(caller);
-        tester.test();
+        System.out.println(tester.check());
     }
 }
 
