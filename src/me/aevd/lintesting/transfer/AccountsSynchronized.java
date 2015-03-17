@@ -27,6 +27,7 @@ public class AccountsSynchronized implements Accounts {
 
     @Override
     public synchronized void transfer(int id1, int id2, int value) {
+        if (id1 == id2) return;
         Integer v1 = data.get(id1);
         Integer v2 = data.get(id2);
         if (v1 == null) v1 = 0;

@@ -73,12 +73,11 @@ public class Tester {
         return results;
     }
 
-    public void test() {
-        final Random random = new Random();
-
+    public boolean check() {
         ExecutorService pool = Executors.newFixedThreadPool(COUNT_THREADS);
         final CyclicBarrier barrier = new CyclicBarrier(COUNT_THREADS);
 
+        boolean errorFound = false;
         for (int iter = 0; iter < COUNT_ITER; iter++) {
             System.out.println("iter = " + iter);
             Thread[] threads = new Thread[COUNT_THREADS];
@@ -105,7 +104,6 @@ public class Tester {
 
             int[] cntLinear = new int[linearResults.length];
 
-            boolean errorFound = false;
             System.out.println("Progress:");
             System.out.printf("[%d] ", 100000);
             for (int threads_num = 0; threads_num < 100000; threads_num++) {
@@ -177,5 +175,6 @@ public class Tester {
         }
         pool.shutdown();
         System.out.println("finish");
+        return !errorFound;
     }
 }

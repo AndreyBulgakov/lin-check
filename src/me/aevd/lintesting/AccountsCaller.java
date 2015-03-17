@@ -81,9 +81,16 @@ public class AccountsCaller implements Caller {
                 } else if (t == 1) {
                     actors[i][j] = new Actor(ind++, 1, random.nextInt(2), random.nextInt(10));
                     actors[i][j].methodName = "set";
-//                    j--;
                 } else if (t == 2) {
-                    actors[i][j] = new Actor(ind++, 2, random.nextInt(2), random.nextInt(2), random.nextInt(10));
+                    int from = -1;
+                    int to = -1;
+
+                    while (from == to) {
+                        from = random.nextInt(2);
+                        to = random.nextInt(2);
+                    }
+
+                    actors[i][j] = new Actor(ind++, 2, from, to, random.nextInt(10));
                     actors[i][j].methodName = "transfer";
                 }
             }

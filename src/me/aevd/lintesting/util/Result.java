@@ -3,6 +3,8 @@ package me.aevd.lintesting.util;
 public class Result {
     ResultType resType;
     Integer value;
+    Class exceptionClass;
+
 
     public Result() {
         resType = ResultType.UNDEFINED;
@@ -16,8 +18,9 @@ public class Result {
     public void setVoid() {
         resType = ResultType.VOID;
     }
-    public void setException() {
+    public void setException(Exception e) {
         resType = ResultType.EXCEPTION;
+        exceptionClass = e.getClass();
     }
     public void setTimeout() {
         resType = ResultType.TIMEOUT;
@@ -26,10 +29,6 @@ public class Result {
     @Override
     public String toString() {
         return "Result{" + resType + " : " + value + "}";
-//        return "Result{" +
-//                "resType=" + resType +
-//                ", value=" + value +
-//                '}';
     }
 
     @Override
@@ -40,6 +39,9 @@ public class Result {
         Result result = (Result) o;
 
         if (resType != result.resType) return false;
+        if (exceptionClass != null ? !exceptionClass.equals(result.exceptionClass) : result.exceptionClass != null) {
+            return false;
+        }
         if (value != null ? !value.equals(result.value) : result.value != null) return false;
 
         return true;
@@ -49,6 +51,7 @@ public class Result {
     public int hashCode() {
         int result = resType.hashCode();
         result = 31 * result + (value != null ? value.hashCode() : 0);
+        result = 31 * result + (exceptionClass != null ? exceptionClass.hashCode() : 0);
         return result;
     }
 }
