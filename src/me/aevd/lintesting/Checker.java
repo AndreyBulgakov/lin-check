@@ -10,12 +10,12 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.*;
 
-public class Tester {
+public class Checker {
     Caller caller;
     int COUNT_ITER = 1000;
     int COUNT_THREADS = 2;
 
-    public Tester(Caller caller) {
+    public Checker(Caller caller) {
         this.caller = caller;
     }
 
