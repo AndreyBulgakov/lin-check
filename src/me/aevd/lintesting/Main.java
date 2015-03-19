@@ -8,8 +8,8 @@ public class Main {
 //        Caller caller = new QueueCaller(AccountsSynchronized.class);
 
         Caller caller = new QueueCaller(QueueWithoutAnySync.class);
-        Checker checker = new Checker(caller);
-        System.out.println(checker.check());
+        Checker checker = new Checker();
+        System.out.println(checker.check(caller));
     }
 }
 

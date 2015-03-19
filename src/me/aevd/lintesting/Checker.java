@@ -15,8 +15,7 @@ public class Checker {
     int COUNT_ITER = 1000;
     int COUNT_THREADS = 2;
 
-    public Checker(Caller caller) {
-        this.caller = caller;
+    public Checker() {
     }
 
     private void genPermutationsHelper(List<Actor[]> result, Actor[] out, int countUsed, int countActors, Actor[][] actors, int[] inds) {
@@ -73,7 +72,9 @@ public class Checker {
         return results;
     }
 
-    public boolean check() {
+    public boolean check(Caller callerArg) {
+        this.caller = callerArg;
+
         ExecutorService pool = Executors.newFixedThreadPool(COUNT_THREADS);
         final CyclicBarrier barrier = new CyclicBarrier(COUNT_THREADS);
 
