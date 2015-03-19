@@ -2,6 +2,7 @@ package me.aevd.lintesting;
 
 
 import me.aevd.lintesting.queue.Queue;
+import me.aevd.lintesting.queue.QueueWithoutAnySync;
 import me.aevd.lintesting.util.Actor;
 import me.aevd.lintesting.util.Caller;
 import me.aevd.lintesting.util.Result;
@@ -75,5 +76,11 @@ public class QueueCaller implements Caller {
         }
 
         return actors;
+    }
+
+    public static void main(String[] args) {
+        Checker checker = new Checker();
+        Caller caller = new QueueCaller(QueueWithoutAnySync.class);
+        System.out.println(checker.check(caller));
     }
 }
