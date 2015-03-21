@@ -40,8 +40,11 @@ public class QueueCaller implements Caller {
         0 public int put(int x);
         1 public int get();
     */
-    public Result call(int method, Object... args) {
+    public Result call(Actor act) {
         Result res = new Result();
+
+        int method = act.method;
+        Object[] args = act.args;
 
         if (method == 0) {
             Integer x = (Integer) args[0];

@@ -47,8 +47,21 @@ public class Checker {
         return perms.toArray(new Actor[perms.size()][]);
     }
 
+    private void executeActors(Caller caller, Actor[] actors, Result[] result) {
+        for (Actor actor : actors) {
+            result[actor.ind] = caller.call(actor);
+        }
+    }
+
+    private Result[] executeActors(Caller caller, Actor[] actors) {
+        Result[] result = new Result[actors.length];
+        executeActors(caller, actors, result);
+        return result;
+    }
+
     private Result[][] executeLinear(Actor[][] actors, int countActors) {
         Actor[][] perms = genPermutations(actors, countActors);
+
         // print all possible executions
         for (int i = 0; i < perms.length; i++) {
             System.out.println(Arrays.asList(perms[i]));
@@ -56,23 +69,14 @@ public class Checker {
         System.out.println();
 
         Result[][] results = new Result[perms.length][];
-
         for (int i = 0; i < perms.length; i++) {
-            Actor[] localActors = perms[i];
-            Result[] localResult = new Result[localActors.length];
-
             caller.reload();
-
-            for (int j = 0; j < localActors.length; j++) {
-                localResult[localActors[j].ind] = caller.call(localActors[j].method, localActors[j].args);
-            }
-
-            results[i] = localResult;
+            results[i] = executeActors(caller, perms[i]);
         }
         return results;
     }
 
-    public boolean check(Caller callerArg) {
+    public boolean check(final Caller callerArg) {
         this.caller = callerArg;
 
         ExecutorService pool = Executors.newFixedThreadPool(COUNT_THREADS);
@@ -126,9 +130,7 @@ public class Checker {
                             } catch (BrokenBarrierException e) {
                                 e.printStackTrace();
                             }
-                            for (Actor actor : threadActors) {
-                                results[actor.ind] = caller.call(actor.method, actor.args);
-                            }
+                            executeActors(callerArg, threadActors, results);
                         }
                     };
 

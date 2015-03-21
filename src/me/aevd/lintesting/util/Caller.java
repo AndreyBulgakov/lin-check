@@ -2,6 +2,6 @@ package me.aevd.lintesting.util;
 
 public interface Caller {
     public void reload();
-    Result call(int method, Object... args);
+    Result call(Actor act);
     Actor[][] generateActors(int numThreads);
 }

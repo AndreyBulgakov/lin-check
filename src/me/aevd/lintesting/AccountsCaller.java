@@ -42,8 +42,11 @@ public class AccountsCaller implements Caller {
         1 - setAmount(id, value)
         2 - transfer(from, to, value)
     */
-    public Result call(int method, Object... args) {
+    public Result call(Actor act) {
         Result res = new Result();
+
+        int method = act.method;
+        Object[] args = act.args;
 
         if (method == 0) {
             Integer id = (Integer) args[0];
