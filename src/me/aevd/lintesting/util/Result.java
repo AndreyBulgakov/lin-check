@@ -28,7 +28,10 @@ public class Result {
 
     @Override
     public String toString() {
-        return "Result{" + resType + " : " + value + "}";
+        if (resType == ResultType.EXCEPTION) {
+            return "R{" + resType + " : " + exceptionClass.getSimpleName() + "}";
+        }
+        return "R{" + resType + " : " + value + "}";
     }
 
     @Override
