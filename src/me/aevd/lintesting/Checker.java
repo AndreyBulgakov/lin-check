@@ -73,7 +73,23 @@ public class Checker {
             caller.reload();
             results[i] = executeActors(caller, perms[i]);
         }
-        return results;
+
+        List<Result[]> uniqueResults = new ArrayList<>();
+
+        for (Result[] result : results) {
+            boolean exists = false;
+            for (Result[] uniqueResult : uniqueResults) {
+                if (Arrays.equals(result, uniqueResult)) {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists) {
+                uniqueResults.add(result);
+            }
+        }
+
+        return uniqueResults.toArray(new Result[uniqueResults.size()][]);
     }
 
     public boolean check(final Caller callerArg) {
