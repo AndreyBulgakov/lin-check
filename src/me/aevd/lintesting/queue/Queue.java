@@ -1,6 +1,6 @@
 package me.aevd.lintesting.queue;
 
 public interface Queue {
-    public int put(int x);
-    public int get();
+    public void put(int x) throws QueueFullException;
+    public int get() throws QueueEmptyException;
 }
