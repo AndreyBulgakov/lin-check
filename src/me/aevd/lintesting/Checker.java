@@ -2,18 +2,18 @@ package me.aevd.lintesting;
 
 import me.aevd.lintesting.util.Actor;
 import me.aevd.lintesting.util.Caller;
+import me.aevd.lintesting.util.CheckerConfiguration;
 import me.aevd.lintesting.util.Result;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.*;
 
 public class Checker {
     Caller caller;
-    int COUNT_ITER = 1000;
-    int COUNT_THREADS = 2;
+    int COUNT_ITER;
+    int COUNT_THREADS;
 
     public Checker() {
     }
@@ -95,15 +95,20 @@ public class Checker {
     public boolean check(final Caller callerArg) {
         this.caller = callerArg;
 
+        CheckerConfiguration conf = caller.getConfiguration();
+        COUNT_ITER = conf.getNumIterations();
+        COUNT_THREADS = conf.getNumThreads();
+
+
         ExecutorService pool = Executors.newFixedThreadPool(COUNT_THREADS);
         final CyclicBarrier barrier = new CyclicBarrier(COUNT_THREADS);
 
         boolean errorFound = false;
         for (int iter = 0; iter < COUNT_ITER; iter++) {
             System.out.println("iter = " + iter);
-            Thread[] threads = new Thread[COUNT_THREADS];
 
-            Actor[][] actors = caller.generateActors(COUNT_THREADS);
+            Actor[][] actors = conf.generateActors();
+
             int countActors = 0;
             for (Actor[] actor : actors) {
                 countActors += actor.length;
