@@ -77,15 +77,17 @@ public class QueueCaller implements Caller {
                 .addThread(new Interval(1, 3))
                 .addThread(new Interval(1, 3))
                 .addActorGenerator(act1)
-                .addActorGenerator(act2));
+                .addActorGenerator(act2)
+        );
 
         res.add(new CheckerConfiguration()
-                .setNumIterations(20    )
+                .setNumIterations(20)
                 .addThread(new Interval(1, 3))
                 .addThread(new Interval(1, 3))
                 .addThread(new Interval(1, 3))
                 .addActorGenerator(act1)
-                .addActorGenerator(act2));
+                .addActorGenerator(act2)
+        );
 
         return res;
     }
