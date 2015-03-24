@@ -7,7 +7,7 @@ public class ActorGenerator {
     private String name;
     private Interval[] rangeArgs;
 
-    public ActorGenerator(int methodId, String name, Interval[] rangeArgs) {
+    public ActorGenerator(int methodId, String name, Interval... rangeArgs) {
         this.methodId = methodId;
         this.name = name;
         this.rangeArgs = rangeArgs;

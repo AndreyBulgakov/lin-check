@@ -66,8 +66,8 @@ public class QueueCaller implements Caller {
 
     public CheckerConfiguration getConfiguration() {
         ActorGenerator[] actors = new ActorGenerator[]{
-                new ActorGenerator(0, "put", new Interval[]{new Interval(1, 11)}),
-                new ActorGenerator(1, "get", new Interval[0])
+                new ActorGenerator(0, "put", new Interval(1, 11)),
+                new ActorGenerator(1, "get")
         };
 
         CheckerConfiguration conf = new CheckerConfiguration()
