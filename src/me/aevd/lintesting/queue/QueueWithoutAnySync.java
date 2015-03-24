@@ -28,20 +28,19 @@ public class QueueWithoutAnySync implements Queue {
     }
 
     @Override
-    public int put(int x) {
+    public void put(int x) throws QueueFullException {
         if (countElements == items.length) {
-            return -1;
+            throw new QueueFullException();
         }
         items[indPut] = x;
         indPut = inc(indPut);
         countElements++;
-        return 0;
     }
 
     @Override
-    public int get() {
+    public int get() throws QueueEmptyException {
         if (countElements == 0) {
-            return -1;
+            throw new QueueEmptyException();
         }
         int ret = items[indGet];
         indGet = inc(indGet);
