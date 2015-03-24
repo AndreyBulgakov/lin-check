@@ -2,7 +2,6 @@ package me.aevd.lintesting;
 
 
 import me.aevd.lintesting.transfer.Accounts;
-import me.aevd.lintesting.transfer.AccountsSynchronized;
 import me.aevd.lintesting.util.Actor;
 import me.aevd.lintesting.util.Caller;
 import me.aevd.lintesting.util.CheckerConfiguration;
@@ -10,7 +9,6 @@ import me.aevd.lintesting.util.Result;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 

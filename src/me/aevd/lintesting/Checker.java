@@ -63,8 +63,8 @@ public class Checker {
         Actor[][] perms = genPermutations(actors, countActors);
 
         // print all possible executions
-        for (int i = 0; i < perms.length; i++) {
-            System.out.println(Arrays.asList(perms[i]));
+        for (Actor[] perm : perms) {
+            System.out.println(Arrays.asList(perm));
         }
         System.out.println();
 
@@ -123,16 +123,16 @@ public class Checker {
             }
 
             System.out.println("Thread configuration:");
-            for (int i = 0; i < actors.length; i++) {
-                System.out.println(Arrays.asList(actors[i]));
+            for (Actor[] actor : actors) {
+                System.out.println(Arrays.asList(actor));
             }
             System.out.println();
 
             Result[][] linearResults = executeLinear(actors, countActors);
             // print linear results
             System.out.println();
-            for (int i = 0; i < linearResults.length; i++) {
-                System.out.println(Arrays.asList(linearResults[i]));
+            for (Result[] linearResult : linearResults) {
+                System.out.println(Arrays.asList(linearResult));
             }
             System.out.println();
 
@@ -196,8 +196,8 @@ public class Checker {
             }
             System.out.println();
             System.out.printf("Histogram: ");
-            for (int i = 0; i < cntLinear.length; i++) {
-                System.out.printf("%d ", cntLinear[i]);
+            for (int cnt : cntLinear) {
+                System.out.printf("%d ", cnt);
             }
             System.out.println();
             System.out.println();

@@ -51,8 +51,8 @@ public class CounterTester {
 
             CounterCaller caller = new CounterCaller(new CounterWithoutAnySync());
 
-            for (int j = 0; j < localActors.length; j++) {
-                localResult[localActors[j].ind] = caller.call(localActors[j].method);
+            for (Actor localActor : localActors) {
+                localResult[localActor.ind] = caller.call(localActor.method);
             }
 
             results[i] = localResult;
@@ -94,8 +94,8 @@ public class CounterTester {
                 threads[i] = new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        for (int j = 0; j < threadActors.length; j++) {
-                            results[threadActors[j].ind] = caller.call(threadActors[j].method);
+                        for (Actor threadActor : threadActors) {
+                            results[threadActor.ind] = caller.call(threadActor.method);
                         }
                     }
                 });
@@ -113,8 +113,8 @@ public class CounterTester {
             }
 
             boolean correct = false;
-            for (int i = 0; i < lin.length; i++) {
-                if (Arrays.equals(lin[i], results)) {
+            for (Result[] aLin : lin) {
+                if (Arrays.equals(aLin, results)) {
                     correct = true;
                     break;
                 }
