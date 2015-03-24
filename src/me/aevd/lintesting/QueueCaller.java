@@ -9,6 +9,8 @@ import me.aevd.lintesting.util.*;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class QueueCaller implements Caller {
     Queue queue;
@@ -64,21 +66,30 @@ public class QueueCaller implements Caller {
         return res;
     }
 
-    public CheckerConfiguration getConfiguration() {
-        ActorGenerator[] actors = new ActorGenerator[]{
-                new ActorGenerator(0, "put", new Interval(1, 11)),
-                new ActorGenerator(1, "get")
-        };
+    public List<CheckerConfiguration> getConfigurations() {
+        List<CheckerConfiguration> res = new ArrayList<>();
 
-        CheckerConfiguration conf = new CheckerConfiguration()
-                .setNumIterations(2)
+        ActorGenerator act1 = new ActorGenerator(0, "put", new Interval(1, 11));
+        ActorGenerator act2 = new ActorGenerator(1, "get");
+
+        res.add(new CheckerConfiguration()
+                .setNumIterations(20)
                 .addThread(new Interval(1, 3))
                 .addThread(new Interval(1, 3))
-                .addActorGenerator(actors[0])
-                .addActorGenerator(actors[1]);
+                .addActorGenerator(act1)
+                .addActorGenerator(act2));
 
-        return conf;
+        res.add(new CheckerConfiguration()
+                .setNumIterations(20    )
+                .addThread(new Interval(1, 3))
+                .addThread(new Interval(1, 3))
+                .addThread(new Interval(1, 3))
+                .addActorGenerator(act1)
+                .addActorGenerator(act2));
+
+        return res;
     }
+
 
     public static void main(String[] args) {
         Checker checker = new Checker();
