@@ -2,14 +2,13 @@ package me.aevd.lintesting;
 
 
 import me.aevd.lintesting.queue.Queue;
+import me.aevd.lintesting.queue.QueueEmptyException;
+import me.aevd.lintesting.queue.QueueFullException;
 import me.aevd.lintesting.queue.QueueWithoutAnySync;
-import me.aevd.lintesting.util.Actor;
-import me.aevd.lintesting.util.Caller;
-import me.aevd.lintesting.util.Result;
+import me.aevd.lintesting.util.*;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Random;
 
 public class QueueCaller implements Caller {
     Queue queue;
@@ -48,37 +47,37 @@ public class QueueCaller implements Caller {
 
         if (method == 0) {
             Integer x = (Integer) args[0];
-            Integer value = queue.put(x);
-            res.setValue(value);
+            try {
+                queue.put(x);
+                res.setVoid();
+            } catch (QueueFullException e) {
+                res.setException(e);
+            }
         } else if (method == 1) {
-            Integer value = queue.get();
-            res.setValue(value);
+            try {
+                Integer value = queue.get();
+                res.setValue(value);
+            } catch (QueueEmptyException e) {
+                res.setException(e);
+            }
         }
         return res;
     }
 
+    public CheckerConfiguration getConfiguration() {
+        ActorGenerator[] actors = new ActorGenerator[]{
+                new ActorGenerator(0, "put", new Interval[]{new Interval(1, 11)}),
+                new ActorGenerator(1, "get", new Interval[0])
+        };
 
-    public Actor[][] generateActors(int numThreads) {
-        Random random = new Random();
+        CheckerConfiguration conf = new CheckerConfiguration()
+                .setNumIterations(2)
+                .addThread(new Interval(1, 3))
+                .addThread(new Interval(1, 3))
+                .addActorGenerator(actors[0])
+                .addActorGenerator(actors[1]);
 
-        Actor[][] actors = new Actor[numThreads][];
-        int ind = 0;
-        for (int i = 0; i < numThreads; i++) {
-            int cnt = random.nextInt(2) + 1;
-            actors[i] = new Actor[cnt];
-            for (int j = 0; j < cnt; j++) {
-                int t = random.nextInt(2);
-                if (t == 0) {
-                    actors[i][j] = new Actor(ind++, 0, random.nextInt(10) + 1);
-                    actors[i][j].methodName = "put";
-                } else if (t == 1) {
-                    actors[i][j] = new Actor(ind++, 1);
-                    actors[i][j].methodName = "get";
-                }
-            }
-        }
-
-        return actors;
+        return conf;
     }
 
     public static void main(String[] args) {

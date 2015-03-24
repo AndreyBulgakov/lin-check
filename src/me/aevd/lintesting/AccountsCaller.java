@@ -5,6 +5,7 @@ import me.aevd.lintesting.transfer.Accounts;
 import me.aevd.lintesting.transfer.AccountsSynchronized;
 import me.aevd.lintesting.util.Actor;
 import me.aevd.lintesting.util.Caller;
+import me.aevd.lintesting.util.CheckerConfiguration;
 import me.aevd.lintesting.util.Result;
 
 import java.lang.reflect.Constructor;
@@ -65,6 +66,11 @@ public class AccountsCaller implements Caller {
             res.setVoid();
         }
         return res;
+    }
+
+    @Override
+    public CheckerConfiguration getConfiguration() {
+        return null; // TODO fix
     }
 
 
