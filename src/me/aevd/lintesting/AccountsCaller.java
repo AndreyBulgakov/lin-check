@@ -11,6 +11,7 @@ import me.aevd.lintesting.util.Result;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 public class AccountsCaller implements Caller {
@@ -69,7 +70,7 @@ public class AccountsCaller implements Caller {
     }
 
     @Override
-    public CheckerConfiguration getConfiguration() {
+    public List<CheckerConfiguration> getConfigurations() {
         return null; // TODO fix
     }
 

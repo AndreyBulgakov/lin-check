@@ -92,13 +92,21 @@ public class Checker {
         return uniqueResults.toArray(new Result[uniqueResults.size()][]);
     }
 
-    public boolean check(final Caller callerArg) {
-        this.caller = callerArg;
+    public boolean check(Caller caller) {
+        this.caller = caller;
 
-        CheckerConfiguration conf = caller.getConfiguration();
+        for (CheckerConfiguration conf : caller.getConfigurations()) {
+            if (!checkImpl(conf)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private boolean checkImpl(CheckerConfiguration conf) {
         COUNT_ITER = conf.getNumIterations();
         COUNT_THREADS = conf.getNumThreads();
-
 
         ExecutorService pool = Executors.newFixedThreadPool(COUNT_THREADS);
         final CyclicBarrier barrier = new CyclicBarrier(COUNT_THREADS);
@@ -151,7 +159,7 @@ public class Checker {
                             } catch (BrokenBarrierException e) {
                                 e.printStackTrace();
                             }
-                            executeActors(callerArg, threadActors, results);
+                            executeActors(caller, threadActors, results);
                         }
                     };
 
