@@ -2,7 +2,6 @@ package me.aevd.lintesting.util;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class CheckerConfiguration {
     private int numThreads;
@@ -44,13 +43,11 @@ public class CheckerConfiguration {
     }
 
     private ActorGenerator randomGenerator() {
-        Random rand = new Random();
-        return actorGenerators.get(rand.nextInt(actorGenerators.size()));
+        return actorGenerators.get(MyRandom.nextInt(actorGenerators.size()));
     }
 
     private Actor[] generateActorsArray(Interval count) {
-        Random rand = new Random();
-        int countActors = rand.nextInt(count.to - count.from) + count.from;
+        int countActors = MyRandom.fromInterval(count);
 
         Actor[] actors = new Actor[countActors];
         for (int i = 0; i < countActors; i++) {

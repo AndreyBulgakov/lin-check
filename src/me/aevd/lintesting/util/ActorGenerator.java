@@ -13,16 +13,10 @@ public class ActorGenerator {
         this.rangeArgs = rangeArgs;
     }
 
-    private static int intFromInterval(Random r, Interval iv) {
-        return r.nextInt(iv.to - iv.from) + iv.from;
-    }
-
     public Actor generate(int indActor) {
-        Random rand = new Random();
-
         Integer[] args = new Integer[rangeArgs.length];
         for (int i = 0; i < rangeArgs.length; i++) {
-            args[i] = intFromInterval(rand, rangeArgs[i]);
+            args[i] = MyRandom.fromInterval(rangeArgs[i]);
         }
 
         Actor act = new Actor(indActor, methodId, args);

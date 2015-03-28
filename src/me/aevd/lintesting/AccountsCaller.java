@@ -2,15 +2,11 @@ package me.aevd.lintesting;
 
 
 import me.aevd.lintesting.transfer.Accounts;
-import me.aevd.lintesting.util.Actor;
-import me.aevd.lintesting.util.Caller;
-import me.aevd.lintesting.util.CheckerConfiguration;
-import me.aevd.lintesting.util.Result;
+import me.aevd.lintesting.util.*;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import java.util.Random;
 
 public class AccountsCaller implements Caller {
     Accounts accounts;
@@ -74,31 +70,29 @@ public class AccountsCaller implements Caller {
 
 
     public Actor[][] generateActors(int numThreads) {
-        Random random = new Random();
-
         Actor[][] actors = new Actor[numThreads][];
         int ind = 0;
         for (int i = 0; i < numThreads; i++) {
-            int cnt = random.nextInt(2) + 1;
+            int cnt = MyRandom.nextInt(2) + 1;
             actors[i] = new Actor[cnt];
             for (int j = 0; j < cnt; j++) {
-                int t = random.nextInt(3);
+                int t = MyRandom.nextInt(3);
                 if (t == 0) {
-                    actors[i][j] = new Actor(ind++, 0, random.nextInt(2));
+                    actors[i][j] = new Actor(ind++, 0, MyRandom.nextInt(2));
                     actors[i][j].methodName = "get";
                 } else if (t == 1) {
-                    actors[i][j] = new Actor(ind++, 1, random.nextInt(2), random.nextInt(10));
+                    actors[i][j] = new Actor(ind++, 1, MyRandom.nextInt(2), MyRandom.nextInt(10));
                     actors[i][j].methodName = "set";
                 } else if (t == 2) {
                     int from = -1;
                     int to = -1;
 
                     while (from == to) {
-                        from = random.nextInt(2);
-                        to = random.nextInt(2);
+                        from = MyRandom.nextInt(2);
+                        to = MyRandom.nextInt(2);
                     }
 
-                    actors[i][j] = new Actor(ind++, 2, from, to, random.nextInt(10));
+                    actors[i][j] = new Actor(ind++, 2, from, to, MyRandom.nextInt(10));
                     actors[i][j].methodName = "transfer";
                 }
             }

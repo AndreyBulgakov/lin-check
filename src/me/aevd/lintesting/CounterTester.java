@@ -3,6 +3,7 @@ package me.aevd.lintesting;
 import me.aevd.lintesting.counter.CounterSynchronized;
 import me.aevd.lintesting.counter.CounterWithoutAnySync;
 import me.aevd.lintesting.util.Actor;
+import me.aevd.lintesting.util.MyRandom;
 import me.aevd.lintesting.util.Result;
 
 import java.util.ArrayList;
@@ -64,8 +65,6 @@ public class CounterTester {
         int COUNT_ITER = 100000;
         int COUNT_THREADS = 2;
 
-        Random random = new Random(0);
-
         for (int iter = 0; iter < COUNT_ITER; iter++) {
             final CounterCaller caller = new CounterCaller(new CounterSynchronized());
             Thread[] threads = new Thread[COUNT_THREADS];
@@ -75,7 +74,7 @@ public class CounterTester {
             int ind = 0;
             int countActors = 0;
             for (int i = 0; i < COUNT_THREADS; i++) {
-                int cnt = random.nextInt(2) + 1;
+                int cnt = MyRandom.nextInt(2) + 1;
                 countActors += cnt;
                 actors[i] = new Actor[cnt];
                 for (int j = 0; j < cnt; j++) {
