@@ -140,30 +140,38 @@ public class Checker {
 
             System.out.println("Progress:");
             System.out.printf("[%d] ", 100000);
+
+            final Result[] results = new Result[countActors];
+            for (int i = 0; i < countActors; i++) {
+                results[i] = new Result();
+            }
+
+            Runnable[] runnables = new Runnable[COUNT_THREADS];
+            for (int i = 0; i < COUNT_THREADS; i++) {
+                final Actor[] threadActors = actors[i];
+                runnables[i] = new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            barrier.await();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        } catch (BrokenBarrierException e) {
+                            e.printStackTrace();
+                        }
+                        executeActors(caller, threadActors, results);
+                    }
+                };
+            }
+
+            Future<?>[] futures = new Future[COUNT_THREADS];
             for (int threads_num = 0; threads_num < 100000; threads_num++) {
                 if (threads_num % 10000 == 0) {
                     System.out.printf("%d ", threads_num);
                 }
-                final Result[] results = new Result[countActors];
                 caller.reload();
-                List<Future<?>> futures = new ArrayList<>();
                 for (int i = 0; i < COUNT_THREADS; i++) {
-                    final Actor[] threadActors = actors[i];
-                    Runnable r = new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                barrier.await();
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            } catch (BrokenBarrierException e) {
-                                e.printStackTrace();
-                            }
-                            executeActors(caller, threadActors, results);
-                        }
-                    };
-
-                    futures.add(pool.submit(r));
+                    futures[i] = pool.submit(runnables[i]);
                 }
 
                 for (Future<?> future : futures) {
