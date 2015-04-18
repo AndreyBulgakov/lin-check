@@ -1,7 +1,7 @@
-package main.java.com.devexperts.dxlab.lincheck.util;
+package com.devexperts.dxlab.lincheck.util;
 
 public class Result {
-    ResultType resType;
+    public ResultType resType;
     Integer value;
     Class exceptionClass;
 
@@ -22,6 +22,11 @@ public class Result {
         resType = ResultType.EXCEPTION;
         exceptionClass = e.getClass();
     }
+
+    public void setUndefined() {
+        resType = ResultType.UNDEFINED;
+    }
+
     public void setTimeout() {
         resType = ResultType.TIMEOUT;
     }
@@ -42,12 +47,29 @@ public class Result {
         Result result = (Result) o;
 
         if (resType != result.resType) return false;
-        if (exceptionClass != null ? !exceptionClass.equals(result.exceptionClass) : result.exceptionClass != null) {
-            return false;
-        }
-        if (value != null ? !value.equals(result.value) : result.value != null) return false;
 
-        return true;
+        if (resType == ResultType.VOID) {
+            return true;
+        }
+
+        if (resType == ResultType.UNDEFINED) {
+            return true;
+        }
+
+        if (resType == ResultType.TIMEOUT) {
+            return true;
+        }
+
+
+        if (resType == ResultType.VALUE) {
+            return (value == null ? result.value == null : value.equals(result.value));
+        }
+
+        if (resType == ResultType.EXCEPTION) {
+            return (exceptionClass == null ? result.exceptionClass == null : exceptionClass.equals(result.exceptionClass));
+        }
+
+        return false;
     }
 
     @Override

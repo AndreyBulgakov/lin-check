@@ -1,4 +1,4 @@
-package main.java.com.devexperts.dxlab.lincheck.transfer;
+package com.devexperts.dxlab.lincheck.transfer;
 
 import java.util.HashMap;
 import java.util.Map;

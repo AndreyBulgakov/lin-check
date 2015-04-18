@@ -1,7 +1,7 @@
-package main.java.com.devexperts.dxlab.lincheck;
+package com.devexperts.dxlab.lincheck;
 
-import main.java.com.devexperts.dxlab.lincheck.queue.QueueWithoutAnySync;
-import main.java.com.devexperts.dxlab.lincheck.util.Caller;
+import com.devexperts.dxlab.lincheck.queue.QueueWithoutAnySync;
+import com.devexperts.dxlab.lincheck.util.Caller;
 
 public class Main {
     public static void main(String[] args) throws NoSuchMethodException {

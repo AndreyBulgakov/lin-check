@@ -1,4 +1,4 @@
-package main.java.com.devexperts.dxlab.lincheck.queue;
+package com.devexperts.dxlab.lincheck.queue;
 
 public interface Queue {
     public void put(int x) throws QueueFullException;

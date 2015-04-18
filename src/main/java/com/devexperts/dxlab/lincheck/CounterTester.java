@@ -1,10 +1,10 @@
-package main.java.com.devexperts.dxlab.lincheck;
+package com.devexperts.dxlab.lincheck;
 
-import main.java.com.devexperts.dxlab.lincheck.counter.CounterSynchronized;
-import main.java.com.devexperts.dxlab.lincheck.counter.CounterWithoutAnySync;
-import main.java.com.devexperts.dxlab.lincheck.util.Actor;
-import main.java.com.devexperts.dxlab.lincheck.util.MyRandom;
-import main.java.com.devexperts.dxlab.lincheck.util.Result;
+import com.devexperts.dxlab.lincheck.counter.CounterSynchronized;
+import com.devexperts.dxlab.lincheck.counter.CounterWithoutAnySync;
+import com.devexperts.dxlab.lincheck.util.Actor;
+import com.devexperts.dxlab.lincheck.util.MyRandom;
+import com.devexperts.dxlab.lincheck.util.Result;
 
 import java.util.ArrayList;
 import java.util.Arrays;

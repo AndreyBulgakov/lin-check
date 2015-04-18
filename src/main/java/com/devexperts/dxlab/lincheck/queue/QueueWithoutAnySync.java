@@ -1,4 +1,4 @@
-package main.java.com.devexperts.dxlab.lincheck.queue;
+package com.devexperts.dxlab.lincheck.queue;
 
 public class QueueWithoutAnySync implements Queue {
     private int indGet;

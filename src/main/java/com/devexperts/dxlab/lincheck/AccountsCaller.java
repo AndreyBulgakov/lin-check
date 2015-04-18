@@ -1,8 +1,8 @@
-package main.java.com.devexperts.dxlab.lincheck;
+package com.devexperts.dxlab.lincheck;
 
 
-import main.java.com.devexperts.dxlab.lincheck.transfer.Accounts;
-import main.java.com.devexperts.dxlab.lincheck.util.*;
+import com.devexperts.dxlab.lincheck.transfer.Accounts;
+import com.devexperts.dxlab.lincheck.util.*;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -38,8 +38,8 @@ public class AccountsCaller implements Caller {
         1 - setAmount(id, value)
         2 - transfer(from, to, value)
     */
-    public Result call(Actor act) {
-        Result res = new Result();
+    public void call(Actor act, Result res) {
+        res.setUndefined();
 
         int method = act.method;
         Object[] args = act.args;
@@ -60,7 +60,6 @@ public class AccountsCaller implements Caller {
             accounts.transfer(from, to, value);
             res.setVoid();
         }
-        return res;
     }
 
     @Override

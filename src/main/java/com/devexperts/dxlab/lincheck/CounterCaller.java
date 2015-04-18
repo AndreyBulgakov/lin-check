@@ -1,7 +1,7 @@
-package main.java.com.devexperts.dxlab.lincheck;
+package com.devexperts.dxlab.lincheck;
 
-import main.java.com.devexperts.dxlab.lincheck.counter.Counter;
-import main.java.com.devexperts.dxlab.lincheck.util.Result;
+import com.devexperts.dxlab.lincheck.counter.Counter;
+import com.devexperts.dxlab.lincheck.util.Result;
 
 // TODO use main Tester class
 public class CounterCaller {

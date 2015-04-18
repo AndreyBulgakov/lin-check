@@ -1,4 +1,4 @@
-package main.java.com.devexperts.dxlab.lincheck.counter;
+package com.devexperts.dxlab.lincheck.counter;
 
 public class CounterWithoutAnySync implements Counter {
     private int c;

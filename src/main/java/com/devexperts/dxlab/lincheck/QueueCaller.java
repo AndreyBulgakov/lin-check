@@ -1,11 +1,11 @@
-package main.java.com.devexperts.dxlab.lincheck;
+package com.devexperts.dxlab.lincheck;
 
 
-import main.java.com.devexperts.dxlab.lincheck.queue.Queue;
-import main.java.com.devexperts.dxlab.lincheck.queue.QueueEmptyException;
-import main.java.com.devexperts.dxlab.lincheck.queue.QueueFullException;
-import main.java.com.devexperts.dxlab.lincheck.queue.QueueWithoutAnySync;
-import main.java.com.devexperts.dxlab.lincheck.util.*;
+import com.devexperts.dxlab.lincheck.queue.Queue;
+import com.devexperts.dxlab.lincheck.queue.QueueEmptyException;
+import com.devexperts.dxlab.lincheck.queue.QueueFullException;
+import com.devexperts.dxlab.lincheck.queue.QueueWithoutAnySync;
+import com.devexperts.dxlab.lincheck.util.*;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -41,9 +41,7 @@ public class QueueCaller implements Caller {
         0 public int put(int x);
         1 public int get();
     */
-    public Result call(Actor act) {
-        Result res = new Result();
-
+    public void call(Actor act, Result res) {
         int method = act.method;
         Object[] args = act.args;
 
@@ -63,7 +61,6 @@ public class QueueCaller implements Caller {
                 res.setException(e);
             }
         }
-        return res;
     }
 
     public List<CheckerConfiguration> getConfigurations() {

@@ -1,4 +1,4 @@
-package main.java.com.devexperts.dxlab.lincheck.transfer;
+package com.devexperts.dxlab.lincheck.transfer;
 
 public interface Accounts {
     public Integer getAmount(int id);

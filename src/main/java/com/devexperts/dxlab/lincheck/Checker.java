@@ -1,9 +1,9 @@
-package main.java.com.devexperts.dxlab.lincheck;
+package com.devexperts.dxlab.lincheck;
 
-import main.java.com.devexperts.dxlab.lincheck.util.Actor;
-import main.java.com.devexperts.dxlab.lincheck.util.Caller;
-import main.java.com.devexperts.dxlab.lincheck.util.CheckerConfiguration;
-import main.java.com.devexperts.dxlab.lincheck.util.Result;
+import com.devexperts.dxlab.lincheck.util.Actor;
+import com.devexperts.dxlab.lincheck.util.Caller;
+import com.devexperts.dxlab.lincheck.util.CheckerConfiguration;
+import com.devexperts.dxlab.lincheck.util.Result;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,12 +49,15 @@ public class Checker {
 
     private void executeActors(Caller caller, Actor[] actors, Result[] result) {
         for (Actor actor : actors) {
-            result[actor.ind] = caller.call(actor);
+            caller.call(actor, result[actor.ind]);
         }
     }
 
     private Result[] executeActors(Caller caller, Actor[] actors) {
         Result[] result = new Result[actors.length];
+        for (int i = 0; i < actors.length; i++) {
+            result[i] = new Result();
+        }
         executeActors(caller, actors, result);
         return result;
     }

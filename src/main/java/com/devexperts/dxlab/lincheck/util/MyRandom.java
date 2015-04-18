@@ -1,4 +1,4 @@
-package main.java.com.devexperts.dxlab.lincheck.util;
+package com.devexperts.dxlab.lincheck.util;
 
 import java.util.Random;
 
