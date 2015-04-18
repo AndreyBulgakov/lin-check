@@ -1,4 +1,4 @@
-package me.aevd.lintesting.util;
+package main.java.com.devexperts.dxlab.lincheck.util;
 
 public class Interval {
     public int from, to;

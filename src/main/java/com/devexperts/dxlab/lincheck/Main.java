@@ -1,7 +1,7 @@
-package me.aevd.lintesting;
+package main.java.com.devexperts.dxlab.lincheck;
 
-import me.aevd.lintesting.queue.QueueWithoutAnySync;
-import me.aevd.lintesting.util.Caller;
+import main.java.com.devexperts.dxlab.lincheck.queue.QueueWithoutAnySync;
+import main.java.com.devexperts.dxlab.lincheck.util.Caller;
 
 public class Main {
     public static void main(String[] args) throws NoSuchMethodException {

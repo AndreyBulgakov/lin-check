@@ -1,9 +1,9 @@
-package me.aevd.lintesting;
+package main.java.com.devexperts.dxlab.lincheck;
 
-import me.aevd.lintesting.util.Actor;
-import me.aevd.lintesting.util.Caller;
-import me.aevd.lintesting.util.CheckerConfiguration;
-import me.aevd.lintesting.util.Result;
+import main.java.com.devexperts.dxlab.lincheck.util.Actor;
+import main.java.com.devexperts.dxlab.lincheck.util.Caller;
+import main.java.com.devexperts.dxlab.lincheck.util.CheckerConfiguration;
+import main.java.com.devexperts.dxlab.lincheck.util.Result;
 
 import java.util.ArrayList;
 import java.util.Arrays;

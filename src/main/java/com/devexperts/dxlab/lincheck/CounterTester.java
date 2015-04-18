@@ -1,15 +1,14 @@
-package me.aevd.lintesting;
+package main.java.com.devexperts.dxlab.lincheck;
 
-import me.aevd.lintesting.counter.CounterSynchronized;
-import me.aevd.lintesting.counter.CounterWithoutAnySync;
-import me.aevd.lintesting.util.Actor;
-import me.aevd.lintesting.util.MyRandom;
-import me.aevd.lintesting.util.Result;
+import main.java.com.devexperts.dxlab.lincheck.counter.CounterSynchronized;
+import main.java.com.devexperts.dxlab.lincheck.counter.CounterWithoutAnySync;
+import main.java.com.devexperts.dxlab.lincheck.util.Actor;
+import main.java.com.devexperts.dxlab.lincheck.util.MyRandom;
+import main.java.com.devexperts.dxlab.lincheck.util.Result;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 // TODO use main Tester class
 public class CounterTester {

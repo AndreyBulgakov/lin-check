@@ -1,4 +1,4 @@
-package me.aevd.lintesting.queue;
+package main.java.com.devexperts.dxlab.lincheck.queue;
 
 public class QueueEmptyException extends Exception {
     public QueueEmptyException(String message) {

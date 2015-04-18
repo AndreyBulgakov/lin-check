@@ -1,6 +1,4 @@
-package me.aevd.lintesting.util;
-
-import java.util.Random;
+package main.java.com.devexperts.dxlab.lincheck.util;
 
 public class ActorGenerator {
     private int methodId;

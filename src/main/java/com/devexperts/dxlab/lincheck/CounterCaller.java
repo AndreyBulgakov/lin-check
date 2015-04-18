@@ -1,7 +1,7 @@
-package me.aevd.lintesting;
+package main.java.com.devexperts.dxlab.lincheck;
 
-import me.aevd.lintesting.counter.Counter;
-import me.aevd.lintesting.util.Result;
+import main.java.com.devexperts.dxlab.lincheck.counter.Counter;
+import main.java.com.devexperts.dxlab.lincheck.util.Result;
 
 // TODO use main Tester class
 public class CounterCaller {

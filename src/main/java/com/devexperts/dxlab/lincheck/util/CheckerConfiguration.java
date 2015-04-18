@@ -1,4 +1,4 @@
-package me.aevd.lintesting.util;
+package main.java.com.devexperts.dxlab.lincheck.util;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,8 +1,8 @@
-package me.aevd.lintesting;
+package main.java.com.devexperts.dxlab.lincheck;
 
 
-import me.aevd.lintesting.transfer.Accounts;
-import me.aevd.lintesting.util.*;
+import main.java.com.devexperts.dxlab.lincheck.transfer.Accounts;
+import main.java.com.devexperts.dxlab.lincheck.util.*;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;

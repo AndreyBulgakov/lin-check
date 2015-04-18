@@ -1,11 +1,11 @@
-package me.aevd.lintesting;
+package main.java.com.devexperts.dxlab.lincheck;
 
 
-import me.aevd.lintesting.queue.Queue;
-import me.aevd.lintesting.queue.QueueEmptyException;
-import me.aevd.lintesting.queue.QueueFullException;
-import me.aevd.lintesting.queue.QueueWithoutAnySync;
-import me.aevd.lintesting.util.*;
+import main.java.com.devexperts.dxlab.lincheck.queue.Queue;
+import main.java.com.devexperts.dxlab.lincheck.queue.QueueEmptyException;
+import main.java.com.devexperts.dxlab.lincheck.queue.QueueFullException;
+import main.java.com.devexperts.dxlab.lincheck.queue.QueueWithoutAnySync;
+import main.java.com.devexperts.dxlab.lincheck.util.*;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
