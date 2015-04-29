@@ -1,6 +1,8 @@
 package com.devexperts.dxlab.lincheck;
 
 
+import com.devexperts.dxlab.lincheck.annotations.ActorAnn;
+import com.devexperts.dxlab.lincheck.annotations.Reload;
 import com.devexperts.dxlab.lincheck.queue.Queue;
 import com.devexperts.dxlab.lincheck.queue.QueueEmptyException;
 import com.devexperts.dxlab.lincheck.queue.QueueFullException;
@@ -20,6 +22,32 @@ public class QueueCaller implements Caller {
     public QueueCaller(Class objClass) {
         this.objClass = objClass;
         reload();
+    }
+
+    @Reload
+    public void reloadFunc() {
+        reload();
+    }
+
+    @ActorAnn
+    public void act0(Actor act, Result res) {
+        int x = (int) act.args[0];
+        try {
+            queue.put(x);
+            res.setVoid();
+        } catch (QueueFullException e) {
+            res.setException(e);
+        }
+    }
+
+    @ActorAnn
+    public void act1(Actor act, Result res) {
+        try {
+            int value = queue.get();
+            res.setValue(value);
+        } catch (QueueEmptyException e) {
+            res.setException(e);
+        }
     }
 
     public void reload() {
@@ -91,8 +119,12 @@ public class QueueCaller implements Caller {
 
 
     public static void main(String[] args) {
+        long start = System.currentTimeMillis();
+
         Checker checker = new Checker();
         Caller caller = new QueueCaller(QueueWithoutAnySync.class);
         System.out.println(checker.check(caller));
+
+        System.out.println(System.currentTimeMillis() - start);
     }
 }
