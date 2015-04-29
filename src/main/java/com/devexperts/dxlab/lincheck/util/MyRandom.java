@@ -16,4 +16,8 @@ public class MyRandom {
     public static int nextInt() {
         return r.nextInt();
     }
+
+    public static long nextLong() {
+        return r.nextLong();
+    }
 }

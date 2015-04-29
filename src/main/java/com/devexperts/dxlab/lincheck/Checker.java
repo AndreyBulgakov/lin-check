@@ -1,9 +1,6 @@
 package com.devexperts.dxlab.lincheck;
 
-import com.devexperts.dxlab.lincheck.util.Actor;
-import com.devexperts.dxlab.lincheck.util.Caller;
-import com.devexperts.dxlab.lincheck.util.CheckerConfiguration;
-import com.devexperts.dxlab.lincheck.util.Result;
+import com.devexperts.dxlab.lincheck.util.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -112,7 +109,7 @@ public class Checker {
         COUNT_THREADS = conf.getNumThreads();
 
         ExecutorService pool = Executors.newFixedThreadPool(COUNT_THREADS);
-        final CyclicBarrier barrier = new CyclicBarrier(COUNT_THREADS);
+        final Phaser phaser = new Phaser(COUNT_THREADS + 1);
 
         boolean errorFound = false;
         for (int iter = 0; iter < COUNT_ITER; iter++) {
@@ -155,38 +152,30 @@ public class Checker {
                 runnables[i] = new Runnable() {
                     @Override
                     public void run() {
-                        try {
-                            barrier.await();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        } catch (BrokenBarrierException e) {
-                            e.printStackTrace();
-                        }
+                        phaser.arriveAndAwaitAdvance();
+
+                        long r = MyRandom.nextLong() % 10000L;
+                        busyWait(r);
+
                         executeActors(caller, threadActors, results);
+                        phaser.arrive();
                     }
                 };
             }
 
-            Future<?>[] futures = new Future[COUNT_THREADS];
             for (int threads_num = 0; threads_num < 100000; threads_num++) {
                 if (threads_num % 10000 == 0) {
                     System.out.printf("%d ", threads_num);
                 }
+
                 caller.reload();
                 for (int i = 0; i < COUNT_THREADS; i++) {
-                    futures[i] = pool.submit(runnables[i]);
+                    pool.execute(runnables[i]);
                 }
 
-                for (Future<?> future : futures) {
-                    try {
-                        future.get();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    } catch (ExecutionException e) {
-                        e.printStackTrace();
-                    }
-                }
-                barrier.reset();
+                phaser.arriveAndAwaitAdvance();
+                phaser.arriveAndAwaitAdvance();
+
 
 
                 boolean correct = false;
@@ -219,5 +208,9 @@ public class Checker {
         pool.shutdown();
         System.out.println("finish");
         return !errorFound;
+    }
+
+    private static void busyWait(long nanos) {
+        for (long start = System.nanoTime(); start + nanos >= System.nanoTime(); ){}
     }
 }
