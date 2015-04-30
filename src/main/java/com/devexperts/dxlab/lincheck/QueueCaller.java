@@ -24,32 +24,6 @@ public class QueueCaller implements Caller {
         reload();
     }
 
-    @Reload
-    public void reloadFunc() {
-        reload();
-    }
-
-    @ActorAnn(name = "put", args = {"1:10"})
-    public void act0(Actor act, Result res) {
-        int x = (int) act.args[0];
-        try {
-            queue.put(x);
-            res.setVoid();
-        } catch (QueueFullException e) {
-            res.setException(e);
-        }
-    }
-
-    @ActorAnn(name = "get", args = {})
-    public void act1(Actor act, Result res) {
-        try {
-            int value = queue.get();
-            res.setValue(value);
-        } catch (QueueEmptyException e) {
-            res.setException(e);
-        }
-    }
-
     public void reload() {
         try {
             Constructor ctor = objClass.getConstructor(int.class);
