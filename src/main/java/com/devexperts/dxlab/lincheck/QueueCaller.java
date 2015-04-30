@@ -29,7 +29,7 @@ public class QueueCaller implements Caller {
         reload();
     }
 
-    @ActorAnn
+    @ActorAnn(name = "put", args = {"1:10"})
     public void act0(Actor act, Result res) {
         int x = (int) act.args[0];
         try {
@@ -40,7 +40,7 @@ public class QueueCaller implements Caller {
         }
     }
 
-    @ActorAnn
+    @ActorAnn(name = "get", args = {})
     public void act1(Actor act, Result res) {
         try {
             int value = queue.get();
