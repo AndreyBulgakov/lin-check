@@ -169,8 +169,8 @@ public class Checker {
                 }
 
                 caller.reload();
-                for (int i = 0; i < COUNT_THREADS; i++) {
-                    pool.execute(runnables[i]);
+                for (Runnable r : runnables) {
+                    pool.execute(r);
                 }
 
                 phaser.arriveAndAwaitAdvance();
