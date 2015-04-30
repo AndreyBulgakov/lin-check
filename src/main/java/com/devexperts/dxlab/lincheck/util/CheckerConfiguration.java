@@ -76,4 +76,15 @@ public class CheckerConfiguration {
 
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "CheckerConfiguration{" +
+                "numThreads=" + numThreads +
+                ", numIterations=" + numIterations +
+                ", rangeActorCount=" + rangeActorCount +
+                ", actorGenerators=" + actorGenerators +
+                ", indActor=" + indActor +
+                '}';
+    }
 }

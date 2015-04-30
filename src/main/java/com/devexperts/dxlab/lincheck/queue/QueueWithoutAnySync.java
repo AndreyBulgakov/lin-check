@@ -1,5 +1,7 @@
 package com.devexperts.dxlab.lincheck.queue;
 
+import java.util.Arrays;
+
 public class QueueWithoutAnySync implements Queue {
     private int indGet;
     private int indPut;
@@ -39,5 +41,15 @@ public class QueueWithoutAnySync implements Queue {
         indGet = inc(indGet);
         countElements--;
         return ret;
+    }
+
+    @Override
+    public String toString() {
+        return "QueueWithoutAnySync{" +
+                "indGet=" + indGet +
+                ", indPut=" + indPut +
+                ", countElements=" + countElements +
+                ", items=" + Arrays.toString(items) +
+                '}';
     }
 }

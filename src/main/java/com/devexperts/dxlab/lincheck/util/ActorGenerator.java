@@ -1,5 +1,7 @@
 package com.devexperts.dxlab.lincheck.util;
 
+import java.util.Arrays;
+
 public class ActorGenerator {
     private int methodId;
     private String name;
@@ -20,5 +22,14 @@ public class ActorGenerator {
         Actor act = new Actor(indActor, methodId, args);
         act.methodName = name;
         return act;
+    }
+
+    @Override
+    public String toString() {
+        return "ActorGenerator{" +
+                "methodId=" + methodId +
+                ", name='" + name + '\'' +
+                ", rangeArgs=" + Arrays.toString(rangeArgs) +
+                '}';
     }
 }
