@@ -19,11 +19,28 @@ public class Actor {
         this.args = args;
     }
 
+    private static String argsToString(Object[] args) {
+        if (args == null)
+            return "null";
+
+        int iMax = args.length - 1;
+        if (iMax == -1)
+            return "";
+
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; ; i++) {
+            b.append(String.valueOf(args[i]));
+            if (i == iMax)
+                return b.toString();
+            b.append(", ");
+        }
+    }
+
     @Override
     public String toString() {
-        return "Actor-" + ind +
-                "{ " + methodName +
-                "(" + Arrays.toString(args) +
-                ") }";
+        return ind +
+                "_" + methodName +
+                "(" + argsToString(args) +
+                ")";
     }
 }
