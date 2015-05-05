@@ -56,7 +56,7 @@ public class CheckerAnnotated {
         for (Actor actor : actors) {
             Method m = methodsActor.get(actor.method);
             try {
-                m.invoke(testObject, result[actor.ind], actor);
+                m.invoke(testObject, result[actor.ind], actor.args);
             } catch (IllegalAccessException | InvocationTargetException e) {
                 e.printStackTrace();
             }
@@ -77,7 +77,7 @@ public class CheckerAnnotated {
 
         // print all possible executions
         for (Actor[] perm : perms) {
-            System.out.println(Arrays.asList(perm));
+            System.out.println(Arrays.toString(perm));
         }
         System.out.println();
 
@@ -108,7 +108,6 @@ public class CheckerAnnotated {
 
     private Object testObject;
     private List<Method> methodsActor;
-    private Method methodConf;
     private Method methodReload;
 
     private void reloadTestObject() throws InvocationTargetException, IllegalAccessException {
@@ -129,15 +128,11 @@ public class CheckerAnnotated {
         Method[] ms = clz.getDeclaredMethods();
 
         methodsActor = new ArrayList<>();
-        methodConf = null;
         methodReload = null;
 
         for (Method method : ms) {
             if (method.isAnnotationPresent(ActorAnn.class)) {
                 methodsActor.add(method);
-            }
-            if (method.isAnnotationPresent(Conf.class)) {
-                methodConf = method;
             }
             if (method.isAnnotationPresent(Reload.class)) {
                 methodReload = method;
@@ -212,7 +207,7 @@ public class CheckerAnnotated {
 
             System.out.println("Thread configuration:");
             for (Actor[] actor : actors) {
-                System.out.println(Arrays.asList(actor));
+                System.out.println(Arrays.toString(actor));
             }
             System.out.println();
 
@@ -220,11 +215,10 @@ public class CheckerAnnotated {
             // print linear results
             System.out.println();
             for (Result[] linearResult : linearResults) {
-                System.out.println(Arrays.asList(linearResult));
+                System.out.println(Arrays.toString(linearResult));
             }
             System.out.println();
 
-            int[] cntLinear = new int[linearResults.length];
 
             System.out.println("Progress:");
             System.out.printf("[%d] ", 100000);
@@ -249,12 +243,12 @@ public class CheckerAnnotated {
                 };
             }
 
+            int[] cntLinear = new int[linearResults.length];
             for (int threads_num = 0; threads_num < 100000; threads_num++) {
                 if (threads_num % 10000 == 0) {
                     System.out.printf("%d ", threads_num);
                 }
 
-                //caller.reload();
                 reloadTestObject();
                 for (Runnable r : runnables) {
                     pool.execute(r);
@@ -274,7 +268,7 @@ public class CheckerAnnotated {
                 if (!correct) {
                     System.out.println();
                     System.out.println("Error. Unexpected result:");
-                    System.out.println(Arrays.asList(results));
+                    System.out.println(Arrays.toString(results));
                     errorFound = true;
                     break;
                 }

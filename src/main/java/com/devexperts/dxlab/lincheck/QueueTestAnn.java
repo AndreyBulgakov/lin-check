@@ -24,8 +24,8 @@ public class QueueTestAnn {
     }
 
     @ActorAnn(name = "put", args = {"1:10"})
-    public void actor1(Result res, Actor act) {
-        Integer x = (Integer) act.args[0];
+    public void actor1(Result res, Object[] args) {
+        Integer x = (Integer) args[0];
         try {
             queue.put(x);
             res.setVoid();
@@ -35,7 +35,7 @@ public class QueueTestAnn {
     }
 
     @ActorAnn(name = "get", args = {})
-    public void actor2(Result res, Actor act) {
+    public void actor2(Result res, Object[] args) {
         try {
             Integer value = queue.get();
             res.setValue(value);
