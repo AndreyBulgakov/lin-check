@@ -1,6 +1,7 @@
 package com.devexperts.dxlab.lincheck;
 
 import com.devexperts.dxlab.lincheck.annotations.ActorAnn;
+import com.devexperts.dxlab.lincheck.annotations.CTest;
 import com.devexperts.dxlab.lincheck.annotations.Reload;
 import com.devexperts.dxlab.lincheck.annotations.Conf;
 import com.devexperts.dxlab.lincheck.queue.Queue;
@@ -11,7 +12,8 @@ import com.devexperts.dxlab.lincheck.util.*;
 
 import java.lang.reflect.InvocationTargetException;
 
-
+@CTest(iter = 20, actorsPerThread = {"1:3", "1:3"})
+@CTest(iter = 20, actorsPerThread = {"1:3", "1:3", "1:3"})
 public class QueueTestAnn {
     public Queue queue;
 
