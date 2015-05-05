@@ -256,8 +256,8 @@ public class CheckerAnnotated {
 
                 //caller.reload();
                 reloadTestObject();
-                for (int i = 0; i < COUNT_THREADS; i++) {
-                    pool.execute(runnables[i]);
+                for (Runnable r : runnables) {
+                    pool.execute(r);
                 }
 
                 phaser.arriveAndAwaitAdvance();
