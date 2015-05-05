@@ -1,9 +1,12 @@
 package com.devexperts.dxlab.lincheck.util;
 
 import com.devexperts.dxlab.lincheck.annotations.ActorAnn;
+import com.devexperts.dxlab.lincheck.annotations.CTest;
 import com.devexperts.dxlab.lincheck.annotations.Reload;
 import com.devexperts.dxlab.lincheck.annotations.Conf;
+import com.sun.corba.se.impl.orbutil.CacheTable;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -49,14 +52,18 @@ public class CheckerAnnotated {
         return perms.toArray(new Actor[perms.size()][]);
     }
 
-    private void executeActors(Actor[] actors, Result[] result) throws InvocationTargetException, IllegalAccessException {
+    private void executeActors(Actor[] actors, Result[] result) {
         for (Actor actor : actors) {
             Method m = methodsActor.get(actor.method);
-            m.invoke(testObject, result[actor.ind], actor);
+            try {
+                m.invoke(testObject, result[actor.ind], actor);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    private Result[] executeActors(Actor[] actors) throws InvocationTargetException, IllegalAccessException {
+    private Result[] executeActors(Actor[] actors) {
         Result[] result = new Result[actors.length];
         for (int i = 0; i < actors.length; i++) {
             result[i] = new Result();
@@ -108,10 +115,18 @@ public class CheckerAnnotated {
         methodReload.invoke(testObject);
     }
 
+    private static Interval parseInterval(String s) {
+        String[] split = s.split(":");
+        int from = Integer.valueOf(split[0]);
+        int to = Integer.valueOf(split[1]);
+        return new Interval(from, to);
+    }
+
     public boolean checkAnnotated(Object test) throws InvocationTargetException, IllegalAccessException {
         this.testObject = test;
+        Class clz = test.getClass();
 
-        Method[] ms = testObject.getClass().getDeclaredMethods();
+        Method[] ms = clz.getDeclaredMethods();
 
         methodsActor = new ArrayList<>();
         methodConf = null;
@@ -129,30 +144,51 @@ public class CheckerAnnotated {
             }
         }
 
-        reloadTestObject();
-
-        CheckerConfiguration conf = new CheckerConfiguration();
-        methodConf.invoke(testObject, conf);
-
         int ind = 0;
         List<ActorGenerator> gens = new ArrayList<>();
         for (Method m : methodsActor) {
             String[] args = m.getAnnotation(ActorAnn.class).args();
             String name = m.getAnnotation(ActorAnn.class).name();
-            List<Interval> ivs = new ArrayList<>();
-            for (String arg : args) {
-                String[] split = arg.split(":");
-                int from = Integer.valueOf(split[0]);
-                int to = Integer.valueOf(split[1]);
-                ivs.add(new Interval(from, to));
+            Interval[] ivs = new Interval[args.length];
+
+            for (int i = 0; i < args.length; i++) {
+                ivs[i] = parseInterval(args[i]);
             }
 
-            Interval[] ivsArr = ivs.toArray(new Interval[ivs.size()]);
-            ActorGenerator gen = new ActorGenerator(ind++, name, ivsArr);
-            conf.addActorGenerator(gen);
+            ActorGenerator gen = new ActorGenerator(ind++, name, ivs);
+            gens.add(gen);
         }
 
-        return checkImpl(conf);
+
+        List<CheckerConfiguration> confs = new ArrayList<>();
+        Annotation[] ctests = clz.getAnnotationsByType(CTest.class);
+        for (Annotation ann : ctests) {
+            if (ann instanceof CTest) {
+                CTest ctest = (CTest) ann;
+
+                CheckerConfiguration conf = new CheckerConfiguration();
+
+                conf.setNumIterations(ctest.iter());
+                for (String s : ctest.actorsPerThread()) {
+                    conf.addThread(parseInterval(s));
+                }
+                for (ActorGenerator gen : gens) {
+                    conf.addActorGenerator(gen);
+                }
+
+                confs.add(conf);
+            }
+
+        }
+
+        for (CheckerConfiguration conf : confs) {
+            System.out.println(conf);
+            if (!checkImpl(conf)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
 
@@ -206,13 +242,8 @@ public class CheckerAnnotated {
                     public void run() {
                         phaser.arriveAndAwaitAdvance();
 
-                        try {
-                            executeActors(threadActors, results);
-                        } catch (InvocationTargetException e) {
-                            e.printStackTrace();
-                        } catch (IllegalAccessException e) {
-                            e.printStackTrace();
-                        }
+                        executeActors(threadActors, results);
+
                         phaser.arrive();
                     }
                 };
@@ -231,8 +262,6 @@ public class CheckerAnnotated {
 
                 phaser.arriveAndAwaitAdvance();
                 phaser.arriveAndAwaitAdvance();
-
-
 
                 boolean correct = false;
                 for (int i = 0; i < linearResults.length; i++) {
