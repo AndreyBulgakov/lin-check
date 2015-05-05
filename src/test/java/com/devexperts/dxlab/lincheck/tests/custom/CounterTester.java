@@ -1,7 +1,7 @@
-package com.devexperts.dxlab.lincheck;
+package com.devexperts.dxlab.lincheck.tests.custom;
 
-import com.devexperts.dxlab.lincheck.counter.CounterSynchronized;
-import com.devexperts.dxlab.lincheck.counter.CounterWithoutAnySync;
+import com.devexperts.dxlab.lincheck.tests.custom.counter.CounterSynchronized;
+import com.devexperts.dxlab.lincheck.tests.custom.counter.CounterWithoutAnySync;
 import com.devexperts.dxlab.lincheck.util.Actor;
 import com.devexperts.dxlab.lincheck.util.MyRandom;
 import com.devexperts.dxlab.lincheck.util.Result;

@@ -1,6 +1,6 @@
-package com.devexperts.dxlab.lincheck;
+package com.devexperts.dxlab.lincheck.tests.custom;
 
-import com.devexperts.dxlab.lincheck.counter.Counter;
+import com.devexperts.dxlab.lincheck.tests.custom.counter.Counter;
 import com.devexperts.dxlab.lincheck.util.Result;
 
 // TODO use main Tester class

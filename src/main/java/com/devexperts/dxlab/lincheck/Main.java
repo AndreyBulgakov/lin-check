@@ -1,6 +1,7 @@
 package com.devexperts.dxlab.lincheck;
 
-import com.devexperts.dxlab.lincheck.queue.QueueWithoutAnySync;
+import com.devexperts.dxlab.lincheck.tests.custom.queue.QueueWithoutAnySync;
+import com.devexperts.dxlab.lincheck.tests.custom.QueueCaller;
 import com.devexperts.dxlab.lincheck.util.Caller;
 
 public class Main {

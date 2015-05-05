@@ -1,7 +1,7 @@
-package com.devexperts.dxlab.lincheck;
+package com.devexperts.dxlab.lincheck.tests.custom;
 
 
-import com.devexperts.dxlab.lincheck.transfer.Accounts;
+import com.devexperts.dxlab.lincheck.tests.custom.transfer.Accounts;
 import com.devexperts.dxlab.lincheck.util.*;
 
 import java.lang.reflect.Constructor;

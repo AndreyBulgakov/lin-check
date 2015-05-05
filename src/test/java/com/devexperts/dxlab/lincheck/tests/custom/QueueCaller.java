@@ -1,12 +1,11 @@
-package com.devexperts.dxlab.lincheck;
+package com.devexperts.dxlab.lincheck.tests.custom;
 
 
-import com.devexperts.dxlab.lincheck.annotations.ActorAnn;
-import com.devexperts.dxlab.lincheck.annotations.Reload;
-import com.devexperts.dxlab.lincheck.queue.Queue;
-import com.devexperts.dxlab.lincheck.queue.QueueEmptyException;
-import com.devexperts.dxlab.lincheck.queue.QueueFullException;
-import com.devexperts.dxlab.lincheck.queue.QueueWithoutAnySync;
+import com.devexperts.dxlab.lincheck.Checker;
+import com.devexperts.dxlab.lincheck.tests.custom.queue.Queue;
+import com.devexperts.dxlab.lincheck.tests.custom.queue.QueueEmptyException;
+import com.devexperts.dxlab.lincheck.tests.custom.queue.QueueFullException;
+import com.devexperts.dxlab.lincheck.tests.custom.queue.QueueWithoutAnySync;
 import com.devexperts.dxlab.lincheck.util.*;
 
 import java.lang.reflect.Constructor;

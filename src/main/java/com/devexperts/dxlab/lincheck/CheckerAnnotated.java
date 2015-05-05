@@ -1,9 +1,10 @@
-package com.devexperts.dxlab.lincheck.util;
+package com.devexperts.dxlab.lincheck;
 
 import com.devexperts.dxlab.lincheck.annotations.ActorAnn;
 import com.devexperts.dxlab.lincheck.annotations.CTest;
 import com.devexperts.dxlab.lincheck.annotations.Reload;
 import com.devexperts.dxlab.lincheck.annotations.Conf;
+import com.devexperts.dxlab.lincheck.util.*;
 import com.sun.corba.se.impl.orbutil.CacheTable;
 
 import java.lang.annotation.Annotation;
