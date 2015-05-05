@@ -1,5 +1,8 @@
 package com.devexperts.dxlab.lincheck.util;
 
+import sun.misc.Contended;
+
+@Contended
 public class Result {
     public ResultType resType;
     Integer value;

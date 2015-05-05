@@ -13,6 +13,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
@@ -53,11 +54,19 @@ public class CheckerAnnotated {
         return perms.toArray(new Actor[perms.size()][]);
     }
 
+    private static Result[] generateEmptyResults(int n) {
+        Result[] res = new Result[n];
+        for (int i = 0; i < n; i++) {
+            res[i] = new Result();
+        }
+        return res;
+    }
+
     private void executeActors(Actor[] actors, Result[] result) {
-        for (Actor actor : actors) {
-            Method m = methodsActor.get(actor.method);
+        for (int i = 0; i < actors.length; i++) {
+            Method m = methodsActor.get(actors[i].method);
             try {
-                m.invoke(testObject, result[actor.ind], actor.args);
+                m.invoke(testObject, result[i], actors[i].args);
             } catch (IllegalAccessException | InvocationTargetException e) {
                 e.printStackTrace();
             }
@@ -65,16 +74,13 @@ public class CheckerAnnotated {
     }
 
     private Result[] executeActors(Actor[] actors) {
-        Result[] result = new Result[actors.length];
-        for (int i = 0; i < actors.length; i++) {
-            result[i] = new Result();
-        }
+        Result[] result = generateEmptyResults(actors.length);
         executeActors(actors, result);
         return result;
     }
 
-    private Result[][] executeLinear(Actor[][] actors, int countActors) throws InvocationTargetException, IllegalAccessException {
-        Actor[][] perms = genPermutations(actors, countActors);
+    private Result[][] executeLinear(Actor[][] actorsConf, int countActors) throws InvocationTargetException, IllegalAccessException {
+        Actor[][] perms = genPermutations(actorsConf, countActors);
 
         // print all possible executions
         for (Actor[] perm : perms) {
@@ -84,8 +90,16 @@ public class CheckerAnnotated {
 
         Result[][] results = new Result[perms.length][];
         for (int i = 0; i < perms.length; i++) {
+            Actor[] actors = perms[i];
+
             reloadTestObject();
-            results[i] = executeActors(perms[i]);
+            Result[] resultUnordered = executeActors(actors);
+            Result[] result = new Result[resultUnordered.length];
+            for (int j = 0; j < actors.length; j++) {
+                result[actors[j].ind] = resultUnordered[j];
+            }
+
+            results[i] = result;
         }
 
         List<Result[]> uniqueResults = new ArrayList<>();
@@ -224,26 +238,31 @@ public class CheckerAnnotated {
             System.out.println("Progress:");
             System.out.printf("[%d] ", 100000);
 
-            final Result[] results = new Result[countActors];
-            for (int i = 0; i < countActors; i++) {
-                results[i] = new Result();
+//            final Result[] results = new Result[countActors];
+//            for (int i = 0; i < countActors; i++) {
+//                results[i] = new Result();
+//            }
+
+            final Result[][] results = new Result[COUNT_THREADS][];
+            for (int i = 0; i < COUNT_THREADS; i++) {
+                results[i] = generateEmptyResults(actors[i].length);
             }
 
             Runnable[] runnables = new Runnable[COUNT_THREADS];
             for (int i = 0; i < COUNT_THREADS; i++) {
                 final Actor[] threadActors = actors[i];
+                final Result[] threadResult = results[i];
                 runnables[i] = new Runnable() {
                     @Override
                     public void run() {
                         phaser.arriveAndAwaitAdvance();
-
-                        executeActors(threadActors, results);
-
+                        executeActors(threadActors, threadResult);
                         phaser.arrive();
                     }
                 };
             }
 
+            Result[] resultOrdered = new Result[countActors];
             int[] cntLinear = new int[linearResults.length];
             for (int threads_num = 0; threads_num < 100000; threads_num++) {
                 if (threads_num % 10000 == 0) {
@@ -258,9 +277,16 @@ public class CheckerAnnotated {
                 phaser.arriveAndAwaitAdvance();
                 phaser.arriveAndAwaitAdvance();
 
+                for (int i = 0; i < COUNT_THREADS; i++) {
+                    for (int j = 0; j < actors[i].length; j++) {
+                        resultOrdered[actors[i][j].ind] = results[i][j];
+                    }
+                }
+
+
                 boolean correct = false;
                 for (int i = 0; i < linearResults.length; i++) {
-                    if (Arrays.equals(linearResults[i], results)) {
+                    if (Arrays.equals(linearResults[i], resultOrdered)) {
                         correct = true;
                         cntLinear[i]++;
                         break;
@@ -269,7 +295,7 @@ public class CheckerAnnotated {
                 if (!correct) {
                     System.out.println();
                     System.out.println("Error. Unexpected result:");
-                    System.out.println(Arrays.toString(results));
+                    System.out.println(Arrays.toString(resultOrdered));
                     errorFound = true;
                     break;
                 }
