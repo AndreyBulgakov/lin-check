@@ -3,9 +3,9 @@ package com.devexperts.dxlab.lincheck;
 import com.devexperts.dxlab.lincheck.annotations.ActorAnn;
 import com.devexperts.dxlab.lincheck.annotations.CTest;
 import com.devexperts.dxlab.lincheck.annotations.Reload;
-import com.devexperts.dxlab.lincheck.annotations.Conf;
+import com.devexperts.dxlab.lincheck.asmtest.ClassGenerator2;
+import com.devexperts.dxlab.lincheck.asmtest.Generated;
 import com.devexperts.dxlab.lincheck.util.*;
-import com.sun.corba.se.impl.orbutil.CacheTable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -13,16 +13,16 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
 
-public class CheckerAnnotated {
+public class CheckerAnnotatedASM {
     int COUNT_ITER;
     int COUNT_THREADS;
 
-    public CheckerAnnotated() {
+    public CheckerAnnotatedASM() {
     }
 
     private void genPermutationsHelper(List<Actor[]> result, Actor[] out, int countUsed, int countActors, Actor[][] actors, int[] inds) {
@@ -93,7 +93,11 @@ public class CheckerAnnotated {
             Actor[] actors = perms[i];
 
             reloadTestObject();
+
+
             Result[] resultUnordered = executeActors(actors);
+
+
             Result[] result = new Result[resultUnordered.length];
             for (int j = 0; j < actors.length; j++) {
                 result[actors[j].ind] = resultUnordered[j];
@@ -136,7 +140,7 @@ public class CheckerAnnotated {
         return new Interval(from, to);
     }
 
-    public boolean checkAnnotated(Object test) throws InvocationTargetException, IllegalAccessException {
+    public boolean checkAnnotated(Object test) throws Exception {
         this.testObject = test;
         Class clz = test.getClass();
 
@@ -201,10 +205,13 @@ public class CheckerAnnotated {
         return true;
     }
 
+    Generated[] generatedClasses;
+    Object[][][] argumentMatrix;
 
-    private boolean checkImpl(CheckerConfiguration conf) throws InvocationTargetException, IllegalAccessException {
+    private boolean checkImpl(CheckerConfiguration conf) throws Exception {
         long sumTime = 0;
         double sumDisp = 0;
+
 
         COUNT_ITER = conf.getNumIterations();
         COUNT_THREADS = conf.getNumThreads();
@@ -229,6 +236,40 @@ public class CheckerAnnotated {
             }
             System.out.println();
 
+            // generated classes
+
+            String testClassName = testObject.getClass().getCanonicalName();
+            testClassName = testClassName.replace(".", "/");
+            generatedClasses = new Generated[COUNT_THREADS];
+            argumentMatrix = new Object[COUNT_THREADS][][];
+            for (int i = 0; i < actors.length; i++) {
+                Actor[] actor = actors[i];
+
+                String generatedClassName = "com.devexperts.dxlab.lincheck.asmtest.Generated" + i;
+
+                String[] methodNames = new String[actor.length];
+                Object[][] argForThread = new Object[actor.length][];
+                for (int j = 0; j < actor.length; j++) {
+                    methodNames[j] = actor[j].methodName;
+                    argForThread[j] = actor[j].args;
+                }
+
+//                System.out.println(Arrays.toString(methodNames));
+
+                generatedClasses[i] = ClassGenerator2.generate(
+                        testObject,
+                        generatedClassName,
+                        generatedClassName.replace('.', '/'),
+                        "field",
+                        testClassName,
+                        methodNames,
+                        new int[]{0, 1}
+                );
+                argumentMatrix[i] = argForThread;
+            }
+
+
+
             Result[][] linearResults = executeLinear(actors, countActors);
             // print linear results
             System.out.println();
@@ -241,11 +282,6 @@ public class CheckerAnnotated {
             System.out.println("Progress:");
             System.out.printf("[%d] ", 100000);
 
-//            final Result[] results = new Result[countActors];
-//            for (int i = 0; i < countActors; i++) {
-//                results[i] = new Result();
-//            }
-
             final Result[][] results = new Result[COUNT_THREADS][];
             for (int i = 0; i < COUNT_THREADS; i++) {
                 results[i] = generateEmptyResults(actors[i].length);
@@ -253,13 +289,15 @@ public class CheckerAnnotated {
 
             Runnable[] runnables = new Runnable[COUNT_THREADS];
             for (int i = 0; i < COUNT_THREADS; i++) {
-                final Actor[] threadActors = actors[i];
                 final Result[] threadResult = results[i];
+                final Object[][] threadArgs = argumentMatrix[i];
+                final Generated classGen = generatedClasses[i];
+                final int finalI = i;
                 runnables[i] = new Runnable() {
                     @Override
                     public void run() {
                         phaser.arriveAndAwaitAdvance();
-                        executeActors(threadActors, threadResult);
+                        classGen.process(threadResult, threadArgs);
                         phaser.arrive();
                     }
                 };
@@ -282,7 +320,6 @@ public class CheckerAnnotated {
                 phaser.arriveAndAwaitAdvance();
                 phaser.arriveAndAwaitAdvance();
                 sumTime += (System.currentTimeMillis() - stT);
-
 
                 for (int i = 0; i < COUNT_THREADS; i++) {
                     for (int j = 0; j < actors[i].length; j++) {
@@ -328,9 +365,9 @@ public class CheckerAnnotated {
             }
         }
         pool.shutdown();
+        System.out.println("finish");
         System.out.println("sumTime = " + sumTime);
         System.out.println("sumDisp = " + sumDisp);
-        System.out.println("finish");
         return !errorFound;
     }
 

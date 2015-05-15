@@ -12,8 +12,8 @@ import com.devexperts.dxlab.lincheck.util.Result;
 
 import java.lang.reflect.InvocationTargetException;
 
-@CTest(iter = 2, actorsPerThread = {"1:3", "1:3"})
-@CTest(iter = 2, actorsPerThread = {"1:3", "1:3", "1:3"})
+@CTest(iter = 50, actorsPerThread = {"2:3", "2:3"})
+//@CTest(iter = 20, actorsPerThread = {"1:3", "1:3", "1:3"})
 public class QueueTestAnn {
     public Queue queue;
 
@@ -23,7 +23,7 @@ public class QueueTestAnn {
     }
 
     @ActorAnn(name = "put", args = {"1:10"})
-    public void actor1(Result res, Object[] args) {
+    public void put(Result res, Object[] args) {
         Integer x = (Integer) args[0];
         try {
             queue.put(x);
@@ -34,7 +34,7 @@ public class QueueTestAnn {
     }
 
     @ActorAnn(name = "get", args = {})
-    public void actor2(Result res, Object[] args) {
+    public void get(Result res, Object[] args) {
         try {
             Integer value = queue.get();
             res.setValue(value);
