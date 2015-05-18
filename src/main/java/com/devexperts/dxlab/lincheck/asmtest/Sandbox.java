@@ -3,7 +3,7 @@ package com.devexperts.dxlab.lincheck.asmtest;
 import com.devexperts.dxlab.lincheck.tests.custom.queue.Queue;
 import com.devexperts.dxlab.lincheck.tests.custom.queue.QueueWithoutAnySync;
 import com.devexperts.dxlab.lincheck.util.Result;
-import org.objectweb.asm.util.ASMifier;
+import jdk.internal.org.objectweb.asm.util.ASMifier;
 
 import java.util.Arrays;
 import java.util.concurrent.BrokenBarrierException;

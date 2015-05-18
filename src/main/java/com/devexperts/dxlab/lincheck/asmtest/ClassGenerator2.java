@@ -1,6 +1,7 @@
 package com.devexperts.dxlab.lincheck.asmtest;
 
-import org.objectweb.asm.*;
+
+import jdk.internal.org.objectweb.asm.*;
 
 import java.lang.reflect.Constructor;
 

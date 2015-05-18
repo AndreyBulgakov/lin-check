@@ -1,7 +1,7 @@
 package com.devexperts.dxlab.lincheck.asmtest;
 
 import java.util.*;
-import org.objectweb.asm.*;
+import jdk.internal.org.objectweb.asm.*;
 public class Generated1Dump implements Opcodes {
 
     public static byte[] dump () throws Exception {
