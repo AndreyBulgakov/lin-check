@@ -39,6 +39,9 @@ public class Result {
         if (resType == ResultType.EXCEPTION) {
             return "{" + resType + " : " + exceptionClass.getSimpleName() + "}";
         }
+        if (resType == ResultType.VOID) {
+            return "{ VOID }";
+        }
         return "{" + resType + " : " + value + "}";
     }
 
