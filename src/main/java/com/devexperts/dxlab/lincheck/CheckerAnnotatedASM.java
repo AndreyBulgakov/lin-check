@@ -68,7 +68,8 @@ public class CheckerAnnotatedASM {
             try {
                 m.invoke(testObject, result[i], actors[i].args);
             } catch (IllegalAccessException | InvocationTargetException e) {
-                e.printStackTrace();
+//                e.printStackTrace();
+                result[i].setException((Exception) e.getCause());
             }
         }
     }

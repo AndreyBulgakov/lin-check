@@ -23,24 +23,16 @@ public class QueueTestAnn {
     }
 
     @ActorAnn(name = "put", args = {"1:10"})
-    public void put(Result res, Object[] args) {
+    public void put(Result res, Object[] args) throws Exception {
         Integer x = (Integer) args[0];
-        try {
-            queue.put(x);
-            res.setVoid();
-        } catch (QueueFullException e) {
-            res.setException(e);
-        }
+        queue.put(x);
+        res.setVoid();
     }
 
     @ActorAnn(name = "get", args = {})
-    public void get(Result res, Object[] args) {
-        try {
-            Integer value = queue.get();
-            res.setValue(value);
-        } catch (QueueEmptyException e) {
-            res.setException(e);
-        }
+    public void get(Result res, Object[] args) throws Exception {
+        Integer value = queue.get();
+        res.setValue(value);
     }
 
     public static void main(String[] args) throws InvocationTargetException, IllegalAccessException {
