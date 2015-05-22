@@ -6,11 +6,21 @@ public class ActorGenerator {
     private int methodId;
     private String name;
     private Interval[] rangeArgs;
+    private boolean actorIsMutable = true;
+
 
     public ActorGenerator(int methodId, String name, Interval... rangeArgs) {
         this.methodId = methodId;
         this.name = name;
         this.rangeArgs = rangeArgs;
+    }
+
+    public void setMutable(boolean actorIsMutable) {
+        this.actorIsMutable = actorIsMutable;
+    }
+
+    public boolean isMutable() {
+        return actorIsMutable;
     }
 
     public Actor generate(int indActor) {
@@ -19,7 +29,7 @@ public class ActorGenerator {
             args[i] = MyRandom.fromInterval(rangeArgs[i]);
         }
 
-        Actor act = new Actor(indActor, methodId, args);
+        Actor act = new Actor(indActor, methodId, isMutable(), args);
         act.methodName = name;
         return act;
     }

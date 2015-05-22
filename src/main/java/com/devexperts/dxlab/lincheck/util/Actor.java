@@ -7,15 +7,19 @@ public class Actor {
     public int method;
     public Object[] args;
     public String methodName;
+    public boolean isMutable;
 
-    public Actor(int ind, int method) {
-        this.method = method;
+
+    public Actor(int ind, int method, boolean isMutable) {
         this.ind = ind;
+        this.method = method;
+        this.isMutable = isMutable;
     }
 
-    public Actor(int ind, int method, Object... args) {
+    public Actor(int ind, int method, boolean isMutable, Object... args) {
         this.ind = ind;
         this.method = method;
+        this.isMutable = isMutable;
         this.args = args;
     }
 

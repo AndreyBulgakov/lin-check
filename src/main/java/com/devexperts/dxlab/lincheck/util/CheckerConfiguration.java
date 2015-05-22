@@ -65,13 +65,33 @@ public class CheckerConfiguration {
         return numThreads;
     }
 
-    public Actor[][] generateActors() {
+    public Actor[][] generateActors(boolean immutableFix) {
         indActor = 0;
 
         Actor[][] result = new Actor[numThreads][];
 
+        int minCountRow = Integer.MAX_VALUE;
         for (int i = 0; i < numThreads; i++) {
             result[i] = generateActorsArray(rangeActorCount.get(i));
+            minCountRow = Math.min(minCountRow, result[i].length);
+        }
+
+        if (immutableFix) {
+            for (int row = 0; row < minCountRow; row++) {
+                boolean allImmutable = true;
+                for (int i = 0; i < numThreads; i++) {
+                    if (result[i][row].isMutable) {
+                        allImmutable = false;
+                        break;
+                    }
+                }
+                if (allImmutable) {
+                    int ind = MyRandom.nextInt(numThreads);
+                    while (!result[ind][row].isMutable) {
+                        result[ind][row] = randomGenerator().generate(result[ind][row].ind);
+                    }
+                }
+            }
         }
 
         return result;

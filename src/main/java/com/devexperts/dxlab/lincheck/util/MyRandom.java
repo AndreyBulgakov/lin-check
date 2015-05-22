@@ -20,4 +20,11 @@ public class MyRandom {
     public static long nextLong() {
         return r.nextLong();
     }
+
+
+    public static void busyWait(int nanos) { // d it's ns
+        if (nanos == 0) return;
+
+        for (long start = System.nanoTime(); start + nanos >= System.nanoTime(); ){}
+    }
 }

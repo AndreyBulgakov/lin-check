@@ -115,7 +115,7 @@ public class Checker {
         for (int iter = 0; iter < COUNT_ITER; iter++) {
             System.out.println("iter = " + iter);
 
-            Actor[][] actors = conf.generateActors();
+            Actor[][] actors = conf.generateActors(false);
 
             int countActors = 0;
             for (Actor[] actor : actors) {

@@ -5,15 +5,15 @@ import sun.misc.Contended;
 @Contended
 public class Result {
     public ResultType resType;
-    Integer value;
+    Object value;
     Class exceptionClass;
-
+    String exceptionName;
 
     public Result() {
         resType = ResultType.UNDEFINED;
     }
 
-    public void setValue(Integer value) {
+    public void setValue(Object value) {
         resType = ResultType.VALUE;
         this.value = value;
     }
@@ -21,9 +21,11 @@ public class Result {
     public void setVoid() {
         resType = ResultType.VOID;
     }
+
     public void setException(Exception e) {
         resType = ResultType.EXCEPTION;
         exceptionClass = e.getClass();
+        exceptionName = e.getMessage();
     }
 
     public void setUndefined() {
@@ -37,7 +39,11 @@ public class Result {
     @Override
     public String toString() {
         if (resType == ResultType.EXCEPTION) {
-            return "{" + resType + " : " + exceptionClass.getSimpleName() + "}";
+            return "{" +
+                    resType + " : " +
+                    exceptionClass.getSimpleName() +
+                    (exceptionName == null ? "" : "(" + exceptionName + ")") +
+                    "}";
         }
         if (resType == ResultType.VOID) {
             return "{ VOID }";

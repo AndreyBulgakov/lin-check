@@ -158,7 +158,8 @@ public class CheckerAnnotated {
         List<ActorGenerator> gens = new ArrayList<>();
         for (Method m : methodsActor) {
             String[] args = m.getAnnotation(ActorAnn.class).args();
-            String name = m.getAnnotation(ActorAnn.class).name();
+//            String name = m.getAnnotation(ActorAnn.class).name();
+            String name = m.getName();
             Interval[] ivs = new Interval[args.length];
 
             for (int i = 0; i < args.length; i++) {
@@ -216,7 +217,7 @@ public class CheckerAnnotated {
         for (int iter = 0; iter < COUNT_ITER; iter++) {
             System.out.println("iter = " + iter);
 
-            Actor[][] actors = conf.generateActors();
+            Actor[][] actors = conf.generateActors(false);
 
             int countActors = 0;
             for (Actor[] actor : actors) {

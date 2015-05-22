@@ -5,6 +5,5 @@ import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ActorAnn {
-    String name() default "actor";
     String[] args();
 }
