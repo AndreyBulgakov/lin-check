@@ -39,16 +39,26 @@ public class Result {
     @Override
     public String toString() {
         if (resType == ResultType.EXCEPTION) {
-            return "{" +
-                    resType + " : " +
-                    exceptionClass.getSimpleName() +
-                    (exceptionName == null ? "" : "(" + exceptionName + ")") +
-                    "}";
+            return exceptionClass.getSimpleName() +
+                    (exceptionName == null ? "" : "(" + exceptionName + ")");
         }
         if (resType == ResultType.VOID) {
-            return "{ VOID }";
+            return "-10";
         }
-        return "{" + resType + " : " + value + "}";
+        if (value == null) return "-1";
+        return value.toString();
+
+//        if (resType == ResultType.EXCEPTION) {
+//            return "{" +
+//                    resType + " : " +
+//                    exceptionClass.getSimpleName() +
+//                    (exceptionName == null ? "" : "(" + exceptionName + ")") +
+//                    "}";
+//        }
+//        if (resType == ResultType.VOID) {
+//            return "{ VOID }";
+//        }
+//        return "{" + resType + " : " + value + "}";
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.devexperts.dxlab.lincheck.CheckerAnnotatedASM;
 import com.devexperts.dxlab.lincheck.annotations.ActorAnn;
 import com.devexperts.dxlab.lincheck.annotations.CTest;
 import com.devexperts.dxlab.lincheck.annotations.Reload;
+import com.devexperts.dxlab.lincheck.util.MyRandom;
 import com.devexperts.dxlab.lincheck.util.Result;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import org.junit.Test;
@@ -13,8 +14,8 @@ import java.util.Map;
 import static org.junit.Assert.assertTrue;
 
 
-@CTest(iter = 200, actorsPerThread = {"1:3", "1:3"})
-@CTest(iter = 200, actorsPerThread = {"1:3", "1:3", "1:3"})
+@CTest(iter = 300, actorsPerThread = {"1:3", "1:3"})
+@CTest(iter = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
 public class MapCorrect1 {
     public Map<Integer, Integer> q;
 
@@ -43,6 +44,8 @@ public class MapCorrect1 {
 
     @Test
     public void test() throws Exception {
+        MyRandom.nextInt();
+        MyRandom.nextInt();
         assertTrue(CheckerAnnotatedASM.check(new MapCorrect1()));
         // TODO failed test
 

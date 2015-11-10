@@ -5,7 +5,6 @@ import com.devexperts.dxlab.lincheck.annotations.ActorAnn;
 import com.devexperts.dxlab.lincheck.annotations.CTest;
 import com.devexperts.dxlab.lincheck.annotations.Reload;
 import com.devexperts.dxlab.lincheck.util.Result;
-import org.cliffc.high_scale_lib.old.Counter;
 import org.cliffc.high_scale_lib.old.NonBlockingSetInt;
 import org.junit.Test;
 
@@ -14,9 +13,9 @@ import java.util.Set;
 import static org.junit.Assert.assertTrue;
 
 
-@CTest(iter = 200, actorsPerThread = {"1:3", "1:3"})
-@CTest(iter = 200, actorsPerThread = {"1:3", "1:3", "1:3"})
-public class BitVectorCorrect1 {
+//@CTest(iter = 300, actorsPerThread = {"1:3", "1:3"})
+@CTest(iter = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
+public class BitVectorTest1 {
     public Set<Integer> q;
 
     @Reload
@@ -43,7 +42,7 @@ public class BitVectorCorrect1 {
 
     @Test
     public void test() throws Exception {
-        assertTrue(CheckerAnnotatedASM.check(new BitVectorCorrect1()));
+        assertTrue(CheckerAnnotatedASM.check(new BitVectorTest1()));
         // TODO failed test
 
     }

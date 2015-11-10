@@ -15,8 +15,8 @@ import static org.junit.Assert.assertTrue;
  * http://landz.github.io/
  */
 
-@CTest(iter = 200, actorsPerThread = {"1:3", "1:3"})
-@CTest(iter = 200, actorsPerThread = {"1:3", "1:3", "1:3"})
+//@CTest(iter = 300, actorsPerThread = {"1:3", "1:3"})
+@CTest(iter = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
 public class QueueCorrect2 {
     public GenericMPMCQueue<Integer> q;
 
@@ -32,7 +32,7 @@ public class QueueCorrect2 {
     }
 
     @ActorAnn(args = {})
-    public void remove(Result res, Object[] args) throws Exception {
+    public void poll(Result res, Object[] args) throws Exception {
         res.setValue(q.poll());
     }
 

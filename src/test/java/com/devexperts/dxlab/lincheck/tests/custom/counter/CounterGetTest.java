@@ -7,16 +7,16 @@ import com.devexperts.dxlab.lincheck.annotations.Reload;
 import com.devexperts.dxlab.lincheck.util.Result;
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
+import static junit.framework.TestCase.assertTrue;
 
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
-public class CounterTest4 {
-    public Counter counter;
+public class CounterGetTest {
+    public CounterGet counter;
 
     @Reload
     public void reload() {
-        counter = new CounterWrong2();
+        counter = new CounterGet();
     }
 
     @ActorAnn(args = {})
@@ -25,8 +25,18 @@ public class CounterTest4 {
         res.setValue(v);
     }
 
+    @ActorAnn(args = {})
+    public void get(Result res, Object[] args) {
+        Integer v = counter.get();
+        res.setValue(v);
+    }
+
+
+
+
     @Test
     public void test() throws Exception {
-        assertFalse(CheckerAnnotatedASM.check(new CounterTest4()));
+        CheckerAnnotatedASM checker = new CheckerAnnotatedASM();
+        assertTrue(checker.checkAnnotated(new CounterGetTest()));
     }
 }

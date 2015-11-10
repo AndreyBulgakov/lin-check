@@ -3,7 +3,7 @@ package com.devexperts.dxlab.lincheck.util;
 import java.util.Random;
 
 public class MyRandom {
-    private static final Random r = new Random(0);
+    public static final Random r = new Random(0);
 
     public static int fromInterval(Interval iv) {
         return r.nextInt(iv.to - iv.from) + iv.from;

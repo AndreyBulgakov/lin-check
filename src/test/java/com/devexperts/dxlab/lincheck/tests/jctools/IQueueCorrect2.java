@@ -14,8 +14,8 @@ import java.util.Queue;
 
 import static org.junit.Assert.assertTrue;
 
-//@CTest(iter = 100, actorsPerThread = {"1:3", "1:3"})
-@CTest(iter = 200, actorsPerThread = {"1:3", "1:3", "1:3"})
+//@CTest(iter = 300, actorsPerThread = {"1:3", "1:3"})
+@CTest(iter = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
 public class IQueueCorrect2 {
     public Queue<Integer> q;
 
@@ -65,8 +65,20 @@ public class IQueueCorrect2 {
 //        res.setValue(ret);
 //    }
 
+
+//    [0_offer(4), 2_peek(), 4_offer(8), 3_offer(3), 1_poll()]
+
     @Test
     public void test() throws Exception {
+//        reload();
+//
+//        System.out.println(q.offer(4));
+//        System.out.println(q.peek());
+//        System.out.println(q.offer(8));
+//        System.out.println(q.offer(3));
+//        System.out.println(q.poll());
+//
         assertTrue(CheckerAnnotatedASM.check(new IQueueCorrect2()));
+        // TODO failed test
     }
 }

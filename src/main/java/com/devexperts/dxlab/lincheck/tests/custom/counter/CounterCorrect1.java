@@ -8,8 +8,9 @@ public class CounterCorrect1 implements Counter {
     }
 
     @Override
-    public synchronized int incrementAndGet() {
-        c++;
-        return c;
+    public int incrementAndGet() {
+//        c++;
+//        return c;
+        return ++c;
     }
 }

@@ -14,8 +14,8 @@ import java.util.Queue;
 
 import static org.junit.Assert.assertTrue;
 
-//@CTest(iter = 100, actorsPerThread = {"1:3", "1:3"})
-@CTest(iter = 200, actorsPerThread = {"1:3", "1:3", "1:3"})
+@CTest(iter = 300, actorsPerThread = {"1:3", "1:3"})
+@CTest(iter = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
 public class QueueCorrect4 {
     public Queue<Integer> q;
 

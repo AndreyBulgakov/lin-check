@@ -7,6 +7,7 @@ import com.devexperts.dxlab.lincheck.annotations.Reload;
 import com.devexperts.dxlab.lincheck.asm.ClassGenerator;
 import com.devexperts.dxlab.lincheck.asm.Generated;
 import com.devexperts.dxlab.lincheck.util.*;
+import z.util.SystemProperty;
 
 import java.io.*;
 import java.lang.annotation.Annotation;
@@ -163,7 +164,10 @@ public class CheckerAnnotatedASM {
         return new Interval(from, to);
     }
 
+    long startTime;
     public boolean checkAnnotated(Object test) throws Exception {
+        startTime = System.currentTimeMillis();
+
         this.testObject = test;
         Class clz = test.getClass();
 
@@ -251,6 +255,8 @@ public class CheckerAnnotatedASM {
         final Phaser phaser = new Phaser(COUNT_THREADS + 1);
 
         boolean errorFound = false;
+        int errorIter = -1;
+        int errorConcurIter = -1;
         for (int iter = 0; iter < COUNT_ITER; iter++) {
             System.out.println("iter = " + iter);
 
@@ -418,6 +424,7 @@ public class CheckerAnnotatedASM {
                     System.out.println("Unexpected result:");
                     System.out.println(Arrays.toString(resultOrdered));
                     errorFound = true;
+                    errorConcurIter = threads_num;
                     break;
                 }
             }
@@ -440,10 +447,36 @@ public class CheckerAnnotatedASM {
             System.out.println();
             System.out.println();
             if (errorFound) {
+                errorIter = iter;
                 break;
             }
         }
         pool.shutdown();
+
+
+
+        long timeDelta = System.currentTimeMillis() - startTime;
+
+        errorIter++;
+        errorConcurIter++;
+
+        System.out.println(" === Test info begin");
+        System.out.println("    Total time: " + timeDelta);
+        System.out.println("    errorIter = " + errorIter);
+        System.out.println("    errorConcurIter = " + errorConcurIter);
+        System.out.println(" === Test info end");
+
+        if (errorFound) {
+            StatData.addIter(errorIter);
+            StatData.addConcur(errorConcurIter);
+            StatData.addTime(timeDelta);
+        } else {
+            StatData.addIter(-1);
+            StatData.addConcur(-1);
+            StatData.addTime(-1);
+        }
+
+
         System.out.println("finish");
         System.out.println("sumTime = " + sumTime);
         System.out.println("sumDisp = " + sumDisp);

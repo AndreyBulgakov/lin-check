@@ -16,8 +16,8 @@ import static org.junit.Assert.assertTrue;
  * https://github.com/yaitskov/lock-free-queue
  */
 
-@CTest(iter = 200, actorsPerThread = {"1:3", "1:3"})
-@CTest(iter = 200, actorsPerThread = {"1:3", "1:3", "1:3"})
+//@CTest(iter = 300, actorsPerThread = {"1:3", "1:3"})
+@CTest(iter = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
 public class QueueCorrect1 {
     public LockFreeQueue<Integer> q;
 
@@ -34,7 +34,7 @@ public class QueueCorrect1 {
     }
 
     @ActorAnn(args = {})
-    public void remove(Result res, Object[] args) throws Exception {
+    public void takeOrNull(Result res, Object[] args) throws Exception {
         res.setValue(q.takeOrNull());
     }
 
