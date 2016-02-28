@@ -1,20 +1,32 @@
+/*
+ *  Lincheck - Linearizability checker
+ *  Copyright (C) 2015 Devexperts LLC
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.devexperts.dxlab.lincheck.performance;
 
-import com.devexperts.dxlab.lincheck.CheckerAnnotatedASM;
+import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.StatData;
-import com.devexperts.dxlab.lincheck.tests.custom.counter.CounterTest1;
-import com.devexperts.dxlab.lincheck.tests.custom.queue.WrapperQueueWrong1;
-import com.devexperts.dxlab.lincheck.tests.custom.transfer.AccountsTest1;
 import com.devexperts.dxlab.lincheck.tests.custom.transfer.AccountsTest4;
-import com.devexperts.dxlab.lincheck.tests.high_scale_lib.BitVectorTest1;
 import com.devexperts.dxlab.lincheck.util.MyRandom;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 import static junit.framework.TestCase.assertTrue;
@@ -49,7 +61,7 @@ public class StatTest {
             writer.print(i); writer.print(" ");
             close();
 
-            CheckerAnnotatedASM checker = new CheckerAnnotatedASM();
+            Checker checker = new Checker();
             boolean res = checker.checkAnnotated(test);
         }
 

@@ -1,9 +1,27 @@
+/*
+ *  Lincheck - Linearizability checker
+ *  Copyright (C) 2015 Devexperts LLC
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.devexperts.dxlab.lincheck.tests.juc.blocking_queue;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import com.devexperts.dxlab.lincheck.CheckerAnnotatedASM;
+import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
 import com.devexperts.dxlab.lincheck.util.Result;
 import org.junit.Test;
@@ -21,7 +39,7 @@ public class BlockingQueueTest1 {
         q = new ArrayBlockingQueue<Integer>(10);
     }
 
-    @ActorAnn(args = {"1:10"})
+    @Operation(args = {"1:10"})
     public void add(Result res, Object[] args) throws Exception {
         Integer value = (Integer) args[0];
 
@@ -29,17 +47,17 @@ public class BlockingQueueTest1 {
     }
 
     @ReadOnly
-    @ActorAnn(args = {})
+    @Operation(args = {})
     public void element(Result res, Object[] args)  throws Exception  {
         res.setValue(q.element());
     }
 
-    @ActorAnn(args = {})
+    @Operation(args = {})
     public void remove(Result res, Object[] args) throws Exception {
         res.setValue(q.remove());
     }
 
-    @ActorAnn(args = {})
+    @Operation(args = {})
     public void poll(Result res, Object[] args) throws Exception {
         res.setValue(q.poll());
     }
@@ -47,7 +65,7 @@ public class BlockingQueueTest1 {
 
     @Test
     public void test() throws Exception {
-        assertTrue(CheckerAnnotatedASM.check(new BlockingQueueTest1()));
+        assertTrue(Checker.check(new BlockingQueueTest1()));
     }
 }
 

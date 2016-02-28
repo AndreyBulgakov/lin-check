@@ -1,13 +1,30 @@
+/*
+ *  Lincheck - Linearizability checker
+ *  Copyright (C) 2015 Devexperts LLC
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.devexperts.dxlab.lincheck.tests.romix;
 
-import com.devexperts.dxlab.lincheck.CheckerAnnotatedASM;
+import java.util.Map;
+
+import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
-import com.devexperts.dxlab.lincheck.annotations.ReadOnly;
 import com.devexperts.dxlab.lincheck.util.Result;
 import com.romix.scala.collection.concurrent.TrieMap;
 import org.junit.Test;
-
-import java.util.Map;
 
 import static junit.framework.TestCase.assertTrue;
 
@@ -22,7 +39,7 @@ public class TrieCorrect1 {
         m = new TrieMap<>();
     }
 
-    @ActorAnn(args = {"1:4", "1:10"})
+    @Operation(args = {"1:4", "1:10"})
     public void put(Result res, Object[] args) throws Exception {
         Integer key = (Integer) args[0];
         Integer value = (Integer) args[1];
@@ -30,7 +47,7 @@ public class TrieCorrect1 {
     }
 
     @ReadOnly
-    @ActorAnn(args = {"1:4"})
+    @Operation(args = {"1:4"})
     public void get(Result res, Object[] args) throws Exception {
         Integer key = (Integer) args[0];
         res.setValue(m.get(key));
@@ -38,7 +55,7 @@ public class TrieCorrect1 {
 
     @Test
     public void test() throws Exception {
-        assertTrue(CheckerAnnotatedASM.check(new TrieCorrect1()));
+        assertTrue(Checker.check(new TrieCorrect1()));
     }
 }
 

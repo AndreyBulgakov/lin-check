@@ -1,6 +1,24 @@
+/*
+ *  Lincheck - Linearizability checker
+ *  Copyright (C) 2015 Devexperts LLC
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package com.devexperts.dxlab.lincheck.tests.jctools;
 
-import com.devexperts.dxlab.lincheck.CheckerAnnotatedASM;
+import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
 import com.devexperts.dxlab.lincheck.annotations.ReadOnly;
 import com.devexperts.dxlab.lincheck.util.Result;
@@ -24,25 +42,25 @@ public class IQueueCorrect2 {
     }
 
 
-    @ActorAnn(args = {"1:10"})
+    @Operation(args = {"1:10"})
     public void offer(Result res, Object[] args) throws Exception {
         Integer value = (Integer) args[0];
         res.setValue(q.offer(value));
     }
 
-    @ActorAnn(args = {})
+    @Operation(args = {})
     public void poll(Result res, Object[] args) throws Exception {
         res.setValue(q.poll());
     }
 
     @ReadOnly
-    @ActorAnn(args = {})
+    @Operation(args = {})
     public void peek(Result res, Object[] args) throws Exception {
         res.setValue(q.peek());
     }
 
 
-//    @ActorAnn(args = {"1:10"})
+//    @Operation(args = {"1:10"})
 //    public void add(Result res, Object[] args) throws Exception {
 //
 //        Integer value = (Integer) args[0];
@@ -51,13 +69,13 @@ public class IQueueCorrect2 {
 //
 //
 //    @ReadOnly
-//    @ActorAnn(args = {})
+//    @Operation(args = {})
 //    public void element(Result res, Object[] args)  throws Exception  {
 //        Integer value = q.element();
 //        res.setValue(value);
 //    }
 //
-//    @ActorAnn(args = {"1:10"})
+//    @Operation(args = {"1:10"})
 //    public void remove(Result res, Object[] args) throws Exception {
 //        Integer ret = q.remove();
 //        res.setValue(ret);
@@ -76,7 +94,7 @@ public class IQueueCorrect2 {
 //        System.out.println(q.offer(3));
 //        System.out.println(q.poll());
 //
-        assertTrue(CheckerAnnotatedASM.check(new IQueueCorrect2()));
+        assertTrue(Checker.check(new IQueueCorrect2()));
         // TODO failed test
     }
 }

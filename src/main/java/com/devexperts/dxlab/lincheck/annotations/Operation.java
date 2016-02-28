@@ -16,19 +16,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.devexperts.dxlab.lincheck.tests.custom.counter;
+package com.devexperts.dxlab.lincheck.annotations;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-public class CounterCorrect2 implements Counter {
-    private AtomicInteger c;
-
-    public CounterCorrect2() {
-        c = new AtomicInteger();
-    }
-
-    @Override
-    public synchronized int incrementAndGet() {
-        return c.incrementAndGet();
-    }
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Operation {
+    String[] args();
 }
