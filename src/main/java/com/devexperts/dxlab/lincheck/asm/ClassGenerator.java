@@ -1,10 +1,10 @@
 package com.devexperts.dxlab.lincheck.asm;
 
 
-import com.devexperts.dxlab.lincheck.asm.templ.*;
-import jdk.internal.org.objectweb.asm.*;
-
 import java.lang.reflect.Constructor;
+
+import com.devexperts.dxlab.lincheck.asm.templ.*;
+import jdk.internal.org.objectweb.asm.Opcodes;
 
 public class ClassGenerator implements Opcodes {
 

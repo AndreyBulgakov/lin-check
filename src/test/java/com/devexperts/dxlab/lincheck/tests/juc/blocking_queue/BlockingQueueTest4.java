@@ -3,7 +3,7 @@ package com.devexperts.dxlab.lincheck.tests.juc.blocking_queue;
 import com.devexperts.dxlab.lincheck.CheckerAnnotatedASM;
 import com.devexperts.dxlab.lincheck.annotations.ActorAnn;
 import com.devexperts.dxlab.lincheck.annotations.CTest;
-import com.devexperts.dxlab.lincheck.annotations.Immutable;
+import com.devexperts.dxlab.lincheck.annotations.ReadOnly;
 import com.devexperts.dxlab.lincheck.annotations.Reload;
 import com.devexperts.dxlab.lincheck.util.Result;
 import org.junit.Test;
@@ -31,7 +31,7 @@ public class BlockingQueueTest4 {
         res.setValue(q.add(value));
     }
 
-    @Immutable
+    @ReadOnly
     @ActorAnn(args = {})
     public void element(Result res, Object[] args)  throws Exception  {
         res.setValue(q.element());

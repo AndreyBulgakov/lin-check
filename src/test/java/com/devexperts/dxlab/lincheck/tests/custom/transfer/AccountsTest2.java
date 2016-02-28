@@ -1,10 +1,8 @@
 package com.devexperts.dxlab.lincheck.tests.custom.transfer;
 
 import com.devexperts.dxlab.lincheck.CheckerAnnotatedASM;
-import com.devexperts.dxlab.lincheck.annotations.ActorAnn;
-import com.devexperts.dxlab.lincheck.annotations.CTest;
-import com.devexperts.dxlab.lincheck.annotations.Immutable;
-import com.devexperts.dxlab.lincheck.annotations.Reload;
+import com.devexperts.dxlab.lincheck.annotations.*;
+import com.devexperts.dxlab.lincheck.annotations.ReadOnly;
 import com.devexperts.dxlab.lincheck.util.Result;
 import org.junit.Test;
 
@@ -21,7 +19,7 @@ public class AccountsTest2 {
         acc = new AccountsWrong1();
     }
 
-    @Immutable
+    @ReadOnly
     @ActorAnn(args = {"1:4"})
     public void getAmount(Result res, Object[] args) {
         Integer id = (Integer) args[0];

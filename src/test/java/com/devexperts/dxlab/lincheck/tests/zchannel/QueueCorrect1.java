@@ -3,16 +3,10 @@ package com.devexperts.dxlab.lincheck.tests.zchannel;
 import com.devexperts.dxlab.lincheck.CheckerAnnotatedASM;
 import com.devexperts.dxlab.lincheck.annotations.ActorAnn;
 import com.devexperts.dxlab.lincheck.annotations.CTest;
-import com.devexperts.dxlab.lincheck.annotations.Immutable;
 import com.devexperts.dxlab.lincheck.annotations.Reload;
 import com.devexperts.dxlab.lincheck.util.Result;
-import org.jctools.queues.QueueFactory;
-import org.jctools.queues.spec.ConcurrentQueueSpec;
 import org.junit.Test;
 import z.channel.GenericMPMCQueue;
-import z.channel.MPMCQueue;
-
-import java.util.Queue;
 
 import static org.junit.Assert.assertTrue;
 

@@ -2,12 +2,11 @@ package com.devexperts.dxlab.lincheck;
 
 import com.devexperts.dxlab.lincheck.annotations.ActorAnn;
 import com.devexperts.dxlab.lincheck.annotations.CTest;
-import com.devexperts.dxlab.lincheck.annotations.Immutable;
+import com.devexperts.dxlab.lincheck.annotations.ReadOnly;
 import com.devexperts.dxlab.lincheck.annotations.Reload;
 import com.devexperts.dxlab.lincheck.asm.ClassGenerator;
 import com.devexperts.dxlab.lincheck.asm.Generated;
 import com.devexperts.dxlab.lincheck.util.*;
-import z.util.SystemProperty;
 
 import java.io.*;
 import java.lang.annotation.Annotation;
@@ -199,7 +198,7 @@ public class CheckerAnnotatedASM {
             }
 
             boolean isMutable = true;
-            if (m.isAnnotationPresent(Immutable.class)) {
+            if (m.isAnnotationPresent(ReadOnly.class)) {
                 isMutable = false;
             }
 

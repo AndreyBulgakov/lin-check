@@ -1,10 +1,8 @@
 package com.devexperts.dxlab.lincheck.tests.jctools;
 
 import com.devexperts.dxlab.lincheck.CheckerAnnotatedASM;
-import com.devexperts.dxlab.lincheck.annotations.ActorAnn;
-import com.devexperts.dxlab.lincheck.annotations.CTest;
-import com.devexperts.dxlab.lincheck.annotations.Immutable;
-import com.devexperts.dxlab.lincheck.annotations.Reload;
+import com.devexperts.dxlab.lincheck.annotations.*;
+import com.devexperts.dxlab.lincheck.annotations.ReadOnly;
 import com.devexperts.dxlab.lincheck.util.Result;
 import org.jctools.queues.QueueFactory;
 import org.jctools.queues.spec.ConcurrentQueueSpec;
@@ -38,7 +36,7 @@ public class QueueCorrect5 {
 //        res.setValue(q.offer(value));
 //    }
 
-    @Immutable
+    @ReadOnly
     @ActorAnn(args = {})
     public void element(Result res, Object[] args)  throws Exception  {
         Integer value = q.element();

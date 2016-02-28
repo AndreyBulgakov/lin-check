@@ -1,16 +1,13 @@
 package com.devexperts.dxlab.lincheck.tests.romix;
 
 import com.devexperts.dxlab.lincheck.CheckerAnnotatedASM;
-import com.devexperts.dxlab.lincheck.annotations.ActorAnn;
-import com.devexperts.dxlab.lincheck.annotations.CTest;
-import com.devexperts.dxlab.lincheck.annotations.Immutable;
-import com.devexperts.dxlab.lincheck.annotations.Reload;
+import com.devexperts.dxlab.lincheck.annotations.*;
+import com.devexperts.dxlab.lincheck.annotations.ReadOnly;
 import com.devexperts.dxlab.lincheck.util.Result;
 import com.romix.scala.collection.concurrent.TrieMap;
 import org.junit.Test;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static junit.framework.TestCase.assertTrue;
 
@@ -32,7 +29,7 @@ public class TrieCorrect1 {
         res.setValue(m.put(key, value));
     }
 
-    @Immutable
+    @ReadOnly
     @ActorAnn(args = {"1:4"})
     public void get(Result res, Object[] args) throws Exception {
         Integer key = (Integer) args[0];
