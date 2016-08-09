@@ -878,7 +878,7 @@ public class NonBlockingHashMapLong<TypeV>
       assert nowDone <= oldlen;
       if( workdone > 0 ) {
         while( !_copyDoneUpdater.compareAndSet(this,copyDone,nowDone) ) {
-          copyDone = _copyDone;   // Reload, retry
+          copyDone = _copyDone;   // Reset, retry
           nowDone = copyDone+workdone;
           assert nowDone <= oldlen;
         }

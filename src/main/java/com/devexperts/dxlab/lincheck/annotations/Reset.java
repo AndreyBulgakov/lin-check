@@ -16,20 +16,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.devexperts.dxlab.lincheck.util;
+package com.devexperts.dxlab.lincheck.annotations;
 
-public class Interval {
-    public Number from, to;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-    public Interval(Number from, Number to) {
-        this.from = from;
-        this.to = to;
-    }
-
-    @Override
-    public String toString() {
-        return "[" + from +
-                ", " + to +
-                ')';
-    }
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Reset {
 }

@@ -20,8 +20,7 @@ package com.devexperts.dxlab.lincheck.tests.high_scale_lib;
 
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
-import com.devexperts.dxlab.lincheck.annotations.Operation;
-import com.devexperts.dxlab.lincheck.util.Result;
+import com.devexperts.dxlab.lincheck.SimpleGenerators.IntegerGenerator;
 import org.cliffc.high_scale_lib.old.NonBlockingSetInt;
 import org.junit.Test;
 
@@ -35,26 +34,24 @@ import static org.junit.Assert.assertTrue;
 public class BitVectorTest1 {
     public Set<Integer> q;
 
-    @Reload
+    @Reset
     public void reload() {
         q = new NonBlockingSetInt();
     }
 
-    @Operation(args = {"1:3"})
-    public void add(Result res, Object[] args) throws Exception {
-        Integer value = (Integer) args[0];
-        res.setValue(q.add(value));
+    @Operation
+    public boolean add(@Param(clazz = IntegerGenerator.class)int value) throws Exception {
+        return q.add(value);
     }
 
-    @Operation(args = {"1:3"})
-    public void remove(Result res, Object[] args) throws Exception {
-        Integer value = (Integer) args[0];
-        res.setValue(q.remove(value));
+    @Operation
+    public boolean remove(@Param(clazz = IntegerGenerator.class)int value) throws Exception {
+        return q.remove(value);
     }
 
-    @Operation(args = {})
-    public void size(Result res, Object[] args) throws Exception {
-        res.setValue(q.size());
+    @Operation
+    public int size() throws Exception {
+        return q.size();
     }
 
     @Test

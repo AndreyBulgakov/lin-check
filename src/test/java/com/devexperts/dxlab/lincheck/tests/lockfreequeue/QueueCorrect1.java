@@ -20,8 +20,7 @@ package com.devexperts.dxlab.lincheck.tests.lockfreequeue;
 
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
-import com.devexperts.dxlab.lincheck.annotations.Operation;
-import com.devexperts.dxlab.lincheck.util.Result;
+import com.devexperts.dxlab.lincheck.SimpleGenerators.IntegerGenerator;
 import com.github.lock.free.queue.LockFreeQueue;
 import org.junit.Test;
 
@@ -37,21 +36,19 @@ import static org.junit.Assert.assertTrue;
 public class QueueCorrect1 {
     public LockFreeQueue<Integer> q;
 
-    @Reload
+    @Reset
     public void reload() {
         q = new LockFreeQueue<>();
     }
 
-    @Operation(args = {"1:10"})
-    public void add(Result res, Object[] args) throws Exception {
-        Integer value = (Integer) args[0];
+    @Operation
+    public void add(@Param(clazz = IntegerGenerator.class) int value) throws Exception {
         q.add(value);
-        res.setVoid();
     }
 
-    @Operation(args = {})
-    public void takeOrNull(Result res, Object[] args) throws Exception {
-        res.setValue(q.takeOrNull());
+    @Operation
+    public Object takeOrNull() throws Exception {
+        return q.takeOrNull();
     }
 
     @Test

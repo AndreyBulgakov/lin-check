@@ -20,8 +20,7 @@ package com.devexperts.dxlab.lincheck.tests.juc.blocking_queue;
 
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
-import com.devexperts.dxlab.lincheck.annotations.Operation;
-import com.devexperts.dxlab.lincheck.util.Result;
+import com.devexperts.dxlab.lincheck.SimpleGenerators.IntegerGenerator;
 import org.junit.Test;
 
 import java.util.Queue;
@@ -35,32 +34,31 @@ import static org.junit.Assert.assertTrue;
 public class BlockingQueueTest4 {
     public Queue<Integer> q;
 
-    @Reload
+    @Reset
     public void reload() {
         q = new ConcurrentLinkedQueue<>();
     }
 
-    @Operation(args = {"1:10"})
-    public void add(Result res, Object[] args) throws Exception {
-        Integer value = (Integer) args[0];
+    @Operation
+    public boolean add(@Param(clazz = IntegerGenerator.class)Integer value) throws Exception {
 
-        res.setValue(q.add(value));
+        return q.add(value);
     }
 
     @ReadOnly
-    @Operation(args = {})
-    public void element(Result res, Object[] args)  throws Exception  {
-        res.setValue(q.element());
+    @Operation
+    public int element()  throws Exception  {
+        return q.element();
     }
 
-    @Operation(args = {})
-    public void remove(Result res, Object[] args) throws Exception {
-        res.setValue(q.remove());
+    @Operation
+    public int remove() throws Exception {
+        return q.remove();
     }
 
-    @Operation(args = {})
-    public void poll(Result res, Object[] args) throws Exception {
-        res.setValue(q.poll());
+    @Operation
+    public int poll() throws Exception {
+        return q.poll();
     }
 
 

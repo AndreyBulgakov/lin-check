@@ -20,9 +20,8 @@ package com.devexperts.dxlab.lincheck.tests.boundary;
 
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
-import com.devexperts.dxlab.lincheck.annotations.Operation;
+import com.devexperts.dxlab.lincheck.SimpleGenerators.IntegerGenerator;
 import com.devexperts.dxlab.lincheck.util.MyRandom;
-import com.devexperts.dxlab.lincheck.util.Result;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import org.junit.Test;
 
@@ -33,30 +32,29 @@ import static org.junit.Assert.assertTrue;
 
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
+@Param(name = "key", clazz = IntegerGenerator.class)
+@Param(name = "value", clazz = IntegerGenerator.class)
 public class MapCorrect1 {
     public Map<Integer, Integer> q;
 
-    @Reload
+    @Reset
     public void reload() {
         q = new NonBlockingHashMap<>();
     }
 
-    @Operation(args = {"1:3", "1:10"})
-    public void put(Result res, Object[] args) throws Exception {
-        Integer key = (Integer) args[0];
-        Integer value = (Integer) args[1];
-        res.setValue(q.put(key, value));
+    @Operation(params = {"key","value"})
+    public int put(Integer key, Integer value) throws Exception {
+        return q.put(key, value);
     }
 
-    @Operation(args = {"1:3"})
-    public void get(Result res, Object[] args) throws Exception {
-        Integer key = (Integer) args[0];
-        res.setValue(q.get(key));
+    @Operation
+    public int get(@Param(name = "key") Integer key) throws Exception {
+        return q.get(key);
     }
 
-    @Operation(args = {})
-    public void size(Result res, Object[] args) throws Exception {
-        res.setValue(q.size());
+    @Operation()
+    public int size() throws Exception {
+        return q.size();
     }
 
     @Test

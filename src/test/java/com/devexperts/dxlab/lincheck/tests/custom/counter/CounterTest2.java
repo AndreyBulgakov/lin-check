@@ -19,9 +19,9 @@
 package com.devexperts.dxlab.lincheck.tests.custom.counter;
 
 import com.devexperts.dxlab.lincheck.Checker;
-import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.CTest;
-import com.devexperts.dxlab.lincheck.annotations.Reload;
+import com.devexperts.dxlab.lincheck.annotations.Operation;
+import com.devexperts.dxlab.lincheck.annotations.Reset;
 import com.devexperts.dxlab.lincheck.util.Result;
 import org.junit.Test;
 
@@ -32,15 +32,14 @@ import static junit.framework.TestCase.assertTrue;
 public class CounterTest2 {
     public Counter counter;
 
-    @Reload
+    @Reset
     public void reload() {
         counter = new CounterCorrect2();
     }
 
-    @Operation(args = {})
-    public void incAndGet(Result res, Object[] args) {
-        Integer v = counter.incrementAndGet();
-        res.setValue(v);
+    @Operation
+    public int incAndGet() {
+        return counter.incrementAndGet();
     }
 
     @Test

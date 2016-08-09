@@ -18,23 +18,26 @@
 
 package com.devexperts.dxlab.lincheck.util;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 public class Actor {
     public int ind;
-    public int method;
-    public Object[] args;
+    public Method method;
+    public MethodParameter[] args;
     public String methodName;
     public boolean isMutable;
 
 
-    public Actor(int ind, int method, boolean isMutable) {
+    public Actor(int ind, Method method, boolean isMutable) {
         this.ind = ind;
         this.method = method;
         this.isMutable = isMutable;
     }
 
-    public Actor(int ind, int method, boolean isMutable, Object... args) {
+    public Actor(int ind, Method method, boolean isMutable, MethodParameter... args) {
         this.ind = ind;
         this.method = method;
         this.isMutable = isMutable;
@@ -62,7 +65,7 @@ public class Actor {
     public String toString() {
         return ind +
                 "_" + methodName +
-                "(" + argsToString(args) +
+                "(" + Arrays.toString(args) +
                 ")";
     }
 }

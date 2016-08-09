@@ -22,7 +22,7 @@ import java.util.Map;
 
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
-import com.devexperts.dxlab.lincheck.util.Result;
+import com.devexperts.dxlab.lincheck.SimpleGenerators.IntegerGenerator;
 import com.romix.scala.collection.concurrent.TrieMap;
 import org.junit.Test;
 
@@ -31,26 +31,25 @@ import static junit.framework.TestCase.assertTrue;
 
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
+@Param(name = "key", clazz = IntegerGenerator.class)
+@Param(name = "value", clazz = IntegerGenerator.class)
 public class TrieCorrect1 {
     public Map<Integer, Integer> m;
 
-    @Reload
+    @Reset
     public void reload() {
         m = new TrieMap<>();
     }
 
-    @Operation(args = {"1:4", "1:10"})
-    public void put(Result res, Object[] args) throws Exception {
-        Integer key = (Integer) args[0];
-        Integer value = (Integer) args[1];
-        res.setValue(m.put(key, value));
+    @Operation(params = {"key","value"})
+    public int put(int key, int value) throws Exception {
+        return m.put(key, value);
     }
 
     @ReadOnly
-    @Operation(args = {"1:4"})
-    public void get(Result res, Object[] args) throws Exception {
-        Integer key = (Integer) args[0];
-        res.setValue(m.get(key));
+    @Operation(params = {"key"})
+    public int get(int key) throws Exception {
+        return m.get(key);
     }
 
     @Test

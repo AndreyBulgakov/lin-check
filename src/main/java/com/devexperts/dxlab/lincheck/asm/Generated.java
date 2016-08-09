@@ -18,10 +18,13 @@
 
 package com.devexperts.dxlab.lincheck.asm;
 
+import com.devexperts.dxlab.lincheck.util.MethodParameter;
 import com.devexperts.dxlab.lincheck.util.Result;
 
-public class Generated {
-    public void process(Result[] res, Object[][] args, int[] waits) {
+import java.util.concurrent.Phaser;
 
+
+public class Generated {
+    public void process(Result[] res, MethodParameter[][] args, int[] waits, Phaser phaser) {
     };
 }

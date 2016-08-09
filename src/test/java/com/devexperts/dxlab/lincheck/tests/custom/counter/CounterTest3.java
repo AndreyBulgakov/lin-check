@@ -30,15 +30,14 @@ import static org.junit.Assert.assertFalse;
 public class CounterTest3 {
     public Counter counter;
 
-    @Reload
+    @Reset
     public void reload() {
         counter = new CounterWrong1();
     }
 
-    @Operation(args = {})
-    public void incAndGet(Result res, Object[] args) {
-        Integer v = counter.incrementAndGet();
-        res.setValue(v);
+    @Operation
+    public int incAndGet() {
+        return counter.incrementAndGet();
     }
 
     @Test

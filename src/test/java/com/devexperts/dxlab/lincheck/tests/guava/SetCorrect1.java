@@ -19,10 +19,11 @@
 package com.devexperts.dxlab.lincheck.tests.guava;
 
 import com.devexperts.dxlab.lincheck.Checker;
-import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.CTest;
-import com.devexperts.dxlab.lincheck.annotations.Reload;
-import com.devexperts.dxlab.lincheck.util.Result;
+import com.devexperts.dxlab.lincheck.annotations.Operation;
+import com.devexperts.dxlab.lincheck.annotations.Param;
+import com.devexperts.dxlab.lincheck.annotations.Reset;
+import com.devexperts.dxlab.lincheck.SimpleGenerators.IntegerGenerator;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -34,24 +35,23 @@ import static org.junit.Assert.assertTrue;
 
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
+@Param(name = "count", clazz = IntegerGenerator.class)
 public class SetCorrect1 {
     public Set<Integer> q;
 
-    @Reload
+    @Reset
     public void reload() {
         q = Collections.newSetFromMap(new ConcurrentHashMap<Integer, Boolean>());
     }
 
-    @Operation(args = {"1:3"})
-    public void add(Result res, Object[] args) throws Exception {
-        Integer value = (Integer) args[0];
-        res.setValue(q.add(value));
+    @Operation(params = {"count"})
+    public boolean add(Integer params) throws Exception {
+        return q.add(params);
     }
 
-    @Operation(args = {"1:3"})
-    public void remove(Result res, Object[] args) throws Exception {
-        Integer value = (Integer) args[0];
-        res.setValue(q.remove(value));
+    @Operation(params = {"count"})
+    public boolean remove(Integer params) throws Exception {
+        return q.remove(params);
     }
 
     @Test

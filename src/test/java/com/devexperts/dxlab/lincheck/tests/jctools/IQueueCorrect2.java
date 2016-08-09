@@ -21,7 +21,7 @@ package com.devexperts.dxlab.lincheck.tests.jctools;
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
 import com.devexperts.dxlab.lincheck.annotations.ReadOnly;
-import com.devexperts.dxlab.lincheck.util.Result;
+import com.devexperts.dxlab.lincheck.SimpleGenerators.IntegerGenerator;
 import org.jctools.queues.QueueFactory;
 import org.jctools.queues.spec.ConcurrentQueueSpec;
 import org.junit.Test;
@@ -35,28 +35,27 @@ import static org.junit.Assert.assertTrue;
 public class IQueueCorrect2 {
     public Queue<Integer> q;
 
-    @Reload
+    @Reset
     public void reload() {
 //        q = QueueFactory.newQueue(ConcurrentQueueSpec.createBoundedMpmc(1));
         q = QueueFactory.newQueue(ConcurrentQueueSpec.createBoundedMpmc(1));
     }
 
 
-    @Operation(args = {"1:10"})
-    public void offer(Result res, Object[] args) throws Exception {
-        Integer value = (Integer) args[0];
-        res.setValue(q.offer(value));
+    @Operation
+    public boolean offer(@Param(clazz = IntegerGenerator.class) int value) throws Exception {
+        return q.offer(value);
     }
 
-    @Operation(args = {})
-    public void poll(Result res, Object[] args) throws Exception {
-        res.setValue(q.poll());
+    @Operation
+    public int poll() throws Exception {
+        return q.poll();
     }
 
     @ReadOnly
-    @Operation(args = {})
-    public void peek(Result res, Object[] args) throws Exception {
-        res.setValue(q.peek());
+    @Operation
+    public int peek() throws Exception {
+        return q.peek();
     }
 
 

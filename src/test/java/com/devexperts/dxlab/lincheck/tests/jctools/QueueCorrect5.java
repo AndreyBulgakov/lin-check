@@ -21,7 +21,7 @@ package com.devexperts.dxlab.lincheck.tests.jctools;
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
 import com.devexperts.dxlab.lincheck.annotations.ReadOnly;
-import com.devexperts.dxlab.lincheck.util.Result;
+import com.devexperts.dxlab.lincheck.SimpleGenerators.IntegerGenerator;
 import org.jctools.queues.QueueFactory;
 import org.jctools.queues.spec.ConcurrentQueueSpec;
 import org.junit.Test;
@@ -35,36 +35,25 @@ import static org.junit.Assert.assertTrue;
 public class QueueCorrect5 {
     public Queue<Integer> q;
 
-    @Reload
+    @Reset
     public void reload() {
         q = QueueFactory.newQueue(ConcurrentQueueSpec.createBoundedMpmc(5));
     }
 
-    @Operation(args = {"1:10"})
-    public void add(Result res, Object[] args) throws Exception {
-        Integer value = (Integer) args[0];
-
-        boolean ret = q.add(value);
-        res.setValue(ret);
+    @Operation
+    public boolean add(@Param(clazz = IntegerGenerator.class) Integer value) throws Exception {
+        return q.add(value);
     }
-
-//    @Operation(args = {"1:10"})
-//    public void offer(Result res, Object[] args) throws Exception {
-//        Integer value = (Integer) args[0];
-//        res.setValue(q.offer(value));
-//    }
 
     @ReadOnly
-    @Operation(args = {})
-    public void element(Result res, Object[] args)  throws Exception  {
-        Integer value = q.element();
-        res.setValue(value);
+    @Operation
+    public Integer element()  throws Exception  {
+        return q.element();
     }
 
-    @Operation(args = {"1:10"})
-    public void remove(Result res, Object[] args) throws Exception {
-        Integer ret = q.remove();
-        res.setValue(ret);
+    @Operation
+    public Integer remove() throws Exception {
+        return q.remove();
     }
 
     @Test

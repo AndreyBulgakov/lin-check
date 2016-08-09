@@ -20,8 +20,10 @@ package com.devexperts.dxlab.lincheck;
 
 import java.io.*;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -95,9 +97,20 @@ public class Checker {
 
     private void executeActors(Actor[] actors, Result[] result) {
         for (int i = 0; i < actors.length; i++) {
-            Method m = methodsActor.get(actors[i].method);
+            Method m = actors[i].method;
             try {
-                m.invoke(testObject, result[i], actors[i].args);
+                Object[] test = new Object[actors[i].args.length];
+                //test[0] = result[i];
+                for (int j = 0; j < test.length; j++) {
+                    test[j] = actors[i].args[j].value;
+                }
+                if (actors[i].method.getReturnType().getName().equals("void")){
+                    m.invoke(testObject, test);
+                    result[i].setVoid();
+                }
+                else {
+                    result[i].setValue(m.invoke(testObject, test));
+                }
             } catch (IllegalAccessException | InvocationTargetException e) {
                 result[i].setException((Exception) e.getCause());
             }
@@ -173,12 +186,67 @@ public class Checker {
         return new Interval(from, to);
     }
 
+    /**
+     * use Class clz and methodsActor
+     * @param clz, methodActors
+     * @return return Method-Argument map
+     */
+    private Map<Method, Map<Parameter, Params>> getArgsMap(Class clz)
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
+        Map<Method, Map<Parameter, Params>> argsMap = new HashMap<>();
+        Map<String, Object[]> classParameters = new HashMap<>();
+        Annotation[] params = clz.getAnnotationsByType(Param.class);
+
+
+
+        for (Annotation i: params) {
+            Constructor[] ctors = ((Param)i).clazz().getDeclaredConstructors();
+            Constructor ctor = null;
+            for (int j = 0; j < ctors.length; j++) {
+                ctor = ctors[j];
+                if (ctor.getGenericParameterTypes().length == 0)
+                    break;
+            }
+            ctor.setAccessible(true);
+            if (((Param) i).opt().length != 0) {
+                ParameterizedGenerator p = (ParameterizedGenerator)ctor.newInstance();
+                p.setParameters(((Param) i).opt());
+                classParameters.put(((Param)i).name(), p.generate());
+            } else{
+                Generator c = (Generator) ctor.newInstance();
+                classParameters.put(((Param)i).name(), c.generate());
+            }
+        }
+        for (Method m : methodsActor) {
+            Parameter[] methodParameters = m.getParameters();
+            Annotation methodAnnotation = m.getAnnotation(Operation.class);
+            Map<Parameter, Params> parameters = new HashMap<>();
+            if (((Operation) methodAnnotation).params().length == 0) {
+                for (Parameter i : methodParameters) {
+                    Param p = i.getAnnotation(Param.class);
+                    if (p.name().equals("")) {
+                        parameters.put(i, new Params(((Generator)p.clazz().newInstance()).generate()));
+                    } else {
+                        parameters.put(i, new Params(classParameters.get(p.name())));
+                    }
+                }
+            } else {
+                String[] parametersNames = ((Operation) methodAnnotation).params();
+                for (int i = 0; i < methodParameters.length; i++) {
+                    parameters.put(methodParameters[i], new Params(classParameters.get(parametersNames[i])));
+                }
+            }
+            argsMap.put(m, parameters);
+        }
+        return argsMap;
+    }
+
     long startTime;
     public boolean checkAnnotated(Object test) throws Exception {
         startTime = System.currentTimeMillis();
-
         this.testObject = test;
         Class clz = test.getClass();
+        Annotation[] ctests = clz.getAnnotationsByType(CTest.class);
 
         Method[] ms = clz.getDeclaredMethods();
 
@@ -189,37 +257,25 @@ public class Checker {
             if (method.isAnnotationPresent(Operation.class)) {
                 methodsActor.add(method);
             }
-            if (method.isAnnotationPresent(Reload.class)) {
+            if (method.isAnnotationPresent(Reset.class)) {
                 methodReload = method;
             }
         }
 
         int ind = 0;
         List<ActorGenerator> gens = new ArrayList<>();
+        Map<Method, Map<Parameter, Params>> argsMap = getArgsMap(clz);
         for (Method m : methodsActor) {
-            String[] args = m.getAnnotation(Operation.class).args();
-//            String name = m.getAnnotation(Operation.class).name();
-            String name = m.getName();
 
-            Interval[] ivs = new Interval[args.length];
+            boolean isMutable = !m.isAnnotationPresent(ReadOnly.class);
 
-            for (int i = 0; i < args.length; i++) {
-                ivs[i] = parseInterval(args[i]);
-            }
-
-            boolean isMutable = true;
-            if (m.isAnnotationPresent(ReadOnly.class)) {
-                isMutable = false;
-            }
-
-            ActorGenerator gen = new ActorGenerator(ind++, name, ivs);
+            ActorGenerator gen = new ActorGenerator(ind++, m, argsMap.get(m));
             gen.setMutable(isMutable);
             gens.add(gen);
         }
 
 
         List<CheckerConfiguration> confs = new ArrayList<>();
-        Annotation[] ctests = clz.getAnnotationsByType(CTest.class);
         for (Annotation ann : ctests) {
             if (ann instanceof CTest) {
                 CTest ctest = (CTest) ann;
@@ -250,7 +306,7 @@ public class Checker {
     }
 
     Generated[] generatedClasses;
-    Object[][][] argumentMatrix;
+    MethodParameter[][][] argumentMatrix;
 
     private boolean checkImpl(CheckerConfiguration conf) throws Exception {
         long sumTime = 0;
@@ -289,20 +345,20 @@ public class Checker {
             String testClassName = testObject.getClass().getCanonicalName();
             testClassName = testClassName.replace(".", "/");
             generatedClasses = new Generated[COUNT_THREADS];
-            argumentMatrix = new Object[COUNT_THREADS][][];
+            argumentMatrix = new MethodParameter[COUNT_THREADS][][];
             for (int i = 0; i < actors.length; i++) {
                 Actor[] actor = actors[i];
 
                 String generatedClassName = "com.devexperts.dxlab.lincheck.asm.Generated" + i;
 
                 String[] methodNames = new String[actor.length];
-                Object[][] argForThread = new Object[actor.length][];
+                MethodParameter[][] argForThread = new MethodParameter[actor.length][];
+                String[] methodTypes = new String[actor.length];
                 for (int j = 0; j < actor.length; j++) {
                     methodNames[j] = actor[j].methodName;
                     argForThread[j] = actor[j].args;
+                    methodTypes[j] = actor[j].method.getReturnType().getName();
                 }
-
-//                System.out.println(Arrays.toString(methodNames));
 
                 generatedClasses[i] = ClassGenerator.generate(
                         testObject,
@@ -310,7 +366,9 @@ public class Checker {
                         generatedClassName.replace('.', '/'),
                         "field",
                         testClassName,
-                        methodNames
+                        methodNames,
+                        argForThread,
+                        methodTypes
                 );
                 argumentMatrix[i] = argForThread;
             }
@@ -346,14 +404,13 @@ public class Checker {
             Runnable[] runnables = new Runnable[COUNT_THREADS];
             for (int i = 0; i < COUNT_THREADS; i++) {
                 final Result[] threadResult = results[i];
-                final Object[][] threadArgs = argumentMatrix[i];
+                final MethodParameter[][] threadArgs = argumentMatrix[i];
                 final Generated classGen = generatedClasses[i];
                 final int[] localWaits = waits[i];
                 runnables[i] = new Runnable() {
                     @Override
                     public void run() {
-                        phaser.arriveAndAwaitAdvance();
-                        classGen.process(threadResult, threadArgs, localWaits);
+                        classGen.process(threadResult, threadArgs, localWaits, phaser);
                         phaser.arrive();
                     }
                 };

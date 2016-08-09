@@ -21,7 +21,7 @@ package com.devexperts.dxlab.lincheck.tests.custom.transfer;
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
 import com.devexperts.dxlab.lincheck.annotations.ReadOnly;
-import com.devexperts.dxlab.lincheck.util.Result;
+import com.devexperts.dxlab.lincheck.SimpleGenerators.IntegerGenerator;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertTrue;
@@ -29,36 +29,30 @@ import static org.junit.Assert.assertFalse;
 
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
+@Param(name = "id", clazz = IntegerGenerator.class)
+@Param(name = "amount", clazz = IntegerGenerator.class)
 public class AccountsTest2 {
     public Accounts acc;
 
-    @Reload
+    @Reset
     public void reload() {
         acc = new AccountsWrong1();
     }
 
     @ReadOnly
-    @Operation(args = {"1:4"})
-    public void getAmount(Result res, Object[] args) {
-        Integer id = (Integer) args[0];
-        res.setValue(acc.getAmount(id));
+    @Operation(params = {"id"})
+    public int getAmount(int key) {
+        return acc.getAmount(key);
     }
 
-    @Operation(args = {"1:4", "10:21"})
-    public void setAmount(Result res, Object[] args) {
-        Integer id = (Integer) args[0];
-        Integer amount = (Integer) args[1];
-        acc.setAmount(id, amount);
-        res.setVoid();
+    @Operation(params = {"id", "amount"})
+    public void setAmount(int key, int value) {
+        acc.setAmount(key, value);
     }
 
-    @Operation(args = {"1:4", "1:4", "1:10"})
-    public void transfer(Result res, Object[] args) {
-        Integer from = (Integer) args[0];
-        Integer to = (Integer) args[1];
-        Integer amount = (Integer) args[2];
+    @Operation
+    public void transfer(@Param(name = "id") int from, @Param(clazz = IntegerGenerator.class) int to, @Param(clazz = IntegerGenerator.class) int amount) {
         acc.transfer(from, to, amount);
-        res.setVoid();
     }
 
 

@@ -20,8 +20,7 @@ package com.devexperts.dxlab.lincheck.tests.juc.hash_map;
 
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
-import com.devexperts.dxlab.lincheck.annotations.Operation;
-import com.devexperts.dxlab.lincheck.util.Result;
+import com.devexperts.dxlab.lincheck.SimpleGenerators.IntegerGenerator;
 import org.junit.Test;
 
 import java.util.Map;
@@ -33,26 +32,24 @@ import static org.junit.Assert.assertFalse;
 
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
+@Param(name = "key", clazz = IntegerGenerator.class)
+@Param(name = "value", clazz = IntegerGenerator.class)
 public class ConcurrentHashMapTest {
     public Map<Integer, Integer> m;
 
-    @Reload
+    @Reset
     public void reload() {
         m = new ConcurrentHashMap<>();
     }
 
-    @Operation(args = {"1:4", "1:10"})
-    public void put(Result res, Object[] args) throws Exception {
-        Integer key = (Integer) args[0];
-        Integer value = (Integer) args[1];
-        res.setValue(m.put(key, value));
+    @Operation(params = {"key","value"})
+    public int put(Integer key, Integer value) throws Exception {
+        return m.put(key, value);
     }
 
-    @ReadOnly
-    @Operation(args = {"1:4"})
-    public void get(Result res, Object[] args) throws Exception {
-        Integer key = (Integer) args[0];
-        res.setValue(m.get(key));
+    @Operation
+    public int get(@Param(name = "key") Integer key) throws Exception {
+        return m.get(key);
     }
 
     @Test

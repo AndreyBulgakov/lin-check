@@ -18,18 +18,20 @@
 
 package com.devexperts.dxlab.lincheck.util;
 
-import java.util.Arrays;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.*;
 
 public class ActorGenerator {
     private int methodId;
-    private String name;
-    private Interval[] rangeArgs;
+    private Method method;
+    private Map<Parameter, Params> rangeArgs;
     private boolean actorIsMutable = true;
 
 
-    public ActorGenerator(int methodId, String name, Interval... rangeArgs) {
+    public ActorGenerator(int methodId, Method method, Map<Parameter, Params> rangeArgs) {
         this.methodId = methodId;
-        this.name = name;
+        this.method = method;
         this.rangeArgs = rangeArgs;
     }
 
@@ -42,13 +44,14 @@ public class ActorGenerator {
     }
 
     public Actor generate(int indActor) {
-        Integer[] args = new Integer[rangeArgs.length];
-        for (int i = 0; i < rangeArgs.length; i++) {
-            args[i] = MyRandom.fromInterval(rangeArgs[i]);
+        MethodParameter[] args = new MethodParameter[rangeArgs.size()];
+        Parameter[] parameters = method.getParameters();
+        for (int i = 0; i < parameters.length; i++) {
+            args[i] = new MethodParameter(parameters[i].getType().getTypeName(), MyRandom.fromParams(rangeArgs.get(parameters[i])));
         }
 
-        Actor act = new Actor(indActor, methodId, isMutable(), args);
-        act.methodName = name;
+        Actor act = new Actor(indActor, method, isMutable(), args);
+        act.methodName = method.getName();
         return act;
     }
 
@@ -56,8 +59,8 @@ public class ActorGenerator {
     public String toString() {
         return "ActorGenerator{" +
                 "methodId=" + methodId +
-                ", name='" + name + '\'' +
-                ", rangeArgs=" + Arrays.toString(rangeArgs) +
+                ", name='" + method.getName() + '\'' +
+                ", rangeArgs=" + rangeArgs.values() +
                 '}';
     }
 }

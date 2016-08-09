@@ -20,8 +20,7 @@ package com.devexperts.dxlab.lincheck.tests.custom.queue;
 
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
-import com.devexperts.dxlab.lincheck.annotations.Operation;
-import com.devexperts.dxlab.lincheck.util.Result;
+import com.devexperts.dxlab.lincheck.SimpleGenerators.IntegerGenerator;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
@@ -30,22 +29,19 @@ import static org.junit.Assert.assertFalse;
 public class WrapperQueueWrong1 {
     public Queue queue;
 
-    @Reload
+    @Reset
     public void reload() {
         queue = new QueueWrong1(10);
     }
 
-    @Operation(args = {"1:10"})
-    public void put(Result res, Object[] args) throws QueueFullException {
-        Integer x = (Integer) args[0];
+    @Operation
+    public void put(@Param(clazz = IntegerGenerator.class)int x) throws Exception {
         queue.put(x);
-        res.setVoid();
     }
 
-    @Operation(args = {})
-    public void get(Result res, Object[] args) throws Exception {
-        Integer value = queue.get();
-        res.setValue(value);
+    @Operation
+    public Integer get() throws Exception {
+        return queue.get();
     }
 
     @Test

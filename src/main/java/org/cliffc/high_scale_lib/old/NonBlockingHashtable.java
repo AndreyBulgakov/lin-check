@@ -980,7 +980,7 @@ public class NonBlockingHashtable<TypeK, TypeV>
       assert (copyDone+workdone) <= oldlen;
       if( workdone > 0 ) {
         while( !_copyDoneUpdater.compareAndSet(this,copyDone,copyDone+workdone) ) {
-          copyDone = _copyDone; // Reload, retry
+          copyDone = _copyDone; // Reset, retry
           assert (copyDone+workdone) <= oldlen;
         }
         //if( (10*copyDone/oldlen) != (10*(copyDone+workdone)/oldlen) )

@@ -19,10 +19,11 @@
 package com.devexperts.dxlab.lincheck.tests.zchannel;
 
 import com.devexperts.dxlab.lincheck.Checker;
-import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.CTest;
-import com.devexperts.dxlab.lincheck.annotations.Reload;
-import com.devexperts.dxlab.lincheck.util.Result;
+import com.devexperts.dxlab.lincheck.annotations.Operation;
+import com.devexperts.dxlab.lincheck.annotations.Param;
+import com.devexperts.dxlab.lincheck.annotations.Reset;
+import com.devexperts.dxlab.lincheck.SimpleGenerators.IntegerGenerator;
 import org.junit.Test;
 import z.channel.GenericMPMCQueue;
 
@@ -38,20 +39,19 @@ import static org.junit.Assert.assertTrue;
 public class QueueCorrect2 {
     public GenericMPMCQueue<Integer> q;
 
-    @Reload
+    @Reset
     public void reload() {
         q = new GenericMPMCQueue(16);
     }
 
-    @Operation(args = {"1:10"})
-    public void offer(Result res, Object[] args) throws Exception {
-        Integer value = (Integer) args[0];
-        res.setValue(q.offer(value));
+    @Operation
+    public boolean offer(@Param(clazz = IntegerGenerator.class) int value) throws Exception {
+        return q.offer(value);
     }
 
-    @Operation(args = {})
-    public void poll(Result res, Object[] args) throws Exception {
-        res.setValue(q.poll());
+    @Operation
+    public int poll() throws Exception {
+        return q.poll();
     }
 
     @Test

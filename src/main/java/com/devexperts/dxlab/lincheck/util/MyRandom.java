@@ -24,7 +24,10 @@ public class MyRandom {
     public static final Random r = new Random(0);
 
     public static int fromInterval(Interval iv) {
-        return r.nextInt(iv.to - iv.from) + iv.from;
+        return r.nextInt((Integer)iv.to - (Integer)iv.from) + (Integer)iv.from;
+    }
+    public static Object fromParams(Params a) {
+        return a.objects[r.nextInt(a.to - a.from)];
     }
 
     public static int nextInt(int n) {
@@ -38,6 +41,7 @@ public class MyRandom {
     public static long nextLong() {
         return r.nextLong();
     }
+    public static double nextDouble() { return r.nextDouble(); }
 
 
     public static void busyWait(int nanos) {
