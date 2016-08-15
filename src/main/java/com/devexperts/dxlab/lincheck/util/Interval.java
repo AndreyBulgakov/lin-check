@@ -18,7 +18,7 @@
 
 package com.devexperts.dxlab.lincheck.util;
 
-public class Interval {
+public class Interval implements Cloneable {
     public Number from, to;
 
     public Interval(Number from, Number to) {
@@ -31,5 +31,9 @@ public class Interval {
         return "[" + from +
                 ", " + to +
                 ')';
+    }
+    @Override
+    public Interval clone(){
+        return new Interval(this.from, this.to);
     }
 }

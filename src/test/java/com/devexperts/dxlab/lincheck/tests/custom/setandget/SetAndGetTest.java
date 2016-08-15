@@ -25,9 +25,15 @@ public class SetAndGetTest {
         setAndGet = new SetAndGet();
     }
 
+    @NumberOfValidStreams(2)
     @Operation(params = {"key"})
     public float setAndGet(float key) throws Exception{
         return setAndGet.setAndGet(key);
+    }
+    @NumberOfValidStreams(1)
+    @Operation
+    public int return3() throws Exception{
+        return 3;
     }
 
     @Test

@@ -18,10 +18,11 @@
 
 package com.devexperts.dxlab.lincheck.util;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.devexperts.dxlab.lincheck.Checker;
 
-public class CheckerConfiguration {
+import java.util.*;
+
+public class CheckerConfiguration implements Cloneable {
     private int numThreads;
 
     private int numIterations;
@@ -29,12 +30,16 @@ public class CheckerConfiguration {
     private List<Interval> rangeActorCount;
     private List<ActorGenerator> actorGenerators;
     private int indActor;
+    private int maxThreadNumber = 0;
 
     public CheckerConfiguration(int numThreads, int numIterations, List<Interval> rangeActorCount, List<ActorGenerator> actorGenerators) {
         this.numThreads = numThreads;
         this.numIterations = numIterations;
         this.rangeActorCount = rangeActorCount;
         this.actorGenerators = actorGenerators;
+        for (ActorGenerator i: actorGenerators) {
+            maxThreadNumber+= i.getNumberOfValidStreams();
+        }
     }
 
     public CheckerConfiguration() {
@@ -64,14 +69,24 @@ public class CheckerConfiguration {
         return actorGenerators.get(MyRandom.nextInt(actorGenerators.size()));
     }
 
-    private Actor[] generateActorsArray(Interval count) {
+    private Actor[] generateActorsArray(Interval count, int numThreads) {
+        for (int i = 0; i < actorGenerators.size(); i++) {
+            if (actorGenerators.get(i).getNumberOfValidStreams() == 0)
+                actorGenerators.remove(i);
+        }
+        ActorGenerator generator = null;
+        if (numThreads == maxThreadNumber)
+            generator = randomGenerator();
         int countActors = MyRandom.fromInterval(count);
-
+        Set<ActorGenerator> actorGeneratorsSet = new HashSet<>();
         Actor[] actors = new Actor[countActors];
         for (int i = 0; i < countActors; i++) {
-            actors[i] = randomGenerator().generate(indActor++);
+            if (numThreads != maxThreadNumber)
+                generator = randomGenerator();
+            actorGeneratorsSet.add(generator);
+            actors[i] = generator.generate(indActor++);
         }
-
+        actorGeneratorsSet.forEach(ActorGenerator::decNumberOfValidStreams);
         return actors;
     }
 
@@ -90,7 +105,7 @@ public class CheckerConfiguration {
 
         int minCountRow = Integer.MAX_VALUE;
         for (int i = 0; i < numThreads; i++) {
-            result[i] = generateActorsArray(rangeActorCount.get(i));
+            result[i] = generateActorsArray(rangeActorCount.get(i), numThreads);
             minCountRow = Math.min(minCountRow, result[i].length);
         }
 
@@ -124,5 +139,13 @@ public class CheckerConfiguration {
                 ", actorGenerators=" + actorGenerators +
                 ", indActor=" + indActor +
                 '}';
+    }
+    @Override
+    public CheckerConfiguration clone(){
+        List<Interval> cloneIntervals = new ArrayList<>();
+        rangeActorCount.forEach(x -> cloneIntervals.add(x.clone()));
+        List<ActorGenerator> cloneActorGenerators = new ArrayList<>();
+        actorGenerators.forEach(x -> cloneActorGenerators.add(x.clone()));
+        return new CheckerConfiguration(numThreads, numIterations, cloneIntervals, cloneActorGenerators);
     }
 }

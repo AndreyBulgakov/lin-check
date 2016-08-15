@@ -20,10 +20,7 @@ package com.devexperts.dxlab.lincheck;
 
 import java.io.*;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -100,7 +97,6 @@ public class Checker {
             Method m = actors[i].method;
             try {
                 Object[] test = new Object[actors[i].args.length];
-                //test[0] = result[i];
                 for (int j = 0; j < test.length; j++) {
                     test[j] = actors[i].args[j].value;
                 }
@@ -191,10 +187,10 @@ public class Checker {
      * @param clz, methodActors
      * @return return Method-Argument map
      */
-    private Map<Method, Map<Parameter, Params>> getArgsMap(Class clz)
+    private Params[][] getArgsMap(Class clz)
             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
-        Map<Method, Map<Parameter, Params>> argsMap = new HashMap<>();
         Map<String, Object[]> classParameters = new HashMap<>();
+        Params[][] mp = new Params[methodsActor.size()][];
         Annotation[] params = clz.getAnnotationsByType(Param.class);
 
 
@@ -217,28 +213,28 @@ public class Checker {
                 classParameters.put(((Param)i).name(), c.generate());
             }
         }
-        for (Method m : methodsActor) {
-            Parameter[] methodParameters = m.getParameters();
-            Annotation methodAnnotation = m.getAnnotation(Operation.class);
-            Map<Parameter, Params> parameters = new HashMap<>();
-            if (((Operation) methodAnnotation).params().length == 0) {
-                for (Parameter i : methodParameters) {
-                    Param p = i.getAnnotation(Param.class);
+        for (int j = 0; j < methodsActor.size(); j++) {
+            Parameter[] methodParameters = methodsActor.get(j).getParameters();
+            Operation methodAnnotation = methodsActor.get(j).getAnnotation(Operation.class);
+            Params[] methodParams = new Params[methodParameters.length];
+            if (methodAnnotation.params().length == 0) {
+                for (int i = 0; i < methodParameters.length; i++) {
+                    Param p = methodParameters[i].getAnnotation(Param.class);
                     if (p.name().equals("")) {
-                        parameters.put(i, new Params(((Generator)p.clazz().newInstance()).generate()));
+                        methodParams[i] = new Params(((Generator) p.clazz().newInstance()).generate(), methodParameters[i].getType().getTypeName());
                     } else {
-                        parameters.put(i, new Params(classParameters.get(p.name())));
+                        methodParams[i] = new Params(classParameters.get(p.name()), methodParameters[i].getType().getTypeName());
                     }
                 }
-            } else {
-                String[] parametersNames = ((Operation) methodAnnotation).params();
+            } else{
+                String[] parametersNames =  methodAnnotation.params();
                 for (int i = 0; i < methodParameters.length; i++) {
-                    parameters.put(methodParameters[i], new Params(classParameters.get(parametersNames[i])));
+                    methodParams[i] = new Params(classParameters.get(parametersNames[i]), methodParameters[i].getType().getTypeName());
                 }
             }
-            argsMap.put(m, parameters);
+            mp[j] = methodParams;
         }
-        return argsMap;
+        return mp;
     }
 
     long startTime;
@@ -264,16 +260,20 @@ public class Checker {
 
         int ind = 0;
         List<ActorGenerator> gens = new ArrayList<>();
-        Map<Method, Map<Parameter, Params>> argsMap = getArgsMap(clz);
-        for (Method m : methodsActor) {
+        Params[][] argsMap = getArgsMap(clz);
+        for (int i = 0; i < methodsActor.size(); i++) {
+            boolean isMutable = !(methodsActor.get(i).isAnnotationPresent(ReadOnly.class));
 
-            boolean isMutable = !m.isAnnotationPresent(ReadOnly.class);
-
-            ActorGenerator gen = new ActorGenerator(ind++, m, argsMap.get(m));
+            NumberOfValidStreams numberOfValidStreams = methodsActor.get(i).getAnnotation(NumberOfValidStreams.class);
+            int x;
+            if (numberOfValidStreams != null)
+                x = numberOfValidStreams.value();
+            else
+                x = -1;
+            ActorGenerator gen = new ActorGenerator(ind++, methodsActor.get(i), x, argsMap[i]);
             gen.setMutable(isMutable);
             gens.add(gen);
         }
-
 
         List<CheckerConfiguration> confs = new ArrayList<>();
         for (Annotation ann : ctests) {
@@ -286,10 +286,12 @@ public class Checker {
                 for (String s : ctest.actorsPerThread()) {
                     conf.addThread(parseInterval(s));
                 }
-                for (ActorGenerator gen : gens) {
-                    conf.addActorGenerator(gen);
+                for (ActorGenerator i: gens) {
+                    if (i.getNumberOfValidStreams() == -1)
+                        i.setNumberOfValidStreams(conf.getNumThreads());
+                    conf.addActorGenerator(i);
                 }
-
+                //gens.forEach(conf::addActorGenerator);
                 confs.add(conf);
             }
 
@@ -326,7 +328,8 @@ public class Checker {
             System.out.println("iter = " + iter);
 
 //            Actor[][] actors = conf.generateActors(false);
-            Actor[][] actors = conf.generateActors(true);
+            CheckerConfiguration cloneConf = conf.clone();
+            Actor[][] actors = cloneConf.generateActors(true);
 
             int countActors = 0;
             for (Actor[] actor : actors) {

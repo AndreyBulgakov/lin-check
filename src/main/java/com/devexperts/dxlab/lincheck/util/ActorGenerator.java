@@ -22,16 +22,18 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
 
-public class ActorGenerator {
+public class ActorGenerator implements Cloneable {
     private int methodId;
     private Method method;
-    private Map<Parameter, Params> rangeArgs;
+    private Params[] rangeArgs;
     private boolean actorIsMutable = true;
+    private int numberOfValidStreams = 0;
 
 
-    public ActorGenerator(int methodId, Method method, Map<Parameter, Params> rangeArgs) {
+    public ActorGenerator(int methodId, Method method, int numberOfValidStreams, Params[] rangeArgs) {
         this.methodId = methodId;
         this.method = method;
+        this.numberOfValidStreams = numberOfValidStreams;
         this.rangeArgs = rangeArgs;
     }
 
@@ -39,15 +41,26 @@ public class ActorGenerator {
         this.actorIsMutable = actorIsMutable;
     }
 
+    public void decNumberOfValidStreams(){
+        if (numberOfValidStreams != -1)
+            numberOfValidStreams--;
+    }
+    public int getNumberOfValidStreams(){
+        return numberOfValidStreams;
+    }
+    public void setNumberOfValidStreams(int numberOfValidStreams){
+        this.numberOfValidStreams = numberOfValidStreams;
+    }
+
     public boolean isMutable() {
         return actorIsMutable;
     }
 
     public Actor generate(int indActor) {
-        MethodParameter[] args = new MethodParameter[rangeArgs.size()];
-        Parameter[] parameters = method.getParameters();
+        MethodParameter[] args = new MethodParameter[rangeArgs.length];
+        Params[] parameters = rangeArgs;
         for (int i = 0; i < parameters.length; i++) {
-            args[i] = new MethodParameter(parameters[i].getType().getTypeName(), MyRandom.fromParams(rangeArgs.get(parameters[i])));
+            args[i] = new MethodParameter(parameters[i].type, MyRandom.fromParams(parameters[i]));
         }
 
         Actor act = new Actor(indActor, method, isMutable(), args);
@@ -60,7 +73,11 @@ public class ActorGenerator {
         return "ActorGenerator{" +
                 "methodId=" + methodId +
                 ", name='" + method.getName() + '\'' +
-                ", rangeArgs=" + rangeArgs.values() +
+                ", rangeArgs=" + rangeArgs.toString() +
                 '}';
+    }
+    @Override
+    public ActorGenerator clone(){
+        return new ActorGenerator(methodId, method, numberOfValidStreams, rangeArgs);
     }
 }
