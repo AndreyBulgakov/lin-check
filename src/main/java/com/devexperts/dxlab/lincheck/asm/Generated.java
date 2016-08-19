@@ -25,6 +25,6 @@ import java.util.concurrent.Phaser;
 
 
 public class Generated {
-    public void process(Result[] res, MethodParameter[][] args, int[] waits, Phaser phaser) {
+    public void process(Result[] res, MethodParameter[][] args, int[] waits, int[] offset) {
     };
 }

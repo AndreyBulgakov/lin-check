@@ -40,6 +40,12 @@ public class GeneratedDump implements Opcodes {
             fv = cw.visitField(ACC_PUBLIC, testFieldName, "L" + testClassName + ";", null, null);
             fv.visitEnd();
         }
+
+        {
+            fv = cw.visitField(ACC_PRIVATE, "phaser", "Ljava/util/concurrent/Phaser;", null, null);
+            fv.visitEnd();
+        }
+
         {
             mv = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
             mv.visitCode();
@@ -50,9 +56,26 @@ public class GeneratedDump implements Opcodes {
             mv.visitMaxs(1, 1);
             mv.visitEnd();
         }
+
+
+
+//        {
+//            mv = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
+//            mv.visitCode();
+//            mv.visitVarInsn(ALOAD, 0);
+////            mv.visitMethodInsn(INVOKESPECIAL, "com/devexperts/dxlab/lincheck/asmtest/Generated", "<init>", "()V", false);
+//            mv.visitMethodInsn(INVOKESPECIAL, "com/devexperts/dxlab/lincheck/asm/Generated", "<init>", "()V", false);
+//            mv.visitInsn(RETURN);
+//            mv.visitMaxs(1, 1);
+//            mv.visitEnd();
+//        }
+
+
+
+
         {
 //            mv = cw.visitMethod(ACC_PUBLIC, "<init>", "(Lcom/devexperts/dxlab/lincheck/tests/custom/QueueTestAnn;)V", null, null);
-            mv = cw.visitMethod(ACC_PUBLIC, "<init>", "(L" + testClassName + ";)V", null, null);
+            mv = cw.visitMethod(ACC_PUBLIC, "<init>", "(L" + testClassName + ";Ljava/util/concurrent/Phaser;)V", null, null);
             mv.visitCode();
             mv.visitVarInsn(ALOAD, 0);
 //            mv.visitMethodInsn(INVOKESPECIAL, "com/devexperts/dxlab/lincheck/asmtest/Generated", "<init>", "()V", false);
@@ -61,21 +84,45 @@ public class GeneratedDump implements Opcodes {
             mv.visitVarInsn(ALOAD, 1);
 //            mv.visitFieldInsn(PUTFIELD, "com/devexperts/dxlab/lincheck/asmtest/Generated10", "queue", "Lcom/devexperts/dxlab/lincheck/tests/custom/QueueTestAnn;");
             mv.visitFieldInsn(PUTFIELD, generatedClassName, testFieldName, "L" + testClassName + ";");
+            mv.visitVarInsn(ALOAD, 0);
+            mv.visitVarInsn(ALOAD, 2);
+            mv.visitFieldInsn(PUTFIELD, generatedClassName, "phaser", "Ljava/util/concurrent/Phaser;");
+
             mv.visitInsn(RETURN);
             mv.visitMaxs(2, 2);
             mv.visitEnd();
         }
         {
-            mv = cw.visitMethod(ACC_PUBLIC, "process", "([Lcom/devexperts/dxlab/lincheck/util/Result;[[Lcom/devexperts/dxlab/lincheck/util/MethodParameter;[ILjava/util/concurrent/Phaser;)V", null, null);
+            mv = cw.visitMethod(ACC_PUBLIC, "process", "([Lcom/devexperts/dxlab/lincheck/util/Result;[[Lcom/devexperts/dxlab/lincheck/util/MethodParameter;[I[I)V", null, null);
             mv.visitCode();
             Label[][] labelsForMethod = new Label[methodNames.length][3];
+            Label[] labelsForFhaser;
             for (int i = 0; i < labelsForMethod.length; i++) {
                 for (int j = 0; j < labelsForMethod[i].length; j++) {
                     labelsForMethod[i][j] = new Label();
                 }
                 mv.visitTryCatchBlock(labelsForMethod[i][0], labelsForMethod[i][1], labelsForMethod[i][2], "java/lang/Exception");
             }
-            Label l12 = new Label();
+            Label l9 = new Label();
+
+
+
+//            mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
+//            mv.visitTypeInsn(NEW, "java/lang/StringBuilder");
+//            mv.visitInsn(DUP);
+//            mv.visitMethodInsn(INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V", false);
+//            mv.visitLdcInsn("________________+++++++++++");
+//            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+//            mv.visitVarInsn(ALOAD, 0);
+//            mv.visitFieldInsn(GETFIELD, generatedClassName, "phaser", "Ljava/util/concurrent/Phaser;");
+//            mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/concurrent/Phaser", "getPhase", "()I", false);
+//            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(I)Ljava/lang/StringBuilder;", false);
+//            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "toString", "()Ljava/lang/String;", false);
+//            mv.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
+
+
+
+
             int border = 5;
             int[][] borders = new int[methodNames.length][];
             String[] methods = new String[methodNames.length];
@@ -84,7 +131,7 @@ public class GeneratedDump implements Opcodes {
             parList.add("[Lcom/devexperts/dxlab/lincheck/util/Result;");
             parList.add("[[Lcom/devexperts/dxlab/lincheck/util/MethodParameter;");
             parList.add("[I");
-            parList.add("java/util/concurrent/Phaser");
+            parList.add("[I");
             for (int i = 0; i < methodNames.length; i++) {
                 borders[i] = new int[parameters[i].length];
                 StringBuilder type = new StringBuilder();
@@ -303,18 +350,59 @@ public class GeneratedDump implements Opcodes {
                 }
                 methods[i] = type.toString();
             }
-
-            mv.visitVarInsn(ALOAD, 4);
-            mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/concurrent/Phaser", "arriveAndAwaitAdvance", "()I", false);
-            mv.visitInsn(POP);
-
-
-
+            labelsForFhaser = new Label[methodNames.length];
             for (int i = 0; i < methodNames.length; i++) {
 
-                mv.visitLabel(labelsForMethod[i][0]);
-                if (i > 0)
+                if (i > 0) {
                     mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
+                }
+
+                mv.visitIntInsn(SIPUSH, 0);
+                mv.visitVarInsn(ISTORE, border);
+                //border++;
+                labelsForFhaser[i] = new Label();
+                mv.visitLabel(labelsForFhaser[i]);
+                if (i == 0) {
+                    parList.add(Opcodes.INTEGER);
+                    mv.visitFrame(Opcodes.F_FULL, parList.size(), parList.toArray(), 0, new Object[]{});
+                    parList.remove(parList.size()-1);
+                }
+                else
+                    mv.visitFrame(Opcodes.F_APPEND, 1, new Object[]{Opcodes.INTEGER}, 0, null);
+                mv.visitVarInsn(ILOAD, border);
+                mv.visitVarInsn(ALOAD, 4);
+                mv.visitIntInsn(SIPUSH, i);
+                mv.visitInsn(IALOAD);
+                mv.visitJumpInsn(IF_ICMPGE, labelsForMethod[i][0]);
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitFieldInsn(GETFIELD, generatedClassName, "phaser", "Ljava/util/concurrent/Phaser;");
+                mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/concurrent/Phaser", "arriveAndAwaitAdvance", "()I", false);
+                mv.visitInsn(POP);
+
+
+//                mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
+//                mv.visitTypeInsn(NEW, "java/lang/StringBuilder");
+//                mv.visitInsn(DUP);
+//                mv.visitMethodInsn(INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V", false);
+//                mv.visitLdcInsn(generatedClassName + "_");
+//                mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+//                mv.visitVarInsn(ALOAD, 0);
+//                mv.visitFieldInsn(GETFIELD, generatedClassName, "phaser", "Ljava/util/concurrent/Phaser;");
+//                mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/concurrent/Phaser", "getPhase", "()I", false);
+//                mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(I)Ljava/lang/StringBuilder;", false);
+//                mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "toString", "()Ljava/lang/String;", false);
+//                mv.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
+
+
+                mv.visitIincInsn(border, 1);
+                mv.visitJumpInsn(GOTO, labelsForFhaser[i]);
+                mv.visitLabel(labelsForMethod[i][0]);
+                mv.visitFrame(Opcodes.F_CHOP, 1, null, 0, null);
+
+
+
+
+
                 mv.visitVarInsn(ALOAD, 3);
                 mv.visitIntInsn(SIPUSH, i);
                 mv.visitInsn(IALOAD);
@@ -409,12 +497,12 @@ public class GeneratedDump implements Opcodes {
                 if (i < labelsForMethod.length - 1) {
                     mv.visitJumpInsn(GOTO, labelsForMethod[i + 1][0]);
                 } else{
-                    mv.visitJumpInsn(GOTO, l12);
+                    mv.visitJumpInsn(GOTO, l9);
                 }
                 mv.visitLabel(labelsForMethod[i][2]);
-                if (i == 0)
-                    mv.visitFrame(Opcodes.F_FULL, parList.size(), parList.toArray(), 1, new Object[]{"java/lang/Exception"});
-                else
+//                if (i == 0)
+//                    mv.visitFrame(Opcodes.F_FULL, parList.size(), parList.toArray(), 1, new Object[]{"java/lang/Exception"});
+//                else
                     mv.visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[]{"java/lang/Exception"});
                 mv.visitVarInsn(ASTORE, border);
                 mv.visitVarInsn(ALOAD, 1);
@@ -423,8 +511,76 @@ public class GeneratedDump implements Opcodes {
                 mv.visitVarInsn(ALOAD, border);
                 mv.visitMethodInsn(INVOKEVIRTUAL, "com/devexperts/dxlab/lincheck/util/Result", "setException", "(Ljava/lang/Exception;)V", false);
             }
-            mv.visitLabel(l12);
+            mv.visitLabel(l9);
+//            mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
+//            mv.visitVarInsn(ALOAD, 5);
+//            mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/concurrent/Phaser", "arriveAndDeregister", "()I", false);
+//            mv.visitInsn(POP);
+
             mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
+            mv.visitIntInsn(SIPUSH, 0);
+            mv.visitVarInsn(ISTORE, border);
+            Label l37 = new Label();
+            mv.visitLabel(l37);
+            mv.visitFrame(Opcodes.F_APPEND, 1, new Object[]{Opcodes.INTEGER}, 0, null);
+            mv.visitVarInsn(ILOAD, border);
+            mv.visitVarInsn(ALOAD, 4);
+            mv.visitIntInsn(SIPUSH, methodNames.length);
+            mv.visitInsn(IALOAD);
+            Label l41 = new Label();
+            mv.visitJumpInsn(IF_ICMPGE, l41);
+
+//            mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
+//            mv.visitTypeInsn(NEW, "java/lang/StringBuilder");
+//            mv.visitInsn(DUP);
+//            mv.visitMethodInsn(INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V", false);
+//            mv.visitLdcInsn("________________*******************");
+//            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+//            mv.visitVarInsn(ALOAD, 0);
+//            mv.visitFieldInsn(GETFIELD, generatedClassName, "phaser", "Ljava/util/concurrent/Phaser;");
+//            mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/concurrent/Phaser", "getPhase", "()I", false);
+//            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(I)Ljava/lang/StringBuilder;", false);
+//            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "toString", "()Ljava/lang/String;", false);
+//            mv.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
+
+            mv.visitVarInsn(ALOAD, 0);
+            mv.visitFieldInsn(GETFIELD, generatedClassName, "phaser", "Ljava/util/concurrent/Phaser;");
+            mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/concurrent/Phaser", "arriveAndAwaitAdvance", "()I", false);
+            mv.visitInsn(POP);
+
+
+//            mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
+//            mv.visitTypeInsn(NEW, "java/lang/StringBuilder");
+//            mv.visitInsn(DUP);
+//            mv.visitMethodInsn(INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V", false);
+//            mv.visitLdcInsn("_" + generatedClassName + "_");
+//            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+//            mv.visitVarInsn(ALOAD, 0);
+//            mv.visitFieldInsn(GETFIELD, generatedClassName, "phaser", "Ljava/util/concurrent/Phaser;");
+//            mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/concurrent/Phaser", "getPhase", "()I", false);
+//            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(I)Ljava/lang/StringBuilder;", false);
+//            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "toString", "()Ljava/lang/String;", false);
+//            mv.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
+
+
+            mv.visitIincInsn(border, 1);
+            mv.visitJumpInsn(GOTO, l37);
+            mv.visitLabel(l41);
+            mv.visitFrame(Opcodes.F_CHOP, 1, null, 0, null);
+
+//            mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
+//            mv.visitTypeInsn(NEW, "java/lang/StringBuilder");
+//            mv.visitInsn(DUP);
+//            mv.visitMethodInsn(INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V", false);
+//            mv.visitLdcInsn("________________-----------");
+//            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+//            mv.visitVarInsn(ALOAD, 0);
+//            mv.visitFieldInsn(GETFIELD, generatedClassName, "phaser", "Ljava/util/concurrent/Phaser;");
+//            mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/concurrent/Phaser", "getPhase", "()I", false);
+//            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(I)Ljava/lang/StringBuilder;", false);
+//            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/StringBuilder", "toString", "()Ljava/lang/String;", false);
+//            mv.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
+
             mv.visitInsn(RETURN);
             mv.visitMaxs(4, 5);
             mv.visitEnd();

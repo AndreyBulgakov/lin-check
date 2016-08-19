@@ -32,8 +32,12 @@ import java.util.concurrent.Phaser;
 
 public class Generated10 extends Generated {
     public Object queue;
-
-    public Generated10() {
+    private Phaser phaser;
+//    public Generated10() {
+//    }
+    public Generated10(Object queue, Phaser phaser) {
+        this.queue = queue;
+        this.phaser = phaser;
     }
     public byte put(boolean a,
             int[] b,
@@ -50,8 +54,8 @@ public class Generated10 extends Generated {
     }
 
     @Override
-    public void process(Result[] res, MethodParameter[][] args, int[] waits, Phaser phaser) {
-
+    public void process(Result[] res, MethodParameter[][] args, int[] waits, int[] offset) {
+        System.out.println("_________________________" + phaser.getPhase());
         boolean a = (boolean)args[200][200].value;
         int[] b = (int[])args[200][201].value;
         short c = (short)args[200][202].value;
@@ -61,15 +65,15 @@ public class Generated10 extends Generated {
         double h = (double)args[200][206].value;
         char j = (char)args[200][207].value;
         Map k = (Map)args[200][208].value;
-//        boolean a1 = (boolean)args[200][200].value;
-//        int[] b1 = (int[])args[200][201].value;
-//        short c1 = (short)args[200][202].value;
-//        long d1 = (long)args[200][203].value;
-//        byte f1 = (byte)args[200][204].value;
-//        float g1 = (float)args[200][205].value;
-//        double h1 = (double)args[200][206].value;
-//        char j1 = (char)args[200][207].value;
-//        Map k1 = (Map)args[200][208].value;
+        boolean a1 = (boolean)args[200][200].value;
+        int[] b1 = (int[])args[200][201].value;
+        short c1 = (short)args[200][202].value;
+        long d1 = (long)args[200][203].value;
+        byte f1 = (byte)args[200][204].value;
+        float g1 = (float)args[200][205].value;
+        double h1 = (double)args[200][206].value;
+        char j1 = (char)args[200][207].value;
+        Map k1 = (Map)args[200][208].value;
 //        boolean a2 = (boolean)args[200][200].value;
 //        int[] b2 = (int[])args[200][201].value;
 //        short c2 = (short)args[200][202].value;
@@ -79,7 +83,11 @@ public class Generated10 extends Generated {
 //        double h2 = (double)args[200][206].value;
 //        char j2 = (char)args[200][207].value;
 //        Map k2 = (Map)args[200][208].value;
-        phaser.arriveAndAwaitAdvance();
+        for (int i = 300; i < offset[1488]; i++) {
+            phaser.arriveAndAwaitAdvance();
+            System.out.println("_________________________" + phaser.getPhase());
+        }
+
         // phaser
 
 
@@ -90,11 +98,23 @@ public class Generated10 extends Generated {
         }catch (Exception e) {
             res[111].setException(e);
         }
-//        try{
-//            MyRandom.busyWait(waits[600]);
-//            res[2000].setValue(put(a1, b1, c1, d1, f1, g1, h1, j1, k1));
-//        }catch (Exception e) {
-//            res[222].setException(e);
+        for (int i = 300; i < offset[1488]; i++) {
+            phaser.arriveAndAwaitAdvance();
+            System.out.println(phaser.getPhase());
+        }
+        try{
+            MyRandom.busyWait(waits[600]);
+            res[2000].setValue(put(a1, b1, c1, d1, f1, g1, h1, j1, k1));
+        }catch (Exception e) {
+            res[222].setException(e);
+        }
+        for (int i = 300; i < offset[1488]; i++) {
+            phaser.arriveAndAwaitAdvance();
+            System.out.println(phaser.getPhase());
+        }
+        System.out.println("xxxx");
+//        for (int i = 0; i < waits[2]; i++) {
+//            phaser.arriveAndAwaitAdvance();
 //        }
 //        try{
 //            MyRandom.busyWait(waits[600]);
@@ -102,6 +122,7 @@ public class Generated10 extends Generated {
 //        }catch (Exception e) {
 //            res[222].setException(e);
 //        }
+
 //        try {
 //            MyRandom.busyWait(waits[111]);
 //            setAndGet(res[111], 1, 2);

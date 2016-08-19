@@ -20,6 +20,7 @@ package com.devexperts.dxlab.lincheck.asm;
 
 
 import java.lang.reflect.Constructor;
+import java.util.concurrent.Phaser;
 
 import com.devexperts.dxlab.lincheck.asm.templ.*;
 import com.devexperts.dxlab.lincheck.util.Interval;
@@ -30,6 +31,7 @@ public class ClassGenerator implements Opcodes {
 
     public static Generated generate(
             Object test,
+            Phaser phaser,
             String pointedClassName,
             String generatedClassName, // "com/devexperts/dxlab/lincheck/asmtest/Generated2"
             String testFieldName, // queue
@@ -53,7 +55,8 @@ public class ClassGenerator implements Opcodes {
 
         Constructor<?>[] ctors = clz.getConstructors();
         Constructor<?> ctor = ctors[1];
-        Generated o = (Generated) ctor.newInstance(test);
+        Object[] a = {test, phaser};
+        Generated o = (Generated) ctor.newInstance(a);
         return o;
     }
 

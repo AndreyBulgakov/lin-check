@@ -365,6 +365,7 @@ public class Checker {
 
                 generatedClasses[i] = ClassGenerator.generate(
                         testObject,
+                        phaser,
                         generatedClassName,
                         generatedClassName.replace('.', '/'),
                         "field",
@@ -403,24 +404,65 @@ public class Checker {
             for (int i = 0; i < COUNT_THREADS; i++) {
                 waits[i] = new int[actors[i].length];
             }
-
+            int[][] offset = new int[COUNT_THREADS][];
+            int offsetCount = 0;
+            for (int i = 0; i < COUNT_THREADS; i++) {
+                offset[i] = new int[actors[i].length+1];
+                offset[i][0] = 1;
+                offset[i][actors[i].length] = 1;
+            }
+//            int[] offset0 = {2, 0, 0, 1};
+//            int[] offset1 = {1, 1, 0, 1};
+//            for (int i = 0; i < COUNT_THREADS; i++) {
+//                offset[i] = new int[actors[i].length+1];
+//                for (int k = 0; k < actors[i].length+1; k++) {
+//                    if (i == 0) {
+//                        if (k == 0)
+//                            offset[i][k] = 2;
+//                        else
+//                            offset[i][k] = 0;
+//                        if (k == actors[i].length)
+//                            offset[i][k] = 1;
+//                    }
+//                    else {
+//                        if (k == 0)
+//                            offset[i][k] = 1;
+//                        else
+//                            offset[i][k] = 1;
+//                        if (k == actors[i].length)
+//                            offset[i][k] = 1;
+//                    }
+//                }
+//            }
+//            offset[0] = offset0;
+//            offset[1] = offset1;
+            for (int i: offset[0]) {
+                offsetCount += i;
+            }
             Runnable[] runnables = new Runnable[COUNT_THREADS];
             for (int i = 0; i < COUNT_THREADS; i++) {
                 final Result[] threadResult = results[i];
                 final MethodParameter[][] threadArgs = argumentMatrix[i];
                 final Generated classGen = generatedClasses[i];
                 final int[] localWaits = waits[i];
+                final int[] localoffset = offset[i];
+                //final Phaser localPhaser = phaser;
                 runnables[i] = new Runnable() {
                     @Override
                     public void run() {
-                        classGen.process(threadResult, threadArgs, localWaits, phaser);
-                        phaser.arrive();
+                        classGen.process(threadResult, threadArgs, localWaits, localoffset);
+                        //phaser.arrive();
                     }
                 };
             }
 
             Result[] resultOrdered = new Result[countActors];
             int[] cntLinear = new int[linearResults.length];
+            for (int i = 0; i < COUNT_THREADS; i++) {
+                for (int j = 0; j < waits[i].length; j++) {
+                    waits[i][j] = (int) (MyRandom.nextLong() % 10_000L);
+                }
+            }
             for (int threads_num = 0; threads_num < 100_000; threads_num++) {
                 if (fullOutput && threads_num % 10000 == 0) {
                     System.out.printf("%d ", threads_num);
@@ -429,7 +471,7 @@ public class Checker {
                 reloadTestObject();
 
 
-                if (threads_num > 50_000) {
+                if (threads_num > 0) {
                     for (int i = 0; i < COUNT_THREADS; i++) {
                         for (int j = 0; j < waits[i].length; j++) {
                             waits[i][j] = (int) (MyRandom.nextLong() % 10_000L);
@@ -441,9 +483,16 @@ public class Checker {
                 for (Runnable r : runnables) {
                     pool.execute(r);
                 }
-
-                phaser.arriveAndAwaitAdvance();
-                phaser.arriveAndAwaitAdvance();
+                for (int i = 0; i < offsetCount; i++) {
+                    phaser.arriveAndAwaitAdvance();
+                    //System.out.println("________________________" + phaser.getPhase());
+                }
+//                phaser.arriveAndAwaitAdvance();
+//                //System.out.println("________________________" + phaser.getPhase());
+//                phaser.arriveAndAwaitAdvance();
+//                //System.out.println("________________________" + phaser.getPhase());
+//                phaser.arriveAndAwaitAdvance();
+//                //System.out.println("________________________" + phaser.getPhase());
                 sumTime += (System.currentTimeMillis() - stT);
 
                 for (int i = 0; i < COUNT_THREADS; i++) {
