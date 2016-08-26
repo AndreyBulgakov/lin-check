@@ -19,10 +19,7 @@
 package com.devexperts.dxlab.lincheck.asm;
 
 import com.devexperts.dxlab.lincheck.annotations.Param;
-import com.devexperts.dxlab.lincheck.util.Interval;
-import com.devexperts.dxlab.lincheck.util.MethodParameter;
-import com.devexperts.dxlab.lincheck.util.MyRandom;
-import com.devexperts.dxlab.lincheck.util.Result;
+import com.devexperts.dxlab.lincheck.util.*;
 import thesis_example.SetAndGet;
 
 import java.util.HashMap;
@@ -33,11 +30,13 @@ import java.util.concurrent.Phaser;
 public class Generated10 extends Generated {
     public Object queue;
     private Phaser phaser;
+    private BusyWait busyWait;
 //    public Generated10() {
 //    }
-    public Generated10(Object queue, Phaser phaser) {
+    public Generated10(Object queue, Phaser phaser, BusyWait busyWait) {
         this.queue = queue;
         this.phaser = phaser;
+        this.busyWait = busyWait;
     }
     public byte put(boolean a,
             int[] b,
@@ -87,7 +86,7 @@ public class Generated10 extends Generated {
             System.out.print("xxx" + (res[i]) + "    " + (waits[i]));
         }
         try{
-            MyRandom.busyWait(waits[600]);
+            busyWait.busyWait(waits[600]);
             res[2000].setValue(put(a, b, c, d, f, g, h, j, k));
             //res[2000].setVoid();
         }catch (Exception e) {
@@ -98,7 +97,7 @@ public class Generated10 extends Generated {
             System.out.print("xxx" + (res[i]) + "    " + (waits[i]));
         }
         try{
-            MyRandom.busyWait(waits[600]);
+            busyWait.busyWait(waits[600]);
             res[2000].setValue(put(a1, b1, c1, d1, f1, g1, h1, j1, k1));
         }catch (Exception e) {
             res[222].setException(e);

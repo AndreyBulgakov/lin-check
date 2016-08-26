@@ -23,6 +23,7 @@ import java.lang.reflect.Constructor;
 import java.util.concurrent.Phaser;
 
 import com.devexperts.dxlab.lincheck.asm.templ.*;
+import com.devexperts.dxlab.lincheck.util.BusyWait;
 import com.devexperts.dxlab.lincheck.util.Interval;
 import com.devexperts.dxlab.lincheck.util.MethodParameter;
 import jdk.internal.org.objectweb.asm.Opcodes;
@@ -55,7 +56,8 @@ public class ClassGenerator implements Opcodes {
 
         Constructor<?>[] ctors = clz.getConstructors();
         Constructor<?> ctor = ctors[1];
-        Object[] a = {test, phaser};
+        BusyWait busyWait = new BusyWait();
+        Object[] a = {test, phaser, busyWait};
         Generated o = (Generated) ctor.newInstance(a);
         return o;
     }

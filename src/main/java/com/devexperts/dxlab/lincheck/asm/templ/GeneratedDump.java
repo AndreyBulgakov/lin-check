@@ -47,6 +47,11 @@ public class GeneratedDump implements Opcodes {
         }
 
         {
+            fv = cw.visitField(ACC_PRIVATE, "busyWait", "Lcom/devexperts/dxlab/lincheck/util/BusyWait;", null, null);
+            fv.visitEnd();
+        }
+
+        {
             mv = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
             mv.visitCode();
             mv.visitVarInsn(ALOAD, 0);
@@ -59,7 +64,7 @@ public class GeneratedDump implements Opcodes {
 
         {
 //            mv = cw.visitMethod(ACC_PUBLIC, "<init>", "(Lcom/devexperts/dxlab/lincheck/tests/custom/QueueTestAnn;)V", null, null);
-            mv = cw.visitMethod(ACC_PUBLIC, "<init>", "(L" + testClassName + ";Ljava/util/concurrent/Phaser;)V", null, null);
+            mv = cw.visitMethod(ACC_PUBLIC, "<init>", "(L" + testClassName + ";Ljava/util/concurrent/Phaser;Lcom/devexperts/dxlab/lincheck/util/BusyWait;)V", null, null);
             mv.visitCode();
             mv.visitVarInsn(ALOAD, 0);
 //            mv.visitMethodInsn(INVOKESPECIAL, "com/devexperts/dxlab/lincheck/asmtest/Generated", "<init>", "()V", false);
@@ -71,6 +76,11 @@ public class GeneratedDump implements Opcodes {
             mv.visitVarInsn(ALOAD, 0);
             mv.visitVarInsn(ALOAD, 2);
             mv.visitFieldInsn(PUTFIELD, generatedClassName, "phaser", "Ljava/util/concurrent/Phaser;");
+
+            mv.visitVarInsn(ALOAD, 0);
+            mv.visitVarInsn(ALOAD, 3);
+            mv.visitFieldInsn(PUTFIELD, generatedClassName, "busyWait", "Lcom/devexperts/dxlab/lincheck/util/BusyWait;");
+
 
             mv.visitInsn(RETURN);
             mv.visitMaxs(2, 2);
@@ -89,6 +99,7 @@ public class GeneratedDump implements Opcodes {
             }
             Label l6 = new Label();
             mv.visitLabel(l6);
+
             int border = 5;
             int[][] borders = new int[methodNames.length][];
             String[] methods = new String[methodNames.length];
@@ -325,6 +336,7 @@ public class GeneratedDump implements Opcodes {
 
                 mv.visitInsn(ICONST_0);
                 mv.visitVarInsn(ISTORE, border);
+                //border++;
                 labelsForFhaser[i] = new Label();
                 mv.visitLabel(labelsForFhaser[i]);
                 if (i == 0) {
@@ -350,10 +362,14 @@ public class GeneratedDump implements Opcodes {
                 mv.visitJumpInsn(GOTO, labelsForFhaser[i]);
                 mv.visitLabel(labelsForMethod[i][0]);
                 mv.visitFrame(Opcodes.F_CHOP, 1, null, 0, null);
+
+                mv.visitVarInsn(ALOAD, 0);
+                mv.visitFieldInsn(GETFIELD, generatedClassName, "busyWait", "Lcom/devexperts/dxlab/lincheck/util/BusyWait;");
+
                 mv.visitVarInsn(ALOAD, 3);
                 mv.visitIntInsn(SIPUSH, i);
                 mv.visitInsn(IALOAD);
-                mv.visitMethodInsn(INVOKESTATIC, "com/devexperts/dxlab/lincheck/util/MyRandom", "busyWait", "(I)V", false);
+                mv.visitMethodInsn(INVOKEVIRTUAL, "com/devexperts/dxlab/lincheck/util/BusyWait", "busyWait", "(I)V", false);
                 mv.visitVarInsn(ALOAD, 1);
                 mv.visitIntInsn(SIPUSH, i);
                 mv.visitInsn(AALOAD);
@@ -438,10 +454,12 @@ public class GeneratedDump implements Opcodes {
                 } else {
                     mv.visitMethodInsn(INVOKEVIRTUAL, "com/devexperts/dxlab/lincheck/util/Result", "setValue", "(Ljava/lang/Object;)V", false);
                 }
+
                 mv.visitLabel(labelsForMethod[i][1]);
                 Label l29 = new Label();
                 mv.visitJumpInsn(GOTO, l29);
                 mv.visitLabel(labelsForMethod[i][2]);
+
                 mv.visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[]{"java/lang/Exception"});
                 mv.visitVarInsn(ASTORE, border);
                 mv.visitVarInsn(ALOAD, 1);
@@ -449,8 +467,10 @@ public class GeneratedDump implements Opcodes {
                 mv.visitInsn(AALOAD);
                 mv.visitVarInsn(ALOAD, border);
                 mv.visitMethodInsn(INVOKEVIRTUAL, "com/devexperts/dxlab/lincheck/util/Result", "setException", "(Ljava/lang/Exception;)V", false);
+
                 mv.visitLabel(l29);
             }
+
             mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
             mv.visitInsn(ICONST_0);
             mv.visitVarInsn(ISTORE, border);
@@ -463,14 +483,19 @@ public class GeneratedDump implements Opcodes {
             mv.visitInsn(IALOAD);
             Label l38 = new Label();
             mv.visitJumpInsn(IF_ICMPGE, l38);
+
             mv.visitVarInsn(ALOAD, 0);
             mv.visitFieldInsn(GETFIELD, generatedClassName, "phaser", "Ljava/util/concurrent/Phaser;");
             mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/concurrent/Phaser", "arriveAndAwaitAdvance", "()I", false);
             mv.visitInsn(POP);
+
             mv.visitIincInsn(border, 1);
             mv.visitJumpInsn(GOTO, l37);
             mv.visitLabel(l38);
             mv.visitFrame(Opcodes.F_CHOP, 1, null, 0, null);
+
+
+
             mv.visitVarInsn(ALOAD, 0);
             mv.visitFieldInsn(GETFIELD, generatedClassName, "phaser", "Ljava/util/concurrent/Phaser;");
             mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/concurrent/Phaser", "arriveAndAwaitAdvance", "()I", false);

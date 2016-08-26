@@ -35,6 +35,7 @@ public class Checker {
     int COUNT_THREADS;
     int[][] threadWaits;
     Map<Result[], List<int[]>> threadWaitsMap = new HashMap<>();
+    Map<Integer, Long> timeMap = new HashMap<>();
 
     public static boolean check(Object test) throws Exception {
         Checker checker = new Checker();
@@ -141,6 +142,34 @@ public class Checker {
         return sum;
     }
 
+
+
+    private void getWaitsFromCommandSequence(Actor[][] actors, int[][]waits, int[] wait){
+        int[] sumWait = new int[COUNT_THREADS];
+        for (int i = 0; i < COUNT_THREADS; i++) {
+            sumWait[i] = 0;
+        }
+        int sum = 0;
+        for (int j = 0; j < wait.length; j++) {
+            int line = 0;
+            int id = wait[j];
+            while (id > actors[line].length-1){
+                id -= actors[line].length;
+                line++;
+            }
+            waits[line][id] = sum - sumWait[line];
+            sumWait[line] += (timeMap.get(wait[j]) + sum - sumWait[line]);
+            sum += timeMap.get(wait[j]);
+//            if (id == actors[line].length-1){
+//                break;
+//            }
+            //id -= waits[i][line].length;
+        }
+    }
+
+
+
+
     private int findIndexOfMaxElement(int[] countLineral){
         int max = countLineral[0];
         int index = 0;
@@ -201,6 +230,28 @@ public class Checker {
         }
         return res;
     }
+
+
+    private void calculateTime(Actor[] actors) {
+        for (int i = 0; i < actors.length; i++) {
+            long time = System.nanoTime();
+            Method m = actors[i].method;
+            Object[] test = new Object[actors[i].args.length];
+            for (int j = 0; j < test.length; j++) {
+                test[j] = actors[i].args[j].value;
+            }
+            for (int j = 0; j < 10_000; j++) {
+                try {
+                    m.invoke(testObject, test);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                }
+            }
+            time = (System.nanoTime() - time)/10_000;
+            if (!timeMap.containsKey(actors[i]))
+                timeMap.put(actors[i].ind, time);
+        }
+    }
+
 
     private void executeActors(Actor[] actors, Result[] result) {
         for (int i = 0; i < actors.length; i++) {
@@ -498,6 +549,10 @@ public class Checker {
 
 
             Result[][] linearResults = executeLinear(actors, countActors);
+            for (Actor[] i : actors
+                 ) {
+                calculateTime(i);
+            }
             if (fullOutput) {
                 // print linear results
                 System.out.println();
@@ -550,34 +605,26 @@ public class Checker {
                     waits[i][j] = (int) (MyRandom.nextLong() % 10_000L);
                 }
             }
-            for (int threads_num = 0; threads_num < 10_000; threads_num++) {
-                if (fullOutput && threads_num % 1_000 == 0) {
-                    System.out.printf("%d ", threads_num);
-                }
+            for (int threads_num = 0; threads_num < 100_000; threads_num++) {
+//                if (fullOutput && threads_num % 10_000 == 0) {
+//                    System.out.printf("%d ", threads_num);
+//                }
 
                 reloadTestObject();
 
-                if (threads_num % 500 == 0) {
+                if (threads_num % 2 == 0) {
                     int mini = findIndexOfMinElement(cntLinear);
-                    resetOffset(offset);
+                    //resetOffset(offset);
                     //get command sequence for getting result[mini]
                     List<int[]> l = threadWaitsMap.get(linearResults[mini]);
                     int[] wait = l.get(MyRandom.nextInt(l.size()));
                     //
-                    int sum = getOffsetFromCommandSequence(actors, offset, wait);
-                    offsetCount = sum;
-                    for (int j = 0; j < threadWaits[0].length; j++) {
-                        int line = 0;
-                        int id = wait[j];
-                        while (id > actors[line].length-1){
-                            id -= actors[line].length;
-                            line++;
-                        }
-                        waits[line][id] = j * MyRandom.nextInt(2000);
-                    }
+                    getWaitsFromCommandSequence(actors, waits, wait);
                 }
 
 
+                long a = System.currentTimeMillis();
+                long b = System.currentTimeMillis();
                 long stT = System.currentTimeMillis();
                 for (Runnable r : runnables) {
                     pool.execute(r);
