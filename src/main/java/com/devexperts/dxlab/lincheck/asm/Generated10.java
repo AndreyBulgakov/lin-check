@@ -55,7 +55,6 @@ public class Generated10 extends Generated {
 
     @Override
     public void process(Result[] res, MethodParameter[][] args, int[] waits, int[] offset) {
-        System.out.println("_________________________" + phaser.getPhase());
         boolean a = (boolean)args[200][200].value;
         int[] b = (int[])args[200][201].value;
         short c = (short)args[200][202].value;
@@ -83,14 +82,10 @@ public class Generated10 extends Generated {
 //        double h2 = (double)args[200][206].value;
 //        char j2 = (char)args[200][207].value;
 //        Map k2 = (Map)args[200][208].value;
-        for (int i = 300; i < offset[1488]; i++) {
+        for (int i = 0; i < offset[700]; i++) {
             phaser.arriveAndAwaitAdvance();
-            System.out.println("_________________________" + phaser.getPhase());
+            System.out.print("xxx" + (res[i]) + "    " + (waits[i]));
         }
-
-        // phaser
-
-
         try{
             MyRandom.busyWait(waits[600]);
             res[2000].setValue(put(a, b, c, d, f, g, h, j, k));
@@ -98,9 +93,9 @@ public class Generated10 extends Generated {
         }catch (Exception e) {
             res[111].setException(e);
         }
-        for (int i = 300; i < offset[1488]; i++) {
+        for (int i = 0; i < offset[701]; i++) {
             phaser.arriveAndAwaitAdvance();
-            System.out.println(phaser.getPhase());
+            System.out.print("xxx" + (res[i]) + "    " + (waits[i]));
         }
         try{
             MyRandom.busyWait(waits[600]);
@@ -108,11 +103,11 @@ public class Generated10 extends Generated {
         }catch (Exception e) {
             res[222].setException(e);
         }
-        for (int i = 300; i < offset[1488]; i++) {
+        for (int i = 0; i < offset[702]; i++) {
             phaser.arriveAndAwaitAdvance();
-            System.out.println(phaser.getPhase());
+            System.out.print("xxx" + (res[i]) + "    " + (waits[i]));
         }
-        System.out.println("xxxx");
+        phaser.arriveAndAwaitAdvance();
 //        for (int i = 0; i < waits[2]; i++) {
 //            phaser.arriveAndAwaitAdvance();
 //        }

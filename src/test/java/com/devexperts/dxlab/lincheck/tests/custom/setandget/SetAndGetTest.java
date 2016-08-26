@@ -13,7 +13,7 @@ import static org.junit.Assert.assertFalse;
 /**
  * Created by apykhtin on 7/29/2016.
  */
-@CTest(iter = 300, actorsPerThread = {"1:2", "1:2"})
+@CTest(iter = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
 @Param(name = "key", clazz = FloatGenerator.class, opt = {"0", "10", "0.1"})
 @Param(name = "value",  clazz = IntegerGenerator.class)

@@ -25,7 +25,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
-@CTest(iter = 300, actorsPerThread = {"1:5", "1:5"})
+@CTest(iter = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
 public class WrapperQueueCorrect1 {
     public Queue queue;
@@ -34,7 +34,7 @@ public class WrapperQueueCorrect1 {
     public void reload() {
         queue = new QueueSynchronized(10);
     }
-    @NumberOfValidStreams(1)
+    //@NumberOfValidStreams(1)
     @Operation
     public void put(@Param(clazz = IntegerGenerator.class)Integer args) throws Exception {
         //Integer x = (Integer) args[0];

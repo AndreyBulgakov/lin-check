@@ -33,6 +33,8 @@ public class Checker {
     boolean fullOutput;
     int COUNT_ITER;
     int COUNT_THREADS;
+    int[][] threadWaits;
+    Map<Result[], List<int[]>> threadWaitsMap = new HashMap<>();
 
     public static boolean check(Object test) throws Exception {
         Checker checker = new Checker();
@@ -53,6 +55,114 @@ public class Checker {
         catch (IOException ex) {
             ex.printStackTrace();
         }
+    }
+
+    private int[][] setOffset(Actor[][] actors){
+        int[][] offset = new int[COUNT_THREADS][];
+        int minOffsetLength = actors[0].length;
+        for (int i = 0; i < COUNT_THREADS; i++) {
+            offset[i] = new int[actors[i].length+1];
+            offset[i][0] = 1;
+            offset[i][actors[i].length] = 1;
+            if (offset[i].length < minOffsetLength)
+                minOffsetLength = actors[i].length;
+        }
+
+        for (int i = 0; i < COUNT_THREADS; i++) {
+            offset[i] = new int[actors[i].length+1];
+            for (int k = 0; k < actors[i].length+1; k++) {
+                if (i == 0) {
+                    if (k == 0)
+                        offset[i][k] = 1;
+                    else
+                        offset[i][k] = 0;
+                    if (k == actors[i].length)
+                        offset[i][k] = 1;
+                }
+                else {
+                    if (k == 0)
+                        offset[i][k] = 1;
+                    else
+                        offset[i][k] = 0;
+                    if (k == actors[i].length)
+                        offset[i][k] = 1;
+                }
+            }
+        }
+        return offset;
+    }
+
+    private void resetOffset(int[][] offset){
+        for (int i = 0; i < offset.length; i++) {
+            for (int j = 0; j < offset[i].length; j++) {
+                offset[i][j] = 0;
+            }
+        }
+    }
+
+    private int getOffsetFromCommandSequence(Actor[][] actors, int[][]offset, int[] wait){
+        int[] sumWait = new int[COUNT_THREADS];
+        for (int i = 0; i < COUNT_THREADS; i++) {
+            sumWait[i] = 0;
+        }
+        int sum = 1;
+        for (int j = 0; j < wait.length; j++) {
+            int line = 0;
+            int id = wait[j];
+            while (id > actors[line].length-1){
+                id -= actors[line].length;
+                line++;
+            }
+            offset[line][id] = sum - sumWait[line];
+            sumWait[line] += sum - sumWait[line];
+            sum++;
+            if (id == actors[line].length-1){
+                break;
+            }
+            //id -= waits[i][line].length;
+        }
+        sum--;
+        int maxSumIndex = findIndexOfMaxElement(sumWait);
+        for (int i = 0; i < sumWait.length; i++) {
+            if (sumWait[i] == 0){
+                offset[i][0] = sumWait[maxSumIndex];
+                sumWait[i] = sumWait[maxSumIndex];
+            }
+        }
+        for (int i = 0; i < offset.length; i++) {
+            for (int j = 0; j < offset[i].length-1; j++) {
+                if (offset[i][j] == 0) {
+                    offset[i][j] = sum - sumWait[i];
+                    sumWait[i] += sum - sumWait[i];
+                    break;
+                }
+            }
+        }
+        return sum;
+    }
+
+    private int findIndexOfMaxElement(int[] countLineral){
+        int max = countLineral[0];
+        int index = 0;
+        for (int i = 0; i < countLineral.length; i++) {
+            if (max < countLineral[i]){
+                max = countLineral[i];
+                index = i;
+            }
+        }
+        return index;
+    }
+
+    private int findIndexOfMinElement(int[] countLineral){
+        int min = countLineral[0];
+        int index = 0;
+        for (int i = 0; i < countLineral.length; i++) {
+            if (min > countLineral[i]){
+                min = countLineral[i];
+                index = i;
+            }
+        }
+        return index;
     }
 
     private void genPermutationsHelper(List<Actor[]> result, Actor[] out, int countUsed, int countActors, Actor[][] actors, int[] inds) {
@@ -121,7 +231,13 @@ public class Checker {
 
     private Result[][] executeLinear(Actor[][] actorsConf, int countActors) throws InvocationTargetException, IllegalAccessException {
         Actor[][] perms = genPermutations(actorsConf, countActors);
-
+        threadWaits = new int[perms.length][];
+        for (int i = 0; i < perms.length; i++) {
+            threadWaits[i] = new int[perms[i].length];
+            for (int j = 0; j < perms[i].length; j++) {
+                threadWaits[i][j] = perms[i][j].ind;
+            }
+        }
         if (fullOutput) {
             // print all possible executions
             for (Actor[] perm : perms) {
@@ -149,20 +265,24 @@ public class Checker {
         }
 
         List<Result[]> uniqueResults = new ArrayList<>();
-
-        for (Result[] result : results) {
+        for (int i = 0; i < results.length; i++) {
             boolean exists = false;
             for (Result[] uniqueResult : uniqueResults) {
-                if (Arrays.equals(result, uniqueResult)) {
+                if (Arrays.equals(results[i], uniqueResult)) {
                     exists = true;
+                    List<int[]> l = threadWaitsMap.get(uniqueResult);
+                    l.add(threadWaits[i]);
+                    threadWaitsMap.put(uniqueResult, l);
                     break;
                 }
             }
             if (!exists) {
-                uniqueResults.add(result);
+                uniqueResults.add(results[i]);
+                List<int[]> l = new ArrayList<>();
+                l.add(threadWaits[i]);
+                threadWaitsMap.put(results[i], l);
             }
         }
-
         return uniqueResults.toArray(new Result[uniqueResults.size()][]);
     }
 
@@ -291,7 +411,6 @@ public class Checker {
                         i.setNumberOfValidStreams(conf.getNumThreads());
                     conf.addActorGenerator(i);
                 }
-                //gens.forEach(conf::addActorGenerator);
                 confs.add(conf);
             }
 
@@ -327,7 +446,6 @@ public class Checker {
         for (int iter = 0; iter < COUNT_ITER; iter++) {
             System.out.println("iter = " + iter);
 
-//            Actor[][] actors = conf.generateActors(false);
             CheckerConfiguration cloneConf = conf.clone();
             Actor[][] actors = cloneConf.generateActors(true);
 
@@ -404,38 +522,9 @@ public class Checker {
             for (int i = 0; i < COUNT_THREADS; i++) {
                 waits[i] = new int[actors[i].length];
             }
-            int[][] offset = new int[COUNT_THREADS][];
+            int[][] offset = setOffset(actors);
             int offsetCount = 0;
-            for (int i = 0; i < COUNT_THREADS; i++) {
-                offset[i] = new int[actors[i].length+1];
-                offset[i][0] = 1;
-                offset[i][actors[i].length] = 1;
-            }
-//            int[] offset0 = {2, 0, 0, 1};
-//            int[] offset1 = {1, 1, 0, 1};
-//            for (int i = 0; i < COUNT_THREADS; i++) {
-//                offset[i] = new int[actors[i].length+1];
-//                for (int k = 0; k < actors[i].length+1; k++) {
-//                    if (i == 0) {
-//                        if (k == 0)
-//                            offset[i][k] = 2;
-//                        else
-//                            offset[i][k] = 0;
-//                        if (k == actors[i].length)
-//                            offset[i][k] = 1;
-//                    }
-//                    else {
-//                        if (k == 0)
-//                            offset[i][k] = 1;
-//                        else
-//                            offset[i][k] = 1;
-//                        if (k == actors[i].length)
-//                            offset[i][k] = 1;
-//                    }
-//                }
-//            }
-//            offset[0] = offset0;
-//            offset[1] = offset1;
+
             for (int i: offset[0]) {
                 offsetCount += i;
             }
@@ -446,12 +535,10 @@ public class Checker {
                 final Generated classGen = generatedClasses[i];
                 final int[] localWaits = waits[i];
                 final int[] localoffset = offset[i];
-                //final Phaser localPhaser = phaser;
                 runnables[i] = new Runnable() {
                     @Override
                     public void run() {
                         classGen.process(threadResult, threadArgs, localWaits, localoffset);
-                        //phaser.arrive();
                     }
                 };
             }
@@ -463,21 +550,33 @@ public class Checker {
                     waits[i][j] = (int) (MyRandom.nextLong() % 10_000L);
                 }
             }
-            for (int threads_num = 0; threads_num < 100_000; threads_num++) {
-                if (fullOutput && threads_num % 10000 == 0) {
+            for (int threads_num = 0; threads_num < 10_000; threads_num++) {
+                if (fullOutput && threads_num % 1_000 == 0) {
                     System.out.printf("%d ", threads_num);
                 }
 
                 reloadTestObject();
 
-
-                if (threads_num > 0) {
-                    for (int i = 0; i < COUNT_THREADS; i++) {
-                        for (int j = 0; j < waits[i].length; j++) {
-                            waits[i][j] = (int) (MyRandom.nextLong() % 10_000L);
+                if (threads_num % 500 == 0) {
+                    int mini = findIndexOfMinElement(cntLinear);
+                    resetOffset(offset);
+                    //get command sequence for getting result[mini]
+                    List<int[]> l = threadWaitsMap.get(linearResults[mini]);
+                    int[] wait = l.get(MyRandom.nextInt(l.size()));
+                    //
+                    int sum = getOffsetFromCommandSequence(actors, offset, wait);
+                    offsetCount = sum;
+                    for (int j = 0; j < threadWaits[0].length; j++) {
+                        int line = 0;
+                        int id = wait[j];
+                        while (id > actors[line].length-1){
+                            id -= actors[line].length;
+                            line++;
                         }
+                        waits[line][id] = j * MyRandom.nextInt(2000);
                     }
                 }
+
 
                 long stT = System.currentTimeMillis();
                 for (Runnable r : runnables) {
@@ -485,14 +584,9 @@ public class Checker {
                 }
                 for (int i = 0; i < offsetCount; i++) {
                     phaser.arriveAndAwaitAdvance();
-                    //System.out.println("________________________" + phaser.getPhase());
                 }
-//                phaser.arriveAndAwaitAdvance();
-//                //System.out.println("________________________" + phaser.getPhase());
-//                phaser.arriveAndAwaitAdvance();
-//                //System.out.println("________________________" + phaser.getPhase());
-//                phaser.arriveAndAwaitAdvance();
-//                //System.out.println("________________________" + phaser.getPhase());
+
+                phaser.arriveAndAwaitAdvance();
                 sumTime += (System.currentTimeMillis() - stT);
 
                 for (int i = 0; i < COUNT_THREADS; i++) {
@@ -512,6 +606,7 @@ public class Checker {
                 }
                 if (!correct) {
                     System.out.println("Error found.");
+
 
                     if (!fullOutput) {
                         System.out.println("Thread configuration:");
@@ -599,9 +694,5 @@ public class Checker {
         System.out.println("sumTime = " + sumTime);
         System.out.println("sumDisp = " + sumDisp);
         return !errorFound;
-    }
-
-    private static void busyWait(long nanos) {
-        for (long start = System.nanoTime(); start + nanos >= System.nanoTime(); ){}
     }
 }

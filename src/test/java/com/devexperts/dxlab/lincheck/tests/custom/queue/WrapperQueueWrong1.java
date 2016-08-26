@@ -24,7 +24,7 @@ import com.devexperts.dxlab.lincheck.SimpleGenerators.IntegerGenerator;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
-@CTest(iter = 300, actorsPerThread = {"1:3", "1:3"})
+@CTest(iter = 300, actorsPerThread = {"1:5", "1:5"})
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
 public class WrapperQueueWrong1 {
     public Queue queue;
