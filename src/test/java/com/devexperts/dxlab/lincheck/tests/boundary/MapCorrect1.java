@@ -20,7 +20,7 @@ package com.devexperts.dxlab.lincheck.tests.boundary;
 
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
-import com.devexperts.dxlab.lincheck.SimpleGenerators.IntegerGenerator;
+import com.devexperts.dxlab.lincheck.generators.IntegerGenerator;
 import com.devexperts.dxlab.lincheck.util.MyRandom;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import org.junit.Test;

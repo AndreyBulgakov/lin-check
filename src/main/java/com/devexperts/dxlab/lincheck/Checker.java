@@ -27,13 +27,14 @@ import java.util.concurrent.*;
 import com.devexperts.dxlab.lincheck.annotations.*;
 import com.devexperts.dxlab.lincheck.asm.ClassGenerator;
 import com.devexperts.dxlab.lincheck.asm.Generated;
+import com.devexperts.dxlab.lincheck.generators.Generator;
 import com.devexperts.dxlab.lincheck.util.*;
 
 public class Checker {
     boolean fullOutput;
     int COUNT_ITER;
     int COUNT_THREADS;
-    int[][] threadWaits;
+    int[][] threadWaits; // TODO в рамках данного тикета должны быть изменения, связанные только с новым API
     Map<Result[], List<int[]>> threadWaitsMap = new HashMap<>();
     Map<Integer, Long> timeMap = new HashMap<>();
 
@@ -360,7 +361,7 @@ public class Checker {
      */
     private Params[][] getArgsMap(Class clz)
             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
-        Map<String, Object[]> classParameters = new HashMap<>();
+        Map<String, Object[]> classParameters = new HashMap<>(); // TODO по названию не понятно, что тут хранится
         Params[][] mp = new Params[methodsActor.size()][];
         Annotation[] params = clz.getAnnotationsByType(Param.class);
 
@@ -392,7 +393,7 @@ public class Checker {
                 for (int i = 0; i < methodParameters.length; i++) {
                     Param p = methodParameters[i].getAnnotation(Param.class);
                     if (p.name().equals("")) {
-                        methodParams[i] = new Params(((Generator) p.clazz().newInstance()).generate(), methodParameters[i].getType().getTypeName());
+                        methodParams[i] = new Params(((Generator) p.clazz().newInstance()).generate(), methodParameters[i].getType().getTypeName()); // TODO не нужно каждый раз делать newInstance
                     } else {
                         methodParams[i] = new Params(classParameters.get(p.name()), methodParameters[i].getType().getTypeName());
                     }

@@ -20,7 +20,7 @@ package com.devexperts.dxlab.lincheck.tests.guava;
 
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
-import com.devexperts.dxlab.lincheck.SimpleGenerators.IntegerGenerator;
+import com.devexperts.dxlab.lincheck.generators.IntegerGenerator;
 import com.google.common.collect.ConcurrentHashMultiset;
 import org.junit.Test;
 

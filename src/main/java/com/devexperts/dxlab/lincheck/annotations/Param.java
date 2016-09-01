@@ -7,13 +7,13 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Created by apykhtin on 7/29/2016.
+ * TODO add javadoc
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Repeatable(Param.Params.class)
 public @interface Param {
-    Class clazz() default String.class;
-    String name() default "";
+    Class clazz() default String.class; // TODO String??
+    String name() default ""; // TODO null by default
     String[] opt() default {};
 
     /**

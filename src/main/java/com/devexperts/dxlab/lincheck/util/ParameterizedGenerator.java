@@ -1,7 +1,9 @@
 package com.devexperts.dxlab.lincheck.util;
 
+import com.devexperts.dxlab.lincheck.generators.Generator;
+
 /**
- * Created by apykhtin on 8/8/2016.
+ * TODO delete this class
  */
 public interface ParameterizedGenerator extends Generator {
     public void setParameters(String... parameters);

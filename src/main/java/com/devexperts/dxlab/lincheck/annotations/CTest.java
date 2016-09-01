@@ -22,6 +22,9 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+/**
+ * TODO javadoc
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Repeatable(CTest.CTests.class)
 public @interface CTest {

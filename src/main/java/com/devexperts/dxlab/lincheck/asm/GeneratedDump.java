@@ -1,77 +1,59 @@
-package com.devexperts.dxlab.lincheck.asm.templ;
+package com.devexperts.dxlab.lincheck.asm;
 
 import com.devexperts.dxlab.lincheck.util.MethodParameter;
-import jdk.internal.org.objectweb.asm.*;
+import org.objectweb.asm.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.objectweb.asm.Opcodes.*;
 
-public class GeneratedDump implements Opcodes {
+/**
+ * TODO add example of generated file to javadoc
+ */
+public class GeneratedDump { // TODO rename
 
-    private static String GetBrackets(String s){
+    private static String getBrackets(String s) {
         StringBuilder bracketBuilder = new StringBuilder();
-        for (char i:s.toCharArray()
-             ) {
+        for (char i : s.toCharArray()) {
             if (i == '[')
                 bracketBuilder.append("[");
         }
         return bracketBuilder.toString();
     }
-    public static byte[] dump(
-            String generatedClassName, // "com/devexperts/dxlab/lincheck/asmtest/Generated10"
-            String testFieldName, // queue
-            String testClassName, // com/devexperts/dxlab/lincheck/tests/custom/QueueTestAnn
-            String[] methodNames,
-            MethodParameter[][] parameters,
-            String[] methodTypes
-    ) throws Exception {
 
+    // TODO use Type instead of field/method string description
+    // TODO add javadoc and comments in this method
+    public static byte[] dump(String generatedClassName, String testClassName, Type[] methods, MethodParameter[][] parameters) throws Exception {
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         FieldVisitor fv;
         MethodVisitor mv;
-        AnnotationVisitor av0;
 
-//        cw.visit(52, ACC_PUBLIC + ACC_SUPER, "com/devexperts/dxlab/lincheck/asmtest/Generated10", null, "com/devexperts/dxlab/lincheck/asmtest/Generated", null);
         cw.visit(52, ACC_PUBLIC + ACC_SUPER, generatedClassName, null, "com/devexperts/dxlab/lincheck/asm/Generated", null);
 
-        {
-//            fv = cw.visitField(ACC_PUBLIC, "queue", "Lcom/devexperts/dxlab/lincheck/tests/custom/QueueTestAnn;", null, null);
             fv = cw.visitField(ACC_PUBLIC, testFieldName, "L" + testClassName + ";", null, null);
             fv.visitEnd();
-        }
 
-        {
             fv = cw.visitField(ACC_PRIVATE, "phaser", "Ljava/util/concurrent/Phaser;", null, null);
             fv.visitEnd();
-        }
 
-        {
             fv = cw.visitField(ACC_PRIVATE, "busyWait", "Lcom/devexperts/dxlab/lincheck/util/BusyWait;", null, null);
             fv.visitEnd();
-        }
 
-        {
             mv = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
             mv.visitCode();
             mv.visitVarInsn(ALOAD, 0);
-//            mv.visitMethodInsn(INVOKESPECIAL, "com/devexperts/dxlab/lincheck/asmtest/Generated", "<init>", "()V", false);
             mv.visitMethodInsn(INVOKESPECIAL, "com/devexperts/dxlab/lincheck/asm/Generated", "<init>", "()V", false);
             mv.visitInsn(RETURN);
             mv.visitMaxs(1, 1);
             mv.visitEnd();
-        }
 
-        {
-//            mv = cw.visitMethod(ACC_PUBLIC, "<init>", "(Lcom/devexperts/dxlab/lincheck/tests/custom/QueueTestAnn;)V", null, null);
             mv = cw.visitMethod(ACC_PUBLIC, "<init>", "(L" + testClassName + ";Ljava/util/concurrent/Phaser;Lcom/devexperts/dxlab/lincheck/util/BusyWait;)V", null, null);
             mv.visitCode();
             mv.visitVarInsn(ALOAD, 0);
-//            mv.visitMethodInsn(INVOKESPECIAL, "com/devexperts/dxlab/lincheck/asmtest/Generated", "<init>", "()V", false);
             mv.visitMethodInsn(INVOKESPECIAL, "com/devexperts/dxlab/lincheck/asm/Generated", "<init>", "()V", false);
             mv.visitVarInsn(ALOAD, 0);
             mv.visitVarInsn(ALOAD, 1);
-//            mv.visitFieldInsn(PUTFIELD, "com/devexperts/dxlab/lincheck/asmtest/Generated10", "queue", "Lcom/devexperts/dxlab/lincheck/tests/custom/QueueTestAnn;");
             mv.visitFieldInsn(PUTFIELD, generatedClassName, testFieldName, "L" + testClassName + ";");
             mv.visitVarInsn(ALOAD, 0);
             mv.visitVarInsn(ALOAD, 2);
@@ -85,7 +67,7 @@ public class GeneratedDump implements Opcodes {
             mv.visitInsn(RETURN);
             mv.visitMaxs(2, 2);
             mv.visitEnd();
-        }
+
         {
             mv = cw.visitMethod(ACC_PUBLIC, "process", "([Lcom/devexperts/dxlab/lincheck/util/Result;[[Lcom/devexperts/dxlab/lincheck/util/MethodParameter;[I[I)V", null, null);
             mv.visitCode();
@@ -115,7 +97,7 @@ public class GeneratedDump implements Opcodes {
                 type.append("(");
                 for (int j = 0; j < parameters[i].length; j++) {
                     String s = parameters[i][j].type.replace(".", "/");
-                    String brackets = GetBrackets(s);
+                    String brackets = getBrackets(s);
                     s = s.replace("[]", "");
                     mv.visitVarInsn(ALOAD, 2);
                     mv.visitIntInsn(SIPUSH, i);
@@ -279,17 +261,17 @@ public class GeneratedDump implements Opcodes {
                             mv.visitVarInsn(ASTORE, border);
                             borders[i][j] = border;
                             border += 1;
-                            type.append("L"+s+";");
+                            type.append("L").append(s).append(";");
                             break;
                     }
-
-
-
                 }
+
                 String s = methodTypes[i].replace(".", "/");
-                String brackets = GetBrackets(s);
+                String brackets = getBrackets(s);
                 s = s.replace("[]", "");
                 type.append(")");
+
+                // TODO use Type
                 switch (methodTypes[i]){
                     case "void":
                         type.append("V");
@@ -407,9 +389,9 @@ public class GeneratedDump implements Opcodes {
                             break;
                     }
                 }
+
                 String s = methodTypes[i].replace(".", "/");
-                String brackets = GetBrackets(s);
-                s = s.replace("[]", "");
+                String brackets = getBrackets(s);
                 mv.visitMethodInsn(INVOKEVIRTUAL, testClassName, methodNames[i], methods[i], false);
                 switch (methodTypes[i]){
                     case "void":

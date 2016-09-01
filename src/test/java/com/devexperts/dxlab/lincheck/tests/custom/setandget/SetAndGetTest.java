@@ -1,17 +1,15 @@
 package com.devexperts.dxlab.lincheck.tests.custom.setandget;
 
 import com.devexperts.dxlab.lincheck.Checker;
-import com.devexperts.dxlab.lincheck.SimpleGenerators.FloatGenerator;
+import com.devexperts.dxlab.lincheck.generators.FloatGenerator;
 import com.devexperts.dxlab.lincheck.annotations.*;
-import com.devexperts.dxlab.lincheck.util.Generator;
-import com.devexperts.dxlab.lincheck.SimpleGenerators.IntegerGenerator;
+import com.devexperts.dxlab.lincheck.generators.IntegerGenerator;
 import org.junit.Test;
-import thesis_example.SetAndGet;
 
 import static org.junit.Assert.assertFalse;
 
 /**
- * Created by apykhtin on 7/29/2016.
+ * TODO javadoc
  */
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
@@ -30,21 +28,24 @@ public class SetAndGetTest {
     public float setAndGet(float key) throws Exception{
         return setAndGet.setAndGet(key);
     }
-//    @NumberOfValidStreams(1)
-//    @Operation
-//    public int return3() throws Exception{
-//        return 3;
-//    }
 
     @Test
     public void test() throws Exception {
         Checker checker = new Checker();
         assertFalse(checker.checkAnnotated(new SetAndGetTest()));
     }
-}
-class DoubleGeneratot implements Generator{
-    public Double[] generate(){
-        Double[] a = {1.0, 2.0, 3.0, 4.0};
-        return a;
+
+    private static class SetAndGet {
+        private float c;
+
+        public SetAndGet() {
+            c = 0;
+        }
+
+        public float setAndGet(float c) {
+            this.c = c;
+            return this.c;
+        }
     }
 }
+

@@ -20,7 +20,7 @@ package com.devexperts.dxlab.lincheck.tests.juc.blocking_queue;
 
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
-import com.devexperts.dxlab.lincheck.SimpleGenerators.IntegerGenerator;
+import com.devexperts.dxlab.lincheck.generators.IntegerGenerator;
 import org.junit.Test;
 
 import java.util.concurrent.BlockingQueue;

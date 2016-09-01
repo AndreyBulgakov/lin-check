@@ -22,7 +22,7 @@ import java.util.Map;
 
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
-import com.devexperts.dxlab.lincheck.SimpleGenerators.IntegerGenerator;
+import com.devexperts.dxlab.lincheck.generators.IntegerGenerator;
 import com.romix.scala.collection.concurrent.TrieMap;
 import org.junit.Test;
 

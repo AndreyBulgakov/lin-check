@@ -21,7 +21,7 @@ package com.devexperts.dxlab.lincheck.tests.custom.transfer;
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
 import com.devexperts.dxlab.lincheck.annotations.ReadOnly;
-import com.devexperts.dxlab.lincheck.SimpleGenerators.IntegerGenerator;
+import com.devexperts.dxlab.lincheck.generators.IntegerGenerator;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertTrue;

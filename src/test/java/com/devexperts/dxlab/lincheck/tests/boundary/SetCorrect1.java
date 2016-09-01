@@ -23,7 +23,7 @@ import com.devexperts.dxlab.lincheck.annotations.CTest;
 import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.Param;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
-import com.devexperts.dxlab.lincheck.SimpleGenerators.IntegerGenerator;
+import com.devexperts.dxlab.lincheck.generators.IntegerGenerator;
 import com.devexperts.dxlab.lincheck.util.MyRandom;
 import org.cliffc.high_scale_lib.NonBlockingHashSet;
 import org.junit.Test;

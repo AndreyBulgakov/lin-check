@@ -20,7 +20,7 @@ package com.devexperts.dxlab.lincheck.tests.lockfreequeue;
 
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
-import com.devexperts.dxlab.lincheck.SimpleGenerators.IntegerGenerator;
+import com.devexperts.dxlab.lincheck.generators.IntegerGenerator;
 import com.github.lock.free.queue.LockFreeQueue;
 import org.junit.Test;
 

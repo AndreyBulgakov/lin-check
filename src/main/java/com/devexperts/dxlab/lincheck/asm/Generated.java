@@ -24,7 +24,7 @@ import com.devexperts.dxlab.lincheck.util.Result;
 import java.util.concurrent.Phaser;
 
 
-public class Generated {
+public class Generated { // TODO rename and change to interface
     public void process(Result[] res, MethodParameter[][] args, int[] waits, int[] offset) {
     };
 }

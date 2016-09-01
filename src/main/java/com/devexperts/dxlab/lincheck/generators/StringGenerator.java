@@ -1,20 +1,18 @@
-package com.devexperts.dxlab.lincheck.SimpleGenerators;
+package com.devexperts.dxlab.lincheck.generators;
 
 
 import com.devexperts.dxlab.lincheck.util.MyRandom;
 import com.devexperts.dxlab.lincheck.util.ParameterizedGenerator;
 
-import java.util.Random;
-
-/**
- * Created by apykhtin on 8/4/2016.
- */
 public class StringGenerator implements ParameterizedGenerator {
-    private String [] alphabet = {"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z"};
+    private String[] alphabet = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
     private int length = 10;
     private int maxWordLength = 10;
-    public StringGenerator(){}
-    public String[] generate(){
+
+    public StringGenerator() {
+    }
+
+    public String[] generate() {
         String[] strings = new String[length];
         for (int i = 0; i < length; i++) {
             int l = MyRandom.nextInt(maxWordLength);
@@ -27,7 +25,7 @@ public class StringGenerator implements ParameterizedGenerator {
         return strings;
     }
 
-    public void setParameters(String... params){
+    public void setParameters(String... params) {
         this.length = Integer.parseInt(params[0]);
         this.maxWordLength = Integer.parseInt(params[1]);
         this.alphabet = params[2].split(",");

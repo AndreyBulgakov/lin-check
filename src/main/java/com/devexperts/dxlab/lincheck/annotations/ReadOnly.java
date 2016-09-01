@@ -21,6 +21,9 @@ package com.devexperts.dxlab.lincheck.annotations;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+/**
+ * TODO add javadoc
+ */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ReadOnly {
 }

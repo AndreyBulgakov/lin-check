@@ -1,8 +1,6 @@
 package com.devexperts.dxlab.lincheck.util;
 
-/**
- * Created by apykhtin on 8/4/2016.
- */
+// TODO что это такое и зачем?
 public class Params {
     public Object[] objects;
     public int from, to;

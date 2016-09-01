@@ -4,7 +4,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Created by apykhtin on 8/12/2016.
+ * TODO remove it. Do not implement maximum parallel threads restriction under current issue
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface NumberOfValidStreams {
