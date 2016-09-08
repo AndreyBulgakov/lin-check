@@ -23,12 +23,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * TODO javadoc
+ * This annotation shows number of iteration, number of threads and number of methods in thread
+ * iter - number of iteration
+ * actorsPerThread - number of elements in brackets shows number of threads
+ * actorsPerThread - value in quotes shows range of the number of methods in threads
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Repeatable(CTest.CTests.class)
 public @interface CTest {
     int iter();
+
     String[] actorsPerThread();
 
     /**

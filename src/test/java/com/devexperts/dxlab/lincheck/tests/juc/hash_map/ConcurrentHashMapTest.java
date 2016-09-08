@@ -20,7 +20,7 @@ package com.devexperts.dxlab.lincheck.tests.juc.hash_map;
 
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
-import com.devexperts.dxlab.lincheck.generators.IntegerGenerator;
+import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
 import org.junit.Test;
 
 import java.util.Map;
@@ -32,8 +32,8 @@ import static org.junit.Assert.assertFalse;
 
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
-@Param(name = "key", clazz = IntegerGenerator.class)
-@Param(name = "value", clazz = IntegerGenerator.class)
+@Param(name = "key", generator = IntegerParameterGenerator.class)
+@Param(name = "value", generator = IntegerParameterGenerator.class)
 public class ConcurrentHashMapTest {
     public Map<Integer, Integer> m;
 

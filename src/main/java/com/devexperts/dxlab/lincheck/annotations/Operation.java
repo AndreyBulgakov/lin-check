@@ -22,7 +22,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * TODO add javadoc
+ * Annotation for test method
+ * Params binds the arguments of the method with the values declared in Param
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Operation {

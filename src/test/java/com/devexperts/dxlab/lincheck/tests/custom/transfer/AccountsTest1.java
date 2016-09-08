@@ -21,7 +21,9 @@ package com.devexperts.dxlab.lincheck.tests.custom.transfer;
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
 import com.devexperts.dxlab.lincheck.annotations.ReadOnly;
-import com.devexperts.dxlab.lincheck.generators.IntegerGenerator;
+import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
+import librariesForTesting.tests.custom.transfer.Accounts;
+import librariesForTesting.tests.custom.transfer.AccountsWrong5;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertTrue;
@@ -29,8 +31,8 @@ import static org.junit.Assert.assertFalse;
 
 @CTest(iter = 300, actorsPerThread = {"1:10", "1:10"})
 @CTest(iter = 300, actorsPerThread = {"1:10", "1:10", "1:10"})
-@Param(name = "id", clazz = IntegerGenerator.class)
-@Param(name = "amount", clazz = IntegerGenerator.class)
+@Param(name = "id", generator = IntegerParameterGenerator.class)
+@Param(name = "amount", generator = IntegerParameterGenerator.class)
 public class AccountsTest1 {
     public Accounts acc;
 
@@ -51,7 +53,7 @@ public class AccountsTest1 {
     }
 
     @Operation
-    public void transfer(@Param(name = "id") int from, @Param(clazz = IntegerGenerator.class) int to, @Param(clazz = IntegerGenerator.class) int amount) {
+    public void transfer(@Param(name = "id") int from, @Param(generator = IntegerParameterGenerator.class) int to, @Param(generator = IntegerParameterGenerator.class) int amount) {
         acc.transfer(from, to, amount);
     }
 

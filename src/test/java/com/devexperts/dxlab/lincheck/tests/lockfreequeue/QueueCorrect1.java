@@ -20,8 +20,8 @@ package com.devexperts.dxlab.lincheck.tests.lockfreequeue;
 
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
-import com.devexperts.dxlab.lincheck.generators.IntegerGenerator;
-import com.github.lock.free.queue.LockFreeQueue;
+import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
+import librariesForTesting.com.github.lock.free.queue.LockFreeQueue;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
@@ -42,7 +42,7 @@ public class QueueCorrect1 {
     }
 
     @Operation
-    public void add(@Param(clazz = IntegerGenerator.class) int value) throws Exception {
+    public void add(@Param(generator = IntegerParameterGenerator.class) int value) throws Exception {
         q.add(value);
     }
 

@@ -26,7 +26,7 @@ import java.util.Map;
 public class Actor {
     public int ind;
     public Method method;
-    public MethodParameter[] args;
+    public Object[] args;
     public String methodName;
     public boolean isMutable;
 
@@ -37,7 +37,7 @@ public class Actor {
         this.isMutable = isMutable;
     }
 
-    public Actor(int ind, Method method, boolean isMutable, MethodParameter... args) {
+    public Actor(int ind, Method method, boolean isMutable, Object... args) {
         this.ind = ind;
         this.method = method;
         this.isMutable = isMutable;

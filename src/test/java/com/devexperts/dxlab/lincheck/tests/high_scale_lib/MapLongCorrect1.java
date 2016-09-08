@@ -20,8 +20,7 @@ package com.devexperts.dxlab.lincheck.tests.high_scale_lib;
 
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
-import com.devexperts.dxlab.lincheck.util.Result;
-import org.cliffc.high_scale_lib.old.NonBlockingHashMapLong;
+import org.cliffc.high_scale_lib.NonBlockingHashMapLong;
 import org.junit.Test;
 
 import java.util.Map;
@@ -31,8 +30,8 @@ import static org.junit.Assert.assertTrue;
 
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
-@Param(name = "key", opt = "1:3")
-@Param(name = "value", opt = "1:10")
+@Param(name = "key", generatorParameters = "1:3")
+@Param(name = "value", generatorParameters = "1:10")
 public class MapLongCorrect1 {
     public Map<Long, Integer> q;
 

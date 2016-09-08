@@ -23,7 +23,7 @@ import com.devexperts.dxlab.lincheck.annotations.CTest;
 import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.Param;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
-import com.devexperts.dxlab.lincheck.generators.IntegerGenerator;
+import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -35,7 +35,7 @@ import static org.junit.Assert.assertTrue;
 
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
-@Param(name = "count", clazz = IntegerGenerator.class)
+@Param(name = "count", generator = IntegerParameterGenerator.class)
 public class SetCorrect1 {
     public Set<Integer> q;
 

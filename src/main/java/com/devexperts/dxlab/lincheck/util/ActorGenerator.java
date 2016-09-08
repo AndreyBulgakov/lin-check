@@ -18,6 +18,8 @@
 
 package com.devexperts.dxlab.lincheck.util;
 
+import com.devexperts.dxlab.lincheck.generators.ParameterGenerator;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
@@ -25,15 +27,13 @@ import java.util.*;
 public class ActorGenerator implements Cloneable {
     private int methodId;
     private Method method;
-    private Params[] rangeArgs;
+    private ParameterGenerator[] rangeArgs;
     private boolean actorIsMutable = true;
-    private int numberOfValidStreams = 0;
 
 
-    public ActorGenerator(int methodId, Method method, int numberOfValidStreams, Params[] rangeArgs) {
+    public ActorGenerator(int methodId, Method method, ParameterGenerator[] rangeArgs) {
         this.methodId = methodId;
         this.method = method;
-        this.numberOfValidStreams = numberOfValidStreams;
         this.rangeArgs = rangeArgs;
     }
 
@@ -41,26 +41,16 @@ public class ActorGenerator implements Cloneable {
         this.actorIsMutable = actorIsMutable;
     }
 
-    public void decNumberOfValidStreams(){
-        if (numberOfValidStreams != -1)
-            numberOfValidStreams--;
-    }
-    public int getNumberOfValidStreams(){
-        return numberOfValidStreams;
-    }
-    public void setNumberOfValidStreams(int numberOfValidStreams){
-        this.numberOfValidStreams = numberOfValidStreams;
-    }
 
     public boolean isMutable() {
         return actorIsMutable;
     }
 
     public Actor generate(int indActor) {
-        MethodParameter[] args = new MethodParameter[rangeArgs.length];
-        Params[] parameters = rangeArgs;
+        Object[] args = new Object[rangeArgs.length];
+        ParameterGenerator[] parameters = rangeArgs;
         for (int i = 0; i < parameters.length; i++) {
-            args[i] = new MethodParameter(parameters[i].type, MyRandom.fromParams(parameters[i]));
+            args[i] = parameters[i].generate();
         }
 
         Actor act = new Actor(indActor, method, isMutable(), args);
@@ -76,8 +66,11 @@ public class ActorGenerator implements Cloneable {
                 ", rangeArgs=" + rangeArgs.toString() +
                 '}';
     }
+
     @Override
-    public ActorGenerator clone(){
-        return new ActorGenerator(methodId, method, numberOfValidStreams, rangeArgs);
+    public ActorGenerator clone() {
+        ActorGenerator clone = new ActorGenerator(methodId, method, rangeArgs);
+        clone.setMutable(isMutable());
+        return clone;
     }
 }

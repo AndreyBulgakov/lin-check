@@ -23,7 +23,7 @@ import com.devexperts.dxlab.lincheck.annotations.CTest;
 import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.Param;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
-import com.devexperts.dxlab.lincheck.generators.IntegerGenerator;
+import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
 import org.cliffc.high_scale_lib.NonBlockingHashMapLong;
 import org.junit.Test;
 
@@ -34,8 +34,8 @@ import static org.junit.Assert.assertTrue;
 
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
-@Param(name = "key", clazz = IntegerGenerator.class)
-@Param(name = "value", clazz = IntegerGenerator.class)
+@Param(name = "key", generator = IntegerParameterGenerator.class)
+@Param(name = "value", generator = IntegerParameterGenerator.class)
 public class MapLongCorrect1 {
     public Map<Long, Integer> q;
 
@@ -45,13 +45,13 @@ public class MapLongCorrect1 {
     }
 
     @Operation(params = {"key","value"})
-    public int put(Integer key, Integer value) throws Exception {
+    public Integer put(Integer key, Integer value) throws Exception {
         Long k = key.longValue();
         return q.put(k, value);
     }
 
     @Operation
-    public int get(@Param(name = "key") Integer key) throws Exception {
+    public Integer get(@Param(name = "key") Integer key) throws Exception {
         return q.get(key);
     }
 

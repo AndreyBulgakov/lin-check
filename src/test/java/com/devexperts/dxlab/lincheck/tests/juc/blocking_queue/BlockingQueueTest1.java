@@ -23,7 +23,7 @@ import java.util.concurrent.BlockingQueue;
 
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
-import com.devexperts.dxlab.lincheck.generators.IntegerGenerator;
+import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
@@ -40,7 +40,7 @@ public class BlockingQueueTest1 {
     }
 
     @Operation
-    public boolean add(@Param(clazz = IntegerGenerator.class)Integer value) throws Exception {
+    public boolean add(@Param(generator = IntegerParameterGenerator.class)Integer value) throws Exception {
 
         return q.add(value);
     }

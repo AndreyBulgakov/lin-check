@@ -21,13 +21,14 @@ package com.devexperts.dxlab.lincheck.tests.custom.counter;
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.CTest;
 import com.devexperts.dxlab.lincheck.annotations.Operation;
+import com.devexperts.dxlab.lincheck.annotations.ReadOnly;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
-import com.devexperts.dxlab.lincheck.util.Result;
+import librariesForTesting.tests.custom.counter.CounterGet;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertTrue;
 
-@CTest(iter = 300, actorsPerThread = {"1:3", "1:3"})
+@CTest(iter = 300, actorsPerThread = {"1:2", "1:2"})
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
 public class CounterGetTest {
     public CounterGet counter;
@@ -38,12 +39,13 @@ public class CounterGetTest {
     }
 
     @Operation
-    public Integer incAndGet() {
+    public int incAndGet() {
         return counter.incrementAndGet();
     }
 
     @Operation
-    public Integer get() {
+    @ReadOnly
+    public int get() {
         return counter.get();
     }
 

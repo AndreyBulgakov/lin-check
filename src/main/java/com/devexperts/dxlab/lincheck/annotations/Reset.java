@@ -22,7 +22,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * TODO add javadoc
+ * Annotation for method that reloads test class
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Reset {

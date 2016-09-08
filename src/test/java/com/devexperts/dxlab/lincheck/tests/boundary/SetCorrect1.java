@@ -23,7 +23,7 @@ import com.devexperts.dxlab.lincheck.annotations.CTest;
 import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.Param;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
-import com.devexperts.dxlab.lincheck.generators.IntegerGenerator;
+import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
 import com.devexperts.dxlab.lincheck.util.MyRandom;
 import org.cliffc.high_scale_lib.NonBlockingHashSet;
 import org.junit.Test;
@@ -33,7 +33,7 @@ import static org.junit.Assert.assertTrue;
 
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
-@Param(name = "key", clazz = IntegerGenerator.class)
+@Param(name = "key", generator = IntegerParameterGenerator.class)
 public class SetCorrect1 {
     public NonBlockingHashSet<Integer> q;
 

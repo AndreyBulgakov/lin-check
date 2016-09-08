@@ -20,8 +20,9 @@ package com.devexperts.dxlab.lincheck.tests.high_scale_lib;
 
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
-import com.devexperts.dxlab.lincheck.generators.IntegerGenerator;
-import org.cliffc.high_scale_lib.old.NonBlockingSetInt;
+import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
+//import NonBlockingSetInt;
+import org.cliffc.high_scale_lib.NonBlockingSetInt;
 import org.junit.Test;
 
 import java.util.Set;
@@ -40,12 +41,12 @@ public class BitVectorTest1 {
     }
 
     @Operation
-    public boolean add(@Param(clazz = IntegerGenerator.class)int value) throws Exception {
+    public boolean add(@Param(generator = IntegerParameterGenerator.class)int value) throws Exception {
         return q.add(value);
     }
 
     @Operation
-    public boolean remove(@Param(clazz = IntegerGenerator.class)int value) throws Exception {
+    public boolean remove(@Param(generator = IntegerParameterGenerator.class)int value) throws Exception {
         return q.remove(value);
     }
 

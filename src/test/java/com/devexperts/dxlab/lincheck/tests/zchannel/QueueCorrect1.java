@@ -23,9 +23,9 @@ import com.devexperts.dxlab.lincheck.annotations.CTest;
 import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.Param;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
-import com.devexperts.dxlab.lincheck.generators.IntegerGenerator;
+import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
 import org.junit.Test;
-import z.channel.GenericMPMCQueue;
+import librariesForTesting.z.channel.GenericMPMCQueue;
 
 import static org.junit.Assert.assertTrue;
 
@@ -45,7 +45,7 @@ public class QueueCorrect1 {
     }
 
     @Operation
-    public boolean offer(@Param(clazz = IntegerGenerator.class) int value) throws Exception {
+    public boolean offer(@Param(generator = IntegerParameterGenerator.class) int value) throws Exception {
         return q.offer(value);
     }
 

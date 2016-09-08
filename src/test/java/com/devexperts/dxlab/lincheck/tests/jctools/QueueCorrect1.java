@@ -21,7 +21,7 @@ package com.devexperts.dxlab.lincheck.tests.jctools;
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
 import com.devexperts.dxlab.lincheck.annotations.ReadOnly;
-import com.devexperts.dxlab.lincheck.generators.IntegerGenerator;
+import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
 import org.jctools.queues.QueueFactory;
 import org.jctools.queues.spec.ConcurrentQueueSpec;
 import org.junit.Test;
@@ -41,7 +41,7 @@ public class QueueCorrect1 {
     }
 
     @Operation
-    public int add(@Param(clazz = IntegerGenerator.class) Integer value) throws Exception {
+    public int add(@Param(generator = IntegerParameterGenerator.class) Integer value) throws Exception {
         return q.add(value) ? 1 : 0;
     }
 

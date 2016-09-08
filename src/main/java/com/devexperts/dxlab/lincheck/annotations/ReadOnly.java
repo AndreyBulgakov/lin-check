@@ -22,7 +22,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * TODO add javadoc
+ * It marks the method ReadOnly
+ * Test case can not only consist of ReadOnly methods
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ReadOnly {

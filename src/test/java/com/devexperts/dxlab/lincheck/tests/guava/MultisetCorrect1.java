@@ -20,7 +20,7 @@ package com.devexperts.dxlab.lincheck.tests.guava;
 
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
-import com.devexperts.dxlab.lincheck.generators.IntegerGenerator;
+import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
 import com.google.common.collect.ConcurrentHashMultiset;
 import org.junit.Test;
 
@@ -30,8 +30,8 @@ import static org.junit.Assert.assertTrue;
 
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
-@Param(name = "value", clazz = IntegerGenerator.class)
-@Param(name = "count", clazz = IntegerGenerator.class)
+@Param(name = "value", generator = IntegerParameterGenerator.class)
+@Param(name = "count", generator = IntegerParameterGenerator.class)
 public class MultisetCorrect1 {
     public ConcurrentHashMultiset<Integer> q;
 

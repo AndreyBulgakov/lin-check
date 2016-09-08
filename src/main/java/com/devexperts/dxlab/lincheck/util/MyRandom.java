@@ -23,13 +23,6 @@ import java.util.Random;
 public class MyRandom {
     public static final Random r = new Random(0);
 
-    public static int fromInterval(Interval iv) {
-        return r.nextInt((Integer)iv.to - (Integer)iv.from) + (Integer)iv.from;
-    }
-    public static Object fromParams(Params a) {
-        return a.objects[r.nextInt(a.to - a.from)];
-    }
-
     public static int nextInt(int n) {
         return r.nextInt(n);
     }
@@ -42,7 +35,7 @@ public class MyRandom {
         return r.nextLong();
     }
     public static double nextDouble() { return r.nextDouble(); }
-
+    public static float nextFloat() { return r.nextFloat(); }
 
     public static void busyWait(int nanos) {
         if (nanos == 0) return;

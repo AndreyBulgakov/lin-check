@@ -18,8 +18,7 @@
 
 package com.devexperts.dxlab.lincheck.util;
 
-import com.devexperts.dxlab.lincheck.Checker;
-
+import java.lang.reflect.Array;
 import java.util.*;
 
 public class CheckerConfiguration implements Cloneable {
@@ -27,25 +26,20 @@ public class CheckerConfiguration implements Cloneable {
 
     private int numIterations;
 
-    private List<Interval> rangeActorCount;
     private List<ActorGenerator> actorGenerators;
     private int indActor;
-    private int maxThreadNumber = 0;
+    private int[][] rangeActorCount;
 
-    public CheckerConfiguration(int numThreads, int numIterations, List<Interval> rangeActorCount, List<ActorGenerator> actorGenerators) {
+    public CheckerConfiguration(int numThreads, int numIterations, int[][] rangeActorCount, List<ActorGenerator> actorGenerators) {
         this.numThreads = numThreads;
         this.numIterations = numIterations;
         this.rangeActorCount = rangeActorCount;
         this.actorGenerators = actorGenerators;
-        for (ActorGenerator i: actorGenerators) {
-            maxThreadNumber+= i.getNumberOfValidStreams();
-        }
     }
 
     public CheckerConfiguration() {
         numThreads = 0;
         numIterations = 0;
-        rangeActorCount = new ArrayList<>();
         actorGenerators = new ArrayList<>();
     }
 
@@ -54,9 +48,14 @@ public class CheckerConfiguration implements Cloneable {
         return this;
     }
 
-    public CheckerConfiguration addThread(Interval i) {
-        numThreads++;
-        rangeActorCount.add(i);
+    public CheckerConfiguration addThreads(String[] intervals) {
+        numThreads = intervals.length;
+        rangeActorCount = new int[numThreads][];
+        for (int i = 0; i < intervals.length; i++) {
+            String[] split = intervals[i].split(":");
+            int[] interval = {Integer.valueOf(split[0]), Integer.valueOf(split[1])};
+            rangeActorCount[i] = interval;
+        }
         return this;
     }
 
@@ -69,24 +68,14 @@ public class CheckerConfiguration implements Cloneable {
         return actorGenerators.get(MyRandom.nextInt(actorGenerators.size()));
     }
 
-    private Actor[] generateActorsArray(Interval count, int numThreads) {
-        for (int i = 0; i < actorGenerators.size(); i++) {
-            if (actorGenerators.get(i).getNumberOfValidStreams() == 0)
-                actorGenerators.remove(i);
-        }
-        ActorGenerator generator = null;
-        if (numThreads == maxThreadNumber)
-            generator = randomGenerator();
-        int countActors = MyRandom.fromInterval(count);
-        Set<ActorGenerator> actorGeneratorsSet = new HashSet<>();
+    private Actor[] generateActorsArray(int[] count) {
+        int countActors = count[0] + MyRandom.nextInt(count[1] - count[0]);
+
         Actor[] actors = new Actor[countActors];
         for (int i = 0; i < countActors; i++) {
-            if (numThreads != maxThreadNumber)
-                generator = randomGenerator();
-            actorGeneratorsSet.add(generator);
-            actors[i] = generator.generate(indActor++);
+            actors[i] = randomGenerator().generate(indActor++);
         }
-        actorGeneratorsSet.forEach(ActorGenerator::decNumberOfValidStreams);
+
         return actors;
     }
 
@@ -105,7 +94,7 @@ public class CheckerConfiguration implements Cloneable {
 
         int minCountRow = Integer.MAX_VALUE;
         for (int i = 0; i < numThreads; i++) {
-            result[i] = generateActorsArray(rangeActorCount.get(i), numThreads);
+            result[i] = generateActorsArray(rangeActorCount[i]);
             minCountRow = Math.min(minCountRow, result[i].length);
         }
 
@@ -140,10 +129,10 @@ public class CheckerConfiguration implements Cloneable {
                 ", indActor=" + indActor +
                 '}';
     }
+
     @Override
-    public CheckerConfiguration clone(){
-        List<Interval> cloneIntervals = new ArrayList<>();
-        rangeActorCount.forEach(x -> cloneIntervals.add(x.clone()));
+    public CheckerConfiguration clone() {
+        int[][] cloneIntervals = rangeActorCount.clone();;
         List<ActorGenerator> cloneActorGenerators = new ArrayList<>();
         actorGenerators.forEach(x -> cloneActorGenerators.add(x.clone()));
         return new CheckerConfiguration(numThreads, numIterations, cloneIntervals, cloneActorGenerators);

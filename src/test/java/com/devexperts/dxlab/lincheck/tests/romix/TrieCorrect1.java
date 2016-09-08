@@ -22,8 +22,8 @@ import java.util.Map;
 
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
-import com.devexperts.dxlab.lincheck.generators.IntegerGenerator;
-import com.romix.scala.collection.concurrent.TrieMap;
+import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
+import librariesForTesting.romix.scala.collection.concurrent.TrieMap;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertTrue;
@@ -31,8 +31,8 @@ import static junit.framework.TestCase.assertTrue;
 
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
-@Param(name = "key", clazz = IntegerGenerator.class)
-@Param(name = "value", clazz = IntegerGenerator.class)
+@Param(name = "key", generator = IntegerParameterGenerator.class)
+@Param(name = "value", generator = IntegerParameterGenerator.class)
 public class TrieCorrect1 {
     public Map<Integer, Integer> m;
 
