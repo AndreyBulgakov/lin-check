@@ -20,17 +20,28 @@ package com.devexperts.dxlab.lincheck.util;
 
 import java.lang.reflect.Array;
 import java.util.*;
-
 public class CheckerConfiguration implements Cloneable {
+    private class Interval implements Cloneable{
+        int begin;
+        int end;
+        private Interval(int begin, int end){
+            this.begin = begin;
+            this.end = end;
+        }
+        @Override
+        public Interval clone(){
+            return new Interval(begin, end);
+        }
+    }
     private int numThreads;
 
     private int numIterations;
 
     private List<ActorGenerator> actorGenerators;
     private int indActor;
-    private int[][] rangeActorCount;
+    private Interval[] rangeActorCount;
 
-    public CheckerConfiguration(int numThreads, int numIterations, int[][] rangeActorCount, List<ActorGenerator> actorGenerators) {
+    private CheckerConfiguration(int numThreads, int numIterations, Interval[] rangeActorCount, List<ActorGenerator> actorGenerators) {
         this.numThreads = numThreads;
         this.numIterations = numIterations;
         this.rangeActorCount = rangeActorCount;
@@ -50,11 +61,10 @@ public class CheckerConfiguration implements Cloneable {
 
     public CheckerConfiguration addThreads(String[] intervals) {
         numThreads = intervals.length;
-        rangeActorCount = new int[numThreads][];
+        rangeActorCount = new Interval[numThreads];
         for (int i = 0; i < intervals.length; i++) {
             String[] split = intervals[i].split(":");
-            int[] interval = {Integer.valueOf(split[0]), Integer.valueOf(split[1])};
-            rangeActorCount[i] = interval;
+            rangeActorCount[i] = new Interval(Integer.valueOf(split[0]), Integer.valueOf(split[1]));
         }
         return this;
     }
@@ -68,8 +78,8 @@ public class CheckerConfiguration implements Cloneable {
         return actorGenerators.get(MyRandom.nextInt(actorGenerators.size()));
     }
 
-    private Actor[] generateActorsArray(int[] count) {
-        int countActors = count[0] + MyRandom.nextInt(count[1] - count[0]);
+    private Actor[] generateActorsArray(Interval interval) {
+        int countActors = interval.begin + MyRandom.nextInt(interval.end - interval.begin);
 
         Actor[] actors = new Actor[countActors];
         for (int i = 0; i < countActors; i++) {
@@ -132,7 +142,7 @@ public class CheckerConfiguration implements Cloneable {
 
     @Override
     public CheckerConfiguration clone() {
-        int[][] cloneIntervals = rangeActorCount.clone();;
+        Interval[] cloneIntervals = rangeActorCount.clone();
         List<ActorGenerator> cloneActorGenerators = new ArrayList<>();
         actorGenerators.forEach(x -> cloneActorGenerators.add(x.clone()));
         return new CheckerConfiguration(numThreads, numIterations, cloneIntervals, cloneActorGenerators);
