@@ -7,8 +7,8 @@ import com.devexperts.dxlab.lincheck.Checker;
  * Float numbers generator
  * Constructor parameters
  * <ul>
- *     <li>maxWordLength default value = 100</li>
- *     <li>alphabet default value = letters in two registers + numbers</li>
+ *     <li><b>maxWordLength</b> default value = 100</li>
+ *     <li><b>alphabet</b> default value = letters in two registers + numbers</li>
  * </ul>
  */
 public class StringParameterGenerator implements ParameterGenerator {

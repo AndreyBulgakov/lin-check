@@ -6,9 +6,9 @@ import com.devexperts.dxlab.lincheck.Checker;
  * Float numbers generator
  * Constructor parameters
  * <ul>
- *     <li>begin default value = -100</li>
- *     <li>end default value = 100</li>
- *     <li>step default value = 0.1</li>
+ *     <li><b>begin</b> default value = -100</li>
+ *     <li><b>end</b> default value = 100</li>
+ *     <li><b>step</b> default value = 0.1</li>
  * </ul>
  */
 public class FloatParameterGenerator implements ParameterGenerator {

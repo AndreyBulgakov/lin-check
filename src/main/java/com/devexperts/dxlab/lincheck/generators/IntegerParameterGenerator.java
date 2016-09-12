@@ -7,8 +7,8 @@ import com.devexperts.dxlab.lincheck.Checker;
  * Float numbers generator
  * Constructor parameters
  * <ul>
- *     <li>begin default value = -10</li>
- *     <li>end default value = 10</li>
+ *     <li><b>begin</b> default value = -10</li>
+ *     <li><b>end</b> default value = 10</li>
  * </ul>
  */
 public class IntegerParameterGenerator implements ParameterGenerator {
