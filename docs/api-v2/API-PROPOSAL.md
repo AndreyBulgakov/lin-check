@@ -44,9 +44,10 @@ public class HashMapTest {
 
 * возврат значения через return / throw exception
 * передача аргументов в метод-враппер в явном виде
-* введение аннотации `@Param`, которая описывает диапазон значений аргумента метода. Можно отдельно создать именованный диапазон и ссылаться на него (cм. `MapTest`)
-
-Нет необходимости явно указывать тип аргумента в аннотациях — эту информацию можно получить из сигнатуры метода.
+* генерация параметров с помощью генераторов
+* введение аннотации `@Param`, которая принимает генератор значений аргумента метода. Можно отдельно создать именованный диапазон и ссылаться на него (cм. `MapTest`)
+* в поле generator передаётся класс генератора
+* в поле generatorParameters передаются параметры для генерации, которые принимает конструктор генератора
 
 Примеры:
 
@@ -60,7 +61,7 @@ public class QueueTest {
     public void reset() { queue = new QueueSynchronized(10); }
 
     @Operation
-    public void put(@Param(opt="1:10") int v) throws Exception {
+    public void put(@Param(generator = IntegerParameterGenerator.class) int v) throws Exception {
         queue.put(v);
     }
 
@@ -73,8 +74,8 @@ public class QueueTest {
 
 ```java
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3"})
-@Param("key", opt={"1:3"})
-@Param("value", opt={"1:10"})
+@Param(name = "key", generator = IntegerParameterGenerator.class, generatorParameters = {"1", "3"})
+@Param(name = "value", generator = IntegerParameterGenerator.class, generatorParameters = {"1", "10"})
 public class MapTest {
     public Map<Integer, Integer> q;
 
@@ -89,7 +90,7 @@ public class MapTest {
     }
 
     @Operation()
-    public Integer get(@Param("key") Integer key) throws Exception {
+    public Integer get(@Param(name = "key") Integer key) throws Exception {
         return q.get(key);
     }
 

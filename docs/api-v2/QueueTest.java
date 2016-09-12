@@ -9,7 +9,7 @@ public class QueueTest {
     public void reset() { queue = new QueueSynchronized(10); }
 
     @Operation
-    public void put(@Param(opt="1:10") int v) throws Exception {
+    public void put(@Param(generator = IntegerParameterGenerator.class) int v) throws Exception {
         queue.put(v);
     }
 

@@ -1,8 +1,8 @@
 
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iter = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
-@Param("key", opt={"1:3"})
-@Param("value", opt={"1:10"})
+@Param(name = "key", generator = IntegerParameterGenerator.class, generatorParameters = {"1", "3"})
+@Param(name = "value", generator = IntegerParameterGenerator.class, generatorParameters = {"1", "10"})
 public class MapTest {
     public Map<Integer, Integer> q;
 
@@ -17,7 +17,7 @@ public class MapTest {
     }
 
     @Operation()
-    public Integer get(@Param("key") Integer key) throws Exception {
+    public Integer get(@Param(name = "key") Integer key) throws Exception {
         return q.get(key);
     }
 
