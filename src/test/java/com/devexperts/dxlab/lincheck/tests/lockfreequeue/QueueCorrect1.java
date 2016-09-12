@@ -21,7 +21,7 @@ package com.devexperts.dxlab.lincheck.tests.lockfreequeue;
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
 import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
-import librariesForTesting.com.github.lock.free.queue.LockFreeQueue;
+import com.github.lock.free.queue.LockFreeQueue;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;

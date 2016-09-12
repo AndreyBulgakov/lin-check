@@ -21,7 +21,7 @@ package com.devexperts.dxlab.lincheck.performance;
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.StatData;
 import com.devexperts.dxlab.lincheck.tests.custom.transfer.AccountsTest4;
-import com.devexperts.dxlab.lincheck.util.MyRandom;
+import com.devexperts.dxlab.lincheck.util.BusyWait;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -114,7 +114,7 @@ public class StatTest {
 
 
         Random rand = new Random();
-        MyRandom.r.setSeed(rand.nextLong());
+        rand.setSeed(rand.nextLong());
 
         testAll();
     }

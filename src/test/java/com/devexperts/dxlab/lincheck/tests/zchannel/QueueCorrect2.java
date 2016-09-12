@@ -25,7 +25,7 @@ import com.devexperts.dxlab.lincheck.annotations.Param;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
 import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
 import org.junit.Test;
-import librariesForTesting.z.channel.GenericMPMCQueue;
+import z.channel.GenericMPMCQueue;
 
 import static org.junit.Assert.assertTrue;
 

@@ -1,12 +1,15 @@
 package com.devexperts.dxlab.lincheck.generators;
 
-import com.devexperts.dxlab.lincheck.util.MyRandom;
-
-import java.security.InvalidParameterException;
+import com.devexperts.dxlab.lincheck.Checker;
 
 /**
  * Float numbers generator
- * begin, end, step - order constructor parameters
+ * Constructor parameters
+ * <ul>
+ *     <li>begin default value = -100</li>
+ *     <li>end default value = 100</li>
+ *     <li>step default value = 0.1</li>
+ * </ul>
  */
 public class FloatParameterGenerator implements ParameterGenerator {
     private float begin = -100;
@@ -32,6 +35,6 @@ public class FloatParameterGenerator implements ParameterGenerator {
     }
 
     public Float generate() {
-        return begin + MyRandom.nextInt((int) (end - begin)) + step * (int) (MyRandom.nextFloat() / step);
+        return begin + Checker.r.nextInt((int) (end - begin)) + step * (int) (Checker.r.nextFloat() / step);
     }
 }

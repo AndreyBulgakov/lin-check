@@ -31,6 +31,7 @@ import com.devexperts.dxlab.lincheck.generators.ParameterGenerator;
 import com.devexperts.dxlab.lincheck.util.*;
 
 public class Checker {
+    public static final Random r = new Random(0);
     boolean fullOutput;
     int COUNT_ITER;
     int COUNT_THREADS;
@@ -403,7 +404,7 @@ public class Checker {
                 if (threads_num > 50_000) {
                     for (int i = 0; i < COUNT_THREADS; i++) {
                         for (int j = 0; j < waits[i].length; j++) {
-                            waits[i][j] = (int) (MyRandom.nextLong() % 10_000L);
+                            waits[i][j] = (int) (r.nextLong() % 10_000L);
                         }
                     }
                 }

@@ -18,12 +18,26 @@
 
 package com.devexperts.dxlab.lincheck.util;
 
-import java.lang.reflect.Array;
+import com.devexperts.dxlab.lincheck.Checker;
+
 import java.util.*;
+
+/**
+ * Contains information about
+ * <ul>
+ *     <li>Numbers of threads</li>
+ *     <li>Numbers of methods in thread</li>
+ *     <li>Actor generators {@link ActorGenerator}</li>
+ * </ul>
+ * Generates {@link Actor} array based on known information
+ */
 public class CheckerConfiguration implements Cloneable {
+    /**
+     * Minimum and maximum number of methods in thread
+     */
     private class Interval implements Cloneable{
-        int begin;
-        int end;
+        final int begin;
+        final int end;
         private Interval(int begin, int end){
             this.begin = begin;
             this.end = end;
@@ -37,10 +51,9 @@ public class CheckerConfiguration implements Cloneable {
 
     private int numIterations;
 
-    private List<ActorGenerator> actorGenerators;
+    private final List<ActorGenerator> actorGenerators;
     private int indActor;
     private Interval[] rangeActorCount;
-
     private CheckerConfiguration(int numThreads, int numIterations, Interval[] rangeActorCount, List<ActorGenerator> actorGenerators) {
         this.numThreads = numThreads;
         this.numIterations = numIterations;
@@ -75,11 +88,11 @@ public class CheckerConfiguration implements Cloneable {
     }
 
     private ActorGenerator randomGenerator() {
-        return actorGenerators.get(MyRandom.nextInt(actorGenerators.size()));
+        return actorGenerators.get(Checker.r.nextInt(actorGenerators.size()));
     }
 
     private Actor[] generateActorsArray(Interval interval) {
-        int countActors = interval.begin + MyRandom.nextInt(interval.end - interval.begin);
+        int countActors = interval.begin + Checker.r.nextInt(interval.end - interval.begin);
 
         Actor[] actors = new Actor[countActors];
         for (int i = 0; i < countActors; i++) {
@@ -118,7 +131,7 @@ public class CheckerConfiguration implements Cloneable {
                     }
                 }
                 if (allImmutable) {
-                    int ind = MyRandom.nextInt(numThreads);
+                    int ind = Checker.r.nextInt(numThreads);
                     while (!result[ind][row].isMutable) {
                         result[ind][row] = randomGenerator().generate(result[ind][row].ind);
                     }

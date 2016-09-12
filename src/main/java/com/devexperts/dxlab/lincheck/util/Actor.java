@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Actor {
     public int ind;
@@ -44,28 +45,11 @@ public class Actor {
         this.args = args;
     }
 
-    private static String argsToString(Object[] args) {
-        if (args == null)
-            return "null";
-
-        int iMax = args.length - 1;
-        if (iMax == -1)
-            return "";
-
-        StringBuilder b = new StringBuilder();
-        for (int i = 0; ; i++) {
-            b.append(String.valueOf(args[i]));
-            if (i == iMax)
-                return b.toString();
-            b.append(", ");
-        }
-    }
-
     @Override
     public String toString() {
         return ind +
                 "_" + methodName +
-                "(" + Arrays.toString(args) +
+                "(" + Arrays.stream(args).map(i -> i.toString()).collect(Collectors.joining(", "))+
                 ")";
     }
 }

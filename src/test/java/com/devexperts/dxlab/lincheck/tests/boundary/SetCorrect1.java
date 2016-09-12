@@ -24,7 +24,7 @@ import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.Param;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
 import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
-import com.devexperts.dxlab.lincheck.util.MyRandom;
+import com.devexperts.dxlab.lincheck.util.BusyWait;
 import org.cliffc.high_scale_lib.NonBlockingHashSet;
 import org.junit.Test;
 
@@ -59,7 +59,6 @@ public class SetCorrect1 {
 
     @Test
     public void test() throws Exception {
-        MyRandom.nextInt();
         assertTrue(Checker.check(new SetCorrect1()));
         // TODO failed test
 

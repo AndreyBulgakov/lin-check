@@ -20,8 +20,8 @@ package com.devexperts.dxlab.lincheck.tests.custom.counter;
 
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
-import librariesForTesting.tests.custom.counter.Counter;
-import librariesForTesting.tests.custom.counter.CounterCorrect1;
+import tests.custom.counter.Counter;
+import tests.custom.counter.CounterCorrect1;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertTrue;

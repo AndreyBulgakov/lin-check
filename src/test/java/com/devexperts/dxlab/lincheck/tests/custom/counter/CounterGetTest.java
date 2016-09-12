@@ -23,7 +23,7 @@ import com.devexperts.dxlab.lincheck.annotations.CTest;
 import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.ReadOnly;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
-import librariesForTesting.tests.custom.counter.CounterGet;
+import tests.custom.counter.CounterGet;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertTrue;

@@ -9,9 +9,11 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Annotation for generate arguments for method
- * generator - class that implements generator interface. It generate parameters for methods
- * name - name for a set of parameters
- * generatorParameters - parameters for generator constructor
+ * <ul>
+ *     <li><b>generator</b> - class that implements generator interface. It generate parameters for methods</li>
+ *     <li><b>name</b> - name for a set of parameters</li>
+ *     <li><b>generatorParameters</b> - parameters for generator constructor</li>
+ * </ul>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Repeatable(Param.Params.class)

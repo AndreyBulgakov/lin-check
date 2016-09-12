@@ -22,8 +22,8 @@ import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.CTest;
 import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
-import librariesForTesting.tests.custom.counter.Counter;
-import librariesForTesting.tests.custom.counter.CounterCorrect2;
+import tests.custom.counter.Counter;
+import tests.custom.counter.CounterCorrect2;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertTrue;

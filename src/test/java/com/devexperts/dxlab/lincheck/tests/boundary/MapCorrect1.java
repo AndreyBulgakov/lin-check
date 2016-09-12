@@ -21,7 +21,7 @@ package com.devexperts.dxlab.lincheck.tests.boundary;
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
 import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
-import com.devexperts.dxlab.lincheck.util.MyRandom;
+import com.devexperts.dxlab.lincheck.util.BusyWait;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import org.junit.Test;
 
@@ -59,8 +59,6 @@ public class MapCorrect1 {
 
     @Test
     public void test() throws Exception {
-        MyRandom.nextInt();
-        MyRandom.nextInt();
         assertTrue(Checker.check(new MapCorrect1()));
         // TODO failed test
 

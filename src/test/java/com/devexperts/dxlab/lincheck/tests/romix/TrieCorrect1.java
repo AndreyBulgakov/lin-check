@@ -23,7 +23,7 @@ import java.util.Map;
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
 import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
-import librariesForTesting.romix.scala.collection.concurrent.TrieMap;
+import romix.scala.collection.concurrent.TrieMap;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertTrue;

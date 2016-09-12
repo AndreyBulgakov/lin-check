@@ -22,8 +22,8 @@ import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
 import com.devexperts.dxlab.lincheck.annotations.ReadOnly;
 import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
-import librariesForTesting.tests.custom.transfer.Accounts;
-import librariesForTesting.tests.custom.transfer.AccountsWrong2;
+import tests.custom.transfer.Accounts;
+import tests.custom.transfer.AccountsWrong2;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;

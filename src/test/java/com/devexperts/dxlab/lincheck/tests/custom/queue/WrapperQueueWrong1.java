@@ -21,8 +21,8 @@ package com.devexperts.dxlab.lincheck.tests.custom.queue;
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
 import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
-import librariesForTesting.tests.custom.queue.Queue;
-import librariesForTesting.tests.custom.queue.QueueWrong1;
+import tests.custom.queue.Queue;
+import tests.custom.queue.QueueWrong1;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;

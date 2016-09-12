@@ -23,7 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Annotation for test method
- * Params binds the arguments of the method with the values declared in Param
+ * Params binds the arguments of the method with the values declared in {@link Param}
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Operation {

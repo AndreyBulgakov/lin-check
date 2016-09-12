@@ -261,7 +261,7 @@ public class MultithreadedExecutionClassGenerator {
             mv.visitVarInsn(ALOAD, 3);
             mv.visitIntInsn(SIPUSH, i);
             mv.visitInsn(IALOAD);
-            mv.visitMethodInsn(INVOKESTATIC, "com/devexperts/dxlab/lincheck/util/MyRandom", "busyWait", "(I)V", false);
+            mv.visitMethodInsn(INVOKESTATIC, "com/devexperts/dxlab/lincheck/util/BusyWait", "busyWait", "(I)V", false);
             mv.visitVarInsn(ALOAD, 1);
             mv.visitIntInsn(SIPUSH, i);
             mv.visitInsn(AALOAD);
