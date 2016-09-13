@@ -23,7 +23,7 @@ import static org.objectweb.asm.Opcodes.*;
  * int a = (int)args[0][0].value;
  * phaser.arriveAndAwaitAdvance();
  * try{
- * busyWait.busyWait(waits[0]);
+ * Checker.busyWait(waits[0]);
  * res[0].setValue(testObject.method(a));
  * }catch (Exception e) {
  * res[0].setException(e);
@@ -261,7 +261,7 @@ public class MultithreadedExecutionClassGenerator {
             mv.visitVarInsn(ALOAD, 3);
             mv.visitIntInsn(SIPUSH, i);
             mv.visitInsn(IALOAD);
-            mv.visitMethodInsn(INVOKESTATIC, "com/devexperts/dxlab/lincheck/util/BusyWait", "busyWait", "(I)V", false);
+            mv.visitMethodInsn(INVOKESTATIC, "com/devexperts/dxlab/lincheck/Checker", "busyWait", "(I)V", false);
             mv.visitVarInsn(ALOAD, 1);
             mv.visitIntInsn(SIPUSH, i);
             mv.visitInsn(AALOAD);

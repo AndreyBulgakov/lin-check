@@ -523,4 +523,10 @@ public class Checker {
         System.out.println("sumDisp = " + sumDisp);
         return !errorFound;
     }
+
+    public static void busyWait(int nanos) {
+        if (nanos == 0) return;
+
+        for (long start = System.nanoTime(); start + nanos >= System.nanoTime(); ){}
+    }
 }
