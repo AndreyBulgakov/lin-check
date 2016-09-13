@@ -10,6 +10,41 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>libtest</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>org.jctools</groupId>
+            <artifactId>jctools-core</artifactId>
+            <version>1.0</version>
+        </dependency>
 
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-core</artifactId>
+            <version>0.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-generator-annprocess</artifactId>
+            <version>0.6</version>
+            <scope>provided</scope>
+        </dependency>
 
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>18.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.boundary</groupId>
+            <artifactId>high-scale-lib</artifactId>
+            <version>1.0.6</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.romix</groupId>
+            <artifactId>java-concurrent-hash-trie-map</artifactId>
+            <version>0.2.23</version>
+        </dependency>
+    </dependencies>
 </project>
