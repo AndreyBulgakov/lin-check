@@ -32,15 +32,12 @@ import com.devexperts.dxlab.lincheck.util.*;
 
 public class Checker {
     public static final Random r = new Random(0);
-    boolean fullOutput;
-    int COUNT_ITER;
-    int COUNT_THREADS;
-
-    public static boolean check(Object test) throws Exception {
-        Checker checker = new Checker();
-        return checker.checkAnnotated(test);
-    }
-
+    private boolean fullOutput;
+    private int COUNT_THREADS;
+    private long startTime;
+    private Object testObject;
+    private List<Method> methodsActor;
+    private Method methodReload;
 
     public Checker() {
         try {
@@ -56,6 +53,28 @@ public class Checker {
         }
     }
 
+    public static boolean check(Object test) throws Exception {
+        Checker checker = new Checker();
+        return checker.checkAnnotated(test);
+    }
+
+    private static Result[] generateEmptyResults(int n) {
+        Result[] res = new Result[n];
+        for (int i = 0; i < n; i++) {
+            res[i] = new Result();
+        }
+        return res;
+    }
+
+    //called from the generated classes
+    public static void busyWait(int nanos) {
+        if (nanos == 0) return;
+
+        for (long start = System.nanoTime(); start + nanos >= System.nanoTime(); ) {
+        }
+    }
+
+    //recursively generate all possible permutations of methods for linear execution
     private void genPermutationsHelper(List<Actor[]> result, Actor[] out, int countUsed, int countActors, Actor[][] actors, int[] inds) {
         if (countActors == countUsed) {
             result.add(out.clone());
@@ -85,15 +104,9 @@ public class Checker {
         return perms.toArray(new Actor[perms.size()][]);
     }
 
-    private static Result[] generateEmptyResults(int n) {
-        Result[] res = new Result[n];
-        for (int i = 0; i < n; i++) {
-            res[i] = new Result();
-        }
-        return res;
-    }
-
-    private void executeActors(Actor[] actors, Result[] result) {
+    //execute test methods and save results in Result array
+    private Result[] executeActors(Actor[] actors) {
+        Result[] result = generateEmptyResults(actors.length);
         for (int i = 0; i < actors.length; i++) {
             Method m = actors[i].method;
             try {
@@ -111,17 +124,12 @@ public class Checker {
                 result[i].setException((Exception) e.getCause());
             }
         }
-    }
-
-    private Result[] executeActors(Actor[] actors) {
-        Result[] result = generateEmptyResults(actors.length);
-        executeActors(actors, result);
         return result;
     }
 
+    //return all possible results of linear execution test methods
     private Result[][] executeLinear(Actor[][] actorsConf, int countActors) throws InvocationTargetException, IllegalAccessException {
         Actor[][] perms = genPermutations(actorsConf, countActors);
-
         if (fullOutput) {
             // print all possible executions
             for (Actor[] perm : perms) {
@@ -133,23 +141,16 @@ public class Checker {
         Result[][] results = new Result[perms.length][];
         for (int i = 0; i < perms.length; i++) {
             Actor[] actors = perms[i];
-
             reloadTestObject();
-
-
             Result[] resultUnordered = executeActors(actors);
-
-
             Result[] result = new Result[resultUnordered.length];
             for (int j = 0; j < actors.length; j++) {
                 result[actors[j].ind] = resultUnordered[j];
             }
-
             results[i] = result;
         }
 
         List<Result[]> uniqueResults = new ArrayList<>();
-
         for (Result[] result : results) {
             boolean exists = false;
             for (Result[] uniqueResult : uniqueResults) {
@@ -166,11 +167,6 @@ public class Checker {
         return uniqueResults.toArray(new Result[uniqueResults.size()][]);
     }
 
-
-    private Object testObject;
-    private List<Method> methodsActor;
-    private Method methodReload;
-
     private void reloadTestObject() throws InvocationTargetException, IllegalAccessException {
         methodReload.invoke(testObject);
     }
@@ -184,22 +180,15 @@ public class Checker {
                 break;
         }
         ctor.setAccessible(true);
-        //Object[] x = ((Param)i).generatorParameters();
         return (ParameterGenerator) ctor.newInstance(param.generatorParameters());
     }
 
-    /**
-     * use Class clz and methodsActor
-     *
-     * @param clz, methodActors
-     * @return return Method-Argument map
-     */
+    //Generate ParameterGenerators for all test methods
     private ParameterGenerator[][] getGeneratorsMap(Class clz)
             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException {
         Map<String, ParameterGenerator> ParameterNameGeneratorMap = new HashMap<>();
         ParameterGenerator[][] generators = new ParameterGenerator[methodsActor.size()][];
         Annotation[] params = clz.getAnnotationsByType(Param.class);
-
         for (Annotation i : params) {
             ParameterNameGeneratorMap.put(((Param) i).name(), getGenerator((Param) i));
         }
@@ -227,9 +216,8 @@ public class Checker {
         return generators;
     }
 
-    long startTime;
-
     public boolean checkAnnotated(Object test) throws Exception {
+        startTime = System.currentTimeMillis();
         this.testObject = test;
         Class clz = test.getClass();
         Annotation[] ctests = clz.getAnnotationsByType(CTest.class);
@@ -285,15 +273,12 @@ public class Checker {
         return true;
     }
 
-    MultithreadedExecutionClass[] multithreadedExecutionClasses;
-    Object[][][] argumentMatrix;
-
     private boolean checkImpl(CheckerConfiguration conf) throws Exception {
         long sumTime = 0;
         double sumDisp = 0;
 
 
-        COUNT_ITER = conf.getNumIterations();
+        int COUNT_ITER = conf.getNumIterations();
         COUNT_THREADS = conf.getNumThreads();
 
         ExecutorService pool = Executors.newFixedThreadPool(COUNT_THREADS);
@@ -322,10 +307,8 @@ public class Checker {
             }
 
             // generate classes
-            //String testClassName = testObject.getClass().getCanonicalName();
-            //testClassName = testClassName.replace(".", "/");
-            multithreadedExecutionClasses = new MultithreadedExecutionClass[COUNT_THREADS];
-            argumentMatrix = new Object[COUNT_THREADS][][];
+            MultithreadedExecutionClass[] multithreadedExecutionClasses = new MultithreadedExecutionClass[COUNT_THREADS];
+            Object[][][] argumentMatrix = new Object[COUNT_THREADS][][];
             for (int i = 0; i < actors.length; i++) {
                 Actor[] actor = actors[i];
 
@@ -349,7 +332,6 @@ public class Checker {
                 argumentMatrix[i] = argForThread;
             }
 
-
             Result[][] linearResults = executeLinear(actors, countActors);
             if (fullOutput) {
                 // print linear results
@@ -359,7 +341,6 @@ public class Checker {
                 }
                 System.out.println();
             }
-
 
             if (fullOutput) {
                 System.out.println("Progress:");
@@ -382,13 +363,7 @@ public class Checker {
                 final Object[][] threadArgs = argumentMatrix[i];
                 final MultithreadedExecutionClass classGen = multithreadedExecutionClasses[i];
                 final int[] localWaits = waits[i];
-                runnables[i] = new Runnable() {
-                    @Override
-                    public void run() {
-                        classGen.process(threadResult, threadArgs, localWaits);
-                        //phaser.arrive();
-                    }
-                };
+                runnables[i] = () -> classGen.process(threadResult, threadArgs, localWaits);
             }
 
             Result[] resultOrdered = new Result[countActors];
@@ -399,7 +374,6 @@ public class Checker {
                 }
 
                 reloadTestObject();
-
 
                 if (threads_num > 50_000) {
                     for (int i = 0; i < COUNT_THREADS; i++) {
@@ -423,7 +397,6 @@ public class Checker {
                         resultOrdered[actors[i][j].ind] = results[i][j];
                     }
                 }
-
 
                 boolean correct = false;
                 for (int i = 0; i < linearResults.length; i++) {
@@ -495,7 +468,6 @@ public class Checker {
         }
         pool.shutdown();
 
-
         long timeDelta = System.currentTimeMillis() - startTime;
 
         errorIter++;
@@ -517,16 +489,9 @@ public class Checker {
             StatData.addTime(-1);
         }
 
-
         System.out.println("finish");
         System.out.println("sumTime = " + sumTime);
         System.out.println("sumDisp = " + sumDisp);
         return !errorFound;
-    }
-
-    public static void busyWait(int nanos) {
-        if (nanos == 0) return;
-
-        for (long start = System.nanoTime(); start + nanos >= System.nanoTime(); ){}
     }
 }

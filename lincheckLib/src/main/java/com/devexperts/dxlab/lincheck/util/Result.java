@@ -20,12 +20,16 @@ package com.devexperts.dxlab.lincheck.util;
 
 import sun.misc.Contended;
 
+enum ResultType {
+    VALUE, VOID, EXCEPTION, TIMEOUT, UNDEFINED
+}
+
 @Contended
 public class Result {
-    public ResultType resType;
-    Object value;
-    Class exceptionClass;
-    String exceptionName;
+    private ResultType resType;
+    private Object value;
+    private Class exceptionClass;
+    private String exceptionName;
 
     public Result() {
         resType = ResultType.UNDEFINED;
@@ -65,18 +69,6 @@ public class Result {
         }
         if (value == null) return "-1";
         return value.toString();
-
-//        if (resType == ResultType.EXCEPTION) {
-//            return "{" +
-//                    resType + " : " +
-//                    exceptionClass.getSimpleName() +
-//                    (exceptionName == null ? "" : "(" + exceptionName + ")") +
-//                    "}";
-//        }
-//        if (resType == ResultType.VOID) {
-//            return "{ VOID }";
-//        }
-//        return "{" + resType + " : " + value + "}";
     }
 
     @Override
@@ -100,7 +92,6 @@ public class Result {
             return true;
         }
 
-
         if (resType == ResultType.VALUE) {
             return (value == null ? result.value == null : value.equals(result.value));
         }
@@ -119,8 +110,4 @@ public class Result {
         result = 31 * result + (exceptionClass != null ? exceptionClass.hashCode() : 0);
         return result;
     }
-}
-
-enum ResultType {
-    VALUE, VOID, EXCEPTION, TIMEOUT, UNDEFINED
 }

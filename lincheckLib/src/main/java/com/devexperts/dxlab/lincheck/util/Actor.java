@@ -24,6 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Method with arguments
+ */
 public class Actor {
     public int ind;
     public Method method;

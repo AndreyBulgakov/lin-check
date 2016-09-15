@@ -24,6 +24,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
 
+/**
+ * Generator for {@link Actor}
+ */
 public class ActorGenerator implements Cloneable {
     private int methodId;
     private Method method;
