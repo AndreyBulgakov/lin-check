@@ -21,9 +21,9 @@ package com.devexperts.dxlab.lincheck.tests.custom.queue;
 import com.devexperts.dxlab.lincheck.Checker;
 import com.devexperts.dxlab.lincheck.annotations.*;
 import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
+import org.junit.Test;
 import tests.custom.queue.Queue;
 import tests.custom.queue.QueueSynchronized;
-import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
