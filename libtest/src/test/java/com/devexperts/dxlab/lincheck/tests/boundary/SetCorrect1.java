@@ -24,7 +24,6 @@ import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.Param;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
 import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
-import com.devexperts.dxlab.lincheck.util.BusyWait;
 import org.cliffc.high_scale_lib.NonBlockingHashSet;
 import org.junit.Test;
 
