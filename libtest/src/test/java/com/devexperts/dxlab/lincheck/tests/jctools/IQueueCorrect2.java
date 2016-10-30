@@ -30,8 +30,8 @@ import java.util.Queue;
 
 import static org.junit.Assert.assertTrue;
 
-//@CTest(iter = 300, actorsPerThread = {"1:3", "1:3"})
-@CTest(iter = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
+//@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3"})
+@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
 public class IQueueCorrect2 {
     public Queue<Integer> q;
 

@@ -29,8 +29,8 @@ import java.util.Map;
 import static org.junit.Assert.assertTrue;
 
 
-//@CTest(iter = 300, actorsPerThread = {"1:3", "1:3"})
-@CTest(iter = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
+//@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3"})
+@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
 @Param(name = "key", generator = IntegerParameterGenerator.class)
 @Param(name = "value", generator = IntegerParameterGenerator.class)
 public class MapCorrect1 {

@@ -26,8 +26,8 @@ import org.junit.Test;
 
 import static junit.framework.TestCase.assertTrue;
 
-@CTest(iter = 300, actorsPerThread = {"1:3", "1:3"})
-@CTest(iter = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
+@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3"})
+@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
 public class CounterTest1 {
     public Counter counter;
 

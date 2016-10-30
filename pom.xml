@@ -23,12 +23,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.devexperts.lincheck</groupId>
-    <artifactId>lincheck</artifactId>
+    <artifactId>all</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <modules>
         <module>libtest</module>
-        <module>lincheckLib</module>
+        <module>core</module>
     </modules>
 
 
@@ -49,7 +49,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <skipTests>true</skipTests>
+                    <!--<skipTests>true</skipTests>-->
                 </configuration>
             </plugin>
         </plugins>

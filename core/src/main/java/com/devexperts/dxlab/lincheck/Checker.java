@@ -253,7 +253,7 @@ public class Checker {
 
                 CheckerConfiguration conf = new CheckerConfiguration();
 
-                conf.setNumIterations(ctest.iter());
+                conf.setNumIterations(ctest.iterations());
                 conf.addThreads(ctest.actorsPerThread());
                 for (ActorGenerator i : gens) {
                     conf.addActorGenerator(i);
@@ -288,7 +288,7 @@ public class Checker {
         int errorIter = -1;
         int errorConcurIter = -1;
         for (int iter = 0; iter < COUNT_ITER; iter++) {
-            System.out.println("iter = " + iter);
+            System.out.println("iterations = " + iter);
 
             CheckerConfiguration cloneConf = conf.clone();
             Actor[][] actors = cloneConf.generateActors(true);

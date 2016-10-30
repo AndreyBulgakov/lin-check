@@ -29,8 +29,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import static org.junit.Assert.assertTrue;
 
 
-@CTest(iter = 300, actorsPerThread = {"1:3", "1:3"})
-@CTest(iter = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
+@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3"})
+@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
 public class BlockingQueueTest4 {
     public Queue<Integer> q;
 

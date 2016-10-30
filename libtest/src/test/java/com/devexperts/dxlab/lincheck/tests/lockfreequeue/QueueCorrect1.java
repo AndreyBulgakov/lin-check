@@ -31,8 +31,8 @@ import static org.junit.Assert.assertTrue;
  * https://github.com/yaitskov/lock-free-queue
  */
 
-//@CTest(iter = 300, actorsPerThread = {"1:3", "1:3"})
-@CTest(iter = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
+//@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3"})
+@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
 public class QueueCorrect1 {
     public LockFreeQueue<Integer> q;
 

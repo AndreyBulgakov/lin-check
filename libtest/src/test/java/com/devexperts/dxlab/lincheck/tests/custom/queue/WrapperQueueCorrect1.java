@@ -27,8 +27,8 @@ import tests.custom.queue.QueueSynchronized;
 
 import static org.junit.Assert.assertTrue;
 
-@CTest(iter = 300, actorsPerThread = {"1:5", "1:5", "1:5"})
-@CTest(iter = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
+@CTest(iterations = 300, actorsPerThread = {"1:5", "1:5", "1:5"})
+@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
 public class WrapperQueueCorrect1 {
     public Queue queue;
 

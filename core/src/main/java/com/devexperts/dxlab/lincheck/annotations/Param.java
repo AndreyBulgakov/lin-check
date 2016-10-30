@@ -18,6 +18,7 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 @Repeatable(Param.Params.class)
 public @interface Param {
+
     Class generator() default Void.class;
 
     String name() default "";

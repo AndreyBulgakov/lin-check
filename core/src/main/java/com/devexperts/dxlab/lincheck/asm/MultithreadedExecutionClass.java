@@ -20,7 +20,6 @@ package com.devexperts.dxlab.lincheck.asm;
 
 import com.devexperts.dxlab.lincheck.util.Result;
 
-
 public interface MultithreadedExecutionClass {
     void process(Result[] res, Object[][] args, int[] waits);
 }
