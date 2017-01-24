@@ -18,7 +18,7 @@
 
 package com.devexperts.dxlab.lincheck.tests.boundary;
 
-import com.devexperts.dxlab.lincheck.Checker;
+import com.devexperts.dxlab.lincheck.LinChecker;
 import com.devexperts.dxlab.lincheck.annotations.CTest;
 import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.Param;
@@ -31,13 +31,12 @@ import java.util.Map;
 
 import static org.junit.Assert.assertTrue;
 
-
 @CTest(iterations = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
 @Param(name = "key", generator = IntegerParameterGenerator.class)
 @Param(name = "value", generator = IntegerParameterGenerator.class)
 public class MapLongCorrect1 {
-    public Map<Long, Integer> q;
+    private Map<Long, Integer> q;
 
     @Reset
     public void reload() {
@@ -45,23 +44,23 @@ public class MapLongCorrect1 {
     }
 
     @Operation(params = {"key","value"})
-    public Integer put(Integer key, Integer value) throws Exception {
+    public Integer put(Integer key, Integer value) {
         Long k = key.longValue();
         return q.put(k, value);
     }
 
     @Operation
-    public Integer get(@Param(name = "key") Integer key) throws Exception {
+    public Integer get(@Param(name = "key") Integer key) {
         return q.get(key);
     }
 
     @Operation()
-    public int size() throws Exception {
+    public int size() {
         return q.size();
     }
 
     @Test
-    public void test() throws Exception {
-        assertTrue(Checker.check(new MapLongCorrect1()));
+    public void test() {
+        LinChecker.check(new MapLongCorrect1());
     }
 }

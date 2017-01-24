@@ -18,7 +18,7 @@
 
 package com.devexperts.dxlab.lincheck.tests.zchannel;
 
-import com.devexperts.dxlab.lincheck.Checker;
+import com.devexperts.dxlab.lincheck.LinChecker;
 import com.devexperts.dxlab.lincheck.annotations.CTest;
 import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.Param;
@@ -27,36 +27,31 @@ import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
 import org.junit.Test;
 import z.channel.GenericMPMCQueue;
 
-import static org.junit.Assert.assertTrue;
-
-
 /**
  * http://landz.github.io/
  */
-
-//@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3"})
+@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
 public class QueueCorrect2 {
     public GenericMPMCQueue<Integer> q;
 
     @Reset
     public void reload() {
-        q = new GenericMPMCQueue(16);
+        q = new GenericMPMCQueue<>(16);
     }
 
     @Operation
-    public boolean offer(@Param(generator = IntegerParameterGenerator.class) int value) throws Exception {
+    public boolean offer(@Param(generator = IntegerParameterGenerator.class) int value) {
         return q.offer(value);
     }
 
-    @Operation
-    public int poll() throws Exception {
+    @Operation()
+    public int poll() {
         return q.poll();
     }
 
     @Test
     public void test() throws Exception {
-        assertTrue(Checker.check(new QueueCorrect2()));
-        // TODO failed test
+        LinChecker.check(this);
     }
 }

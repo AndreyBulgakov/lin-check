@@ -18,7 +18,7 @@
 
 package com.devexperts.dxlab.lincheck.tests.guava;
 
-import com.devexperts.dxlab.lincheck.Checker;
+import com.devexperts.dxlab.lincheck.LinChecker;
 import com.devexperts.dxlab.lincheck.annotations.CTest;
 import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.Param;
@@ -32,12 +32,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.Assert.assertTrue;
 
-
 @CTest(iterations = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
 @Param(name = "count", generator = IntegerParameterGenerator.class)
 public class SetCorrect1 {
-    public Set<Integer> q;
+    private Set<Integer> q;
 
     @Reset
     public void reload() {
@@ -45,17 +44,17 @@ public class SetCorrect1 {
     }
 
     @Operation(params = {"count"})
-    public boolean add(Integer params) throws Exception {
+    public boolean add(Integer params) {
         return q.add(params);
     }
 
     @Operation(params = {"count"})
-    public boolean remove(Integer params) throws Exception {
+    public boolean remove(Integer params) {
         return q.remove(params);
     }
 
     @Test
     public void test() throws Exception {
-        assertTrue(Checker.check(new SetCorrect1()));
+        LinChecker.check(this);
     }
 }

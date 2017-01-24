@@ -18,29 +18,25 @@
 
 package com.devexperts.dxlab.lincheck.annotations;
 
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-/**
- * This annotation shows number of iteration, number of threads and number of methods in thread
- * <ul>
- *     <li><b>iterations</b> - number of iteration</li>
- *     <li><b>actorsPerThread</b> - number of elements in brackets shows number of threads</li>
- *     <li><b>actorsPerThread </b> - value in quotes shows range of the number of methods in threads</li>
- * </ul>
- */
 @Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
 @Repeatable(CTest.CTests.class)
 public @interface CTest {
     int iterations();
-
     String[] actorsPerThread();
+    int invocationsPerIteration() default 10_000;
 
     /**
      * Holder annotation for {@link CTest}.
      */
     @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.TYPE)
     @interface CTests {
         CTest[] value();
     }

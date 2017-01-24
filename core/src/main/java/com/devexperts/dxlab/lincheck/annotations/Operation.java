@@ -18,14 +18,17 @@
 
 package com.devexperts.dxlab.lincheck.annotations;
 
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * Annotation for test method
  * Params binds the arguments of the method with the values declared in {@link Param}
  */
 @Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
 public @interface Operation {
     String[] params() default {};
 }

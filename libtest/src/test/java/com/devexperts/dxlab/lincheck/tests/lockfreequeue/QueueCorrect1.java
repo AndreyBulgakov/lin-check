@@ -18,7 +18,7 @@
 
 package com.devexperts.dxlab.lincheck.tests.lockfreequeue;
 
-import com.devexperts.dxlab.lincheck.Checker;
+import com.devexperts.dxlab.lincheck.LinChecker;
 import com.devexperts.dxlab.lincheck.annotations.*;
 import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
 import com.github.lock.free.queue.LockFreeQueue;
@@ -26,12 +26,10 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
-
 /**
  * https://github.com/yaitskov/lock-free-queue
  */
-
-//@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3"})
+@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
 public class QueueCorrect1 {
     public LockFreeQueue<Integer> q;
@@ -42,19 +40,17 @@ public class QueueCorrect1 {
     }
 
     @Operation
-    public void add(@Param(generator = IntegerParameterGenerator.class) int value) throws Exception {
+    public void add(@Param(generator = IntegerParameterGenerator.class) int value) {
         q.add(value);
     }
 
     @Operation
-    public Object takeOrNull() throws Exception {
+    public Object takeOrNull() {
         return q.takeOrNull();
     }
 
     @Test
-    public void test() throws Exception {
-        assertTrue(Checker.check(new QueueCorrect1()));
-        // TODO failed test
-
+    public void test() {
+        LinChecker.check(this);
     }
 }

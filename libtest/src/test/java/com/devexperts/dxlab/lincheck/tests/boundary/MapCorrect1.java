@@ -18,7 +18,7 @@
 
 package com.devexperts.dxlab.lincheck.tests.boundary;
 
-import com.devexperts.dxlab.lincheck.Checker;
+import com.devexperts.dxlab.lincheck.LinChecker;
 import com.devexperts.dxlab.lincheck.annotations.*;
 import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
@@ -28,13 +28,12 @@ import java.util.Map;
 
 import static org.junit.Assert.assertTrue;
 
-
 @CTest(iterations = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
 @Param(name = "key", generator = IntegerParameterGenerator.class)
 @Param(name = "value", generator = IntegerParameterGenerator.class)
 public class MapCorrect1 {
-    public Map<Integer, Integer> q;
+    private Map<Integer, Integer> q;
 
     @Reset
     public void reload() {
@@ -42,23 +41,22 @@ public class MapCorrect1 {
     }
 
     @Operation(params = {"key","value"})
-    public int put(Integer key, Integer value) throws Exception {
+    public int put(Integer key, Integer value) {
         return q.put(key, value);
     }
 
     @Operation
-    public int get(@Param(name = "key") Integer key) throws Exception {
+    public int get(@Param(name = "key") Integer key) {
         return q.get(key);
     }
 
     @Operation()
-    public int size() throws Exception {
+    public int size() {
         return q.size();
     }
 
     @Test
-    public void test() throws Exception {
-        assertTrue(Checker.check(new MapCorrect1()));
-        // TODO failed test
+    public void test() {
+        LinChecker.check(new MapCorrect1());
     }
 }

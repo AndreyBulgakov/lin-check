@@ -1,40 +1,49 @@
 package com.devexperts.dxlab.lincheck.generators;
 
-import com.devexperts.dxlab.lincheck.Checker;
+import com.devexperts.dxlab.lincheck.ParameterGenerator;
 
-/**
- * Float numbers generator
- * Constructor parameters
- * <ul>
- *     <li><b>begin</b> default value = -100</li>
- *     <li><b>end</b> default value = 100</li>
- *     <li><b>step</b> default value = 0.1</li>
- * </ul>
- */
-public class FloatParameterGenerator implements ParameterGenerator {
-    private float begin = -100;
-    private float end = 100;
-    private float step = 0.1F;
+import java.util.Random;
 
-    public FloatParameterGenerator(String begin, String end, String step) {
-        this.begin = Float.parseFloat(begin);
-        this.end = Float.parseFloat(end);
-        this.step = Float.parseFloat(step);
-    }
+public class FloatParameterGenerator implements ParameterGenerator<Float> {
+    private static final float DEFAULT_BEGIN = -10;
+    private static final float DEFAULT_END = 10;
+    private static final float DEFAULT_STEP = 0.1f;
 
-    public FloatParameterGenerator(String begin, String end) {
-        this.begin = Float.parseFloat(begin);
-        this.end = Float.parseFloat(end);
-    }
+    private final Random random = new Random();
+    private final float begin;
+    private final float end;
+    private final float step;
 
-    public FloatParameterGenerator(String begin) {
-        this.begin = Float.parseFloat(begin);
-    }
-
-    public FloatParameterGenerator() {
+    public FloatParameterGenerator(String configuration) {
+        if (configuration.isEmpty()) { // use default configuration
+            begin = DEFAULT_BEGIN;
+            end = DEFAULT_END;
+            step = DEFAULT_STEP;
+            return;
+        }
+        String[] args = configuration.replaceAll("\\s", "").split(":");
+        switch (args.length) {
+        case 2: // begin:end
+            begin = Float.parseFloat(args[0]);
+            end = Float.parseFloat(args[1]);
+            step = DEFAULT_STEP;
+            break;
+        case 3: // begin:step:end
+            begin = Float.parseFloat(args[0]);
+            step = Float.parseFloat(args[1]);
+            end = Float.parseFloat(args[2]);
+            break;
+        default:
+            throw new IllegalArgumentException("Configuration should have two (begin and end) " +
+                "or three (begin, step and end) arguments  separated by comma");
+        }
     }
 
     public Float generate() {
-        return begin + Checker.r.nextInt((int) (end - begin)) + step * (int) (Checker.r.nextFloat() / step);
+        float delta = end - begin;
+        if (step == 0) // step is not defined
+            return begin + delta * random.nextFloat();
+        int maxSteps = (int) (delta / step);
+        return begin + delta * random.nextInt(maxSteps + 1);
     }
 }

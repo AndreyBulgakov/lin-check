@@ -16,43 +16,31 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.devexperts.dxlab.lincheck.util;
+package com.devexperts.dxlab.lincheck;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Method with arguments
+ * The instances of this class are used to generate {@link Actor actors}
+ * using {@link ParameterGenerator parameter generators}.
  */
-public class Actor {
-    public int ind;
-    public Method method;
-    public Object[] args;
-    public String methodName;
-    public boolean isMutable;
+class ActorGenerator {
+    private final Method method;
+    private final List<ParameterGenerator<?>> parameterGenerators;
+    private final List<Class<? extends Throwable>> handledExceptions;
 
-
-    public Actor(int ind, Method method, boolean isMutable) {
-        this.ind = ind;
+    ActorGenerator(Method method, List<ParameterGenerator<?>> parameterGenerators,
+        List<Class<? extends Throwable>> handledExceptions)
+    {
         this.method = method;
-        this.isMutable = isMutable;
+        this.parameterGenerators = parameterGenerators;
+        this.handledExceptions = handledExceptions;
     }
 
-    public Actor(int ind, Method method, boolean isMutable, Object... args) {
-        this.ind = ind;
-        this.method = method;
-        this.isMutable = isMutable;
-        this.args = args;
-    }
-
-    @Override
-    public String toString() {
-        return ind +
-                "_" + methodName +
-                "(" + Arrays.stream(args).map(i -> i.toString()).collect(Collectors.joining(", "))+
-                ")";
+    Actor generate() {
+        return new Actor(method, parameterGenerators.stream()
+            .map(ParameterGenerator::generate).collect(Collectors.toList()), handledExceptions);
     }
 }

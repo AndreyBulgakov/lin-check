@@ -18,53 +18,52 @@
 
 package com.devexperts.dxlab.lincheck.tests.juc.blocking_queue;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-
-import com.devexperts.dxlab.lincheck.Checker;
-import com.devexperts.dxlab.lincheck.annotations.*;
+import com.devexperts.dxlab.lincheck.LinChecker;
+import com.devexperts.dxlab.lincheck.annotations.CTest;
+import com.devexperts.dxlab.lincheck.annotations.Operation;
+import com.devexperts.dxlab.lincheck.annotations.Param;
+import com.devexperts.dxlab.lincheck.annotations.ReadOnly;
+import com.devexperts.dxlab.lincheck.annotations.Reset;
 import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
 import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
-
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 @CTest(iterations = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
 public class BlockingQueueTest1 {
-    public BlockingQueue<Integer> q;
+    private BlockingQueue<Integer> q;
 
     @Reset
     public void reload() {
-        q = new ArrayBlockingQueue<Integer>(10);
+        q = new ArrayBlockingQueue<>(10);
     }
 
     @Operation
-    public boolean add(@Param(generator = IntegerParameterGenerator.class)Integer value) throws Exception {
-
+    public boolean add(@Param(generator = IntegerParameterGenerator.class) Integer value) {
         return q.add(value);
     }
 
     @ReadOnly
     @Operation
-    public int element()  throws Exception  {
+    public int element() {
         return q.element();
     }
 
     @Operation
-    public int remove() throws Exception {
+    public int remove() {
         return q.remove();
     }
 
     @Operation
-    public int poll() throws Exception {
+    public int poll() {
         return q.poll();
     }
 
-
     @Test
-    public void test() throws Exception {
-        assertTrue(Checker.check(new BlockingQueueTest1()));
+    public void test() {
+        LinChecker.check(this);
     }
 }
 

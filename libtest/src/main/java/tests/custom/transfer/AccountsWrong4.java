@@ -21,11 +21,11 @@ package tests.custom.transfer;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AccountsWrong5 implements Accounts {
+public class AccountsWrong4 implements Accounts {
 
     Map<Integer, Integer> data;
 
-    public AccountsWrong5() {
+    public AccountsWrong4() {
         data = new HashMap<>();
     }
 

@@ -18,26 +18,50 @@
 
 package com.devexperts.dxlab.lincheck.tests.custom.transfer;
 
-import com.devexperts.dxlab.lincheck.Checker;
-import com.devexperts.dxlab.lincheck.annotations.*;
+import com.devexperts.dxlab.lincheck.LinChecker;
+import com.devexperts.dxlab.lincheck.annotations.CTest;
+import com.devexperts.dxlab.lincheck.annotations.Operation;
+import com.devexperts.dxlab.lincheck.annotations.Param;
 import com.devexperts.dxlab.lincheck.annotations.ReadOnly;
+import com.devexperts.dxlab.lincheck.annotations.Reset;
 import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
-import tests.custom.transfer.Accounts;
-import tests.custom.transfer.AccountsWrong3;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import tests.custom.transfer.Accounts;
+import tests.custom.transfer.AccountsWrong1;
+import tests.custom.transfer.AccountsWrong2;
+import tests.custom.transfer.AccountsWrong3;
+import tests.custom.transfer.AccountsWrong4;
 
-import static org.junit.Assert.assertFalse;
+import java.util.Arrays;
+import java.util.List;
 
-@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3"})
-@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
+@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:2"})
 @Param(name = "id", generator = IntegerParameterGenerator.class)
 @Param(name = "amount", generator = IntegerParameterGenerator.class)
-public class AccountsTest4 {
-    public Accounts acc;
+@RunWith(Parameterized.class)
+public class AccountsTest {
+    private final Class<? extends Accounts> accountsClass;
+    private Accounts acc;
+
+    @Parameterized.Parameters
+    public static List<Object[]> params() {
+        return Arrays.asList(
+            new Object[] {AccountsWrong1.class},
+            new Object[] {AccountsWrong2.class},
+            new Object[] {AccountsWrong3.class},
+            new Object[] {AccountsWrong4.class}
+        );
+    }
+
+    public AccountsTest(Class<? extends Accounts> accountsClass) {
+        this.accountsClass = accountsClass;
+    }
 
     @Reset
-    public void reload() {
-        acc = new AccountsWrong3();
+    public void reload() throws Exception {
+        acc = accountsClass.newInstance();
     }
 
     @ReadOnly
@@ -52,13 +76,12 @@ public class AccountsTest4 {
     }
 
     @Operation
-    public void transfer(@Param(name = "id") int from, @Param(generator = IntegerParameterGenerator.class) int to, @Param(generator = IntegerParameterGenerator.class) int amount) {
+    public void transfer(@Param(name = "id") int from, @Param(name = "id") int to, @Param(name = "amount") int amount) {
         acc.transfer(from, to, amount);
     }
 
-
-    @Test
+    @Test(expected = AssertionError.class)
     public void test() throws Exception {
-        assertFalse(Checker.check(new AccountsTest4()));
+        LinChecker.check(this);
     }
 }

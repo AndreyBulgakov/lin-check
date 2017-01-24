@@ -18,43 +18,44 @@
 
 package com.devexperts.dxlab.lincheck.tests.romix;
 
-import java.util.Map;
-
-import com.devexperts.dxlab.lincheck.Checker;
-import com.devexperts.dxlab.lincheck.annotations.*;
+import com.devexperts.dxlab.lincheck.LinChecker;
+import com.devexperts.dxlab.lincheck.annotations.CTest;
+import com.devexperts.dxlab.lincheck.annotations.Operation;
+import com.devexperts.dxlab.lincheck.annotations.Param;
+import com.devexperts.dxlab.lincheck.annotations.ReadOnly;
+import com.devexperts.dxlab.lincheck.annotations.Reset;
 import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
-import romix.scala.collection.concurrent.TrieMap;
 import org.junit.Test;
+import romix.scala.collection.concurrent.TrieMap;
 
-import static junit.framework.TestCase.assertTrue;
-
+import java.util.Map;
 
 @CTest(iterations = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
 @Param(name = "key", generator = IntegerParameterGenerator.class)
 @Param(name = "value", generator = IntegerParameterGenerator.class)
 public class TrieCorrect1 {
-    public Map<Integer, Integer> m;
+    private Map<Integer, Integer> m;
 
     @Reset
     public void reload() {
         m = new TrieMap<>();
     }
 
-    @Operation(params = {"key","value"})
-    public int put(int key, int value) throws Exception {
+    @Operation(params = {"key", "value"})
+    public int put(int key, int value) {
         return m.put(key, value);
     }
 
     @ReadOnly
     @Operation(params = {"key"})
-    public int get(int key) throws Exception {
+    public int get(int key) {
         return m.get(key);
     }
 
     @Test
-    public void test() throws Exception {
-        assertTrue(Checker.check(new TrieCorrect1()));
+    public void test() {
+        LinChecker.check(this);
     }
 }
 

@@ -23,8 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * It marks the method ReadOnly
- * Test case can not only consist of ReadOnly methods
+ * Test case should have at least one non read-only operation
  */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ReadOnly {
-}
+public @interface ReadOnly {}

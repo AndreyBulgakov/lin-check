@@ -18,43 +18,42 @@
 
 package com.devexperts.dxlab.lincheck.tests.juc.hash_map;
 
-import com.devexperts.dxlab.lincheck.Checker;
-import com.devexperts.dxlab.lincheck.annotations.*;
+import com.devexperts.dxlab.lincheck.LinChecker;
+import com.devexperts.dxlab.lincheck.annotations.CTest;
+import com.devexperts.dxlab.lincheck.annotations.Operation;
+import com.devexperts.dxlab.lincheck.annotations.Param;
+import com.devexperts.dxlab.lincheck.annotations.Reset;
 import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
 import org.junit.Test;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertFalse;
-
-
 @CTest(iterations = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
 @Param(name = "key", generator = IntegerParameterGenerator.class)
 @Param(name = "value", generator = IntegerParameterGenerator.class)
 public class ConcurrentHashMapTest {
-    public Map<Integer, Integer> m;
+    private Map<Integer, Integer> m;
 
     @Reset
     public void reload() {
         m = new ConcurrentHashMap<>();
     }
 
-    @Operation(params = {"key","value"})
-    public int put(Integer key, Integer value) throws Exception {
+    @Operation(params = {"key", "value"})
+    public int put(Integer key, Integer value) {
         return m.put(key, value);
     }
 
     @Operation
-    public int get(@Param(name = "key") Integer key) throws Exception {
+    public int get(@Param(name = "key") Integer key) {
         return m.get(key);
     }
 
     @Test
     public void test() throws Exception {
-        assertTrue(Checker.check(new ConcurrentHashMapTest()));
+        LinChecker.check(this);
     }
 }
 

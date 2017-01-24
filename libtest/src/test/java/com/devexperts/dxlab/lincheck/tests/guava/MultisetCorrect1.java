@@ -18,15 +18,14 @@
 
 package com.devexperts.dxlab.lincheck.tests.guava;
 
-import com.devexperts.dxlab.lincheck.Checker;
-import com.devexperts.dxlab.lincheck.annotations.*;
+import com.devexperts.dxlab.lincheck.LinChecker;
+import com.devexperts.dxlab.lincheck.annotations.CTest;
+import com.devexperts.dxlab.lincheck.annotations.Operation;
+import com.devexperts.dxlab.lincheck.annotations.Param;
+import com.devexperts.dxlab.lincheck.annotations.Reset;
 import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
 import com.google.common.collect.ConcurrentHashMultiset;
 import org.junit.Test;
-
-import static org.junit.Assert.assertTrue;
-
-
 
 @CTest(iterations = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
@@ -41,17 +40,17 @@ public class MultisetCorrect1 {
     }
 
     @Operation(params = {"value", "count"})
-    public int add(int value, int count) throws Exception {
+    public int add(int value, int count) {
         return q.add(value, count);
     }
 
     @Operation(params = {"value", "count"})
-    public int remove(int value, int count) throws Exception {
+    public int remove(int value, int count) {
         return q.remove(value, count);
     }
 
     @Test
     public void test() throws Exception {
-        assertTrue(Checker.check(new MultisetCorrect1()));
+        LinChecker.check(this);
     }
 }

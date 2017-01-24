@@ -18,7 +18,7 @@
 
 package com.devexperts.dxlab.lincheck.tests.boundary;
 
-import com.devexperts.dxlab.lincheck.Checker;
+import com.devexperts.dxlab.lincheck.LinChecker;
 import com.devexperts.dxlab.lincheck.annotations.*;
 import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
 import org.cliffc.high_scale_lib.NonBlockingSetInt;
@@ -28,12 +28,10 @@ import java.util.Set;
 
 import static org.junit.Assert.assertTrue;
 
-
-@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
-@Param(name = "key", generator = IntegerParameterGenerator.class)
+@Param(name = "key", generator = IntegerParameterGenerator.class, generatorConfiguration = "1:10")
 public class BitVectorCorrect1 {
-    public Set<Integer> q;
+    private Set<Integer> q;
 
     @Reset
     public void reload() {
@@ -41,23 +39,17 @@ public class BitVectorCorrect1 {
     }
 
     @Operation(params = {"key"})
-    public boolean add(int key) throws Exception {
+    public boolean add(int key) {
         return q.add(key);
     }
 
     @Operation
-    public boolean remove(@Param(name = "key") int key) throws Exception {
+    public boolean remove(@Param(name = "key") int key) {
         return q.remove(key);
     }
 
-    @Operation
-    public int size() throws Exception {
-        return q.size();
-    }
-
     @Test
-    public void test() throws Exception {
-        assertTrue(Checker.check(new BitVectorCorrect1()));
-        // TODO failed test
+    public void test() {
+        LinChecker.check(this);
     }
 }

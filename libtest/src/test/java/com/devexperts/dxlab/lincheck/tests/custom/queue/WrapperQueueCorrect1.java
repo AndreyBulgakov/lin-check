@@ -18,36 +18,40 @@
 
 package com.devexperts.dxlab.lincheck.tests.custom.queue;
 
-import com.devexperts.dxlab.lincheck.Checker;
+import com.devexperts.dxlab.lincheck.LinChecker;
 import com.devexperts.dxlab.lincheck.annotations.*;
 import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
 import org.junit.Test;
 import tests.custom.queue.Queue;
+import tests.custom.queue.QueueEmptyException;
+import tests.custom.queue.QueueFullException;
 import tests.custom.queue.QueueSynchronized;
 
 import static org.junit.Assert.assertTrue;
 
 @CTest(iterations = 300, actorsPerThread = {"1:5", "1:5", "1:5"})
-@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
 public class WrapperQueueCorrect1 {
-    public Queue queue;
+    private Queue queue;
 
     @Reset
     public void reload() {
         queue = new QueueSynchronized(10);
     }
+
     @Operation
+    @HandleExceptionAsResult(QueueFullException.class)
     public void put(@Param(generator = IntegerParameterGenerator.class)int args) throws Exception {
         queue.put(args);
     }
+
     @Operation
+    @HandleExceptionAsResult(QueueEmptyException.class)
     public int get() throws Exception {
         return queue.get();
     }
 
     @Test
-    public void test() throws Exception {
-        Checker checker = new Checker();
-        assertTrue(checker.checkAnnotated(new WrapperQueueCorrect1()));
+    public void test() {
+        LinChecker.check(new WrapperQueueCorrect1());
     }
 }

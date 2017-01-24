@@ -1,39 +1,37 @@
 package com.devexperts.dxlab.lincheck.generators;
 
+import com.devexperts.dxlab.lincheck.ParameterGenerator;
 
-import com.devexperts.dxlab.lincheck.Checker;
+import java.util.Random;
 
-/**
- * Float numbers generator
- * Constructor parameters
- * <ul>
- *     <li><b>maxWordLength</b> default value = 100</li>
- *     <li><b>alphabet</b> default value = letters in two registers + numbers</li>
- * </ul>
- */
-public class StringParameterGenerator implements ParameterGenerator {
-    private String[] alphabet = {"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z",
-            "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
-            "1", "2", "3", "4", "5", "6", "7", "8", "9", "0"};
-    private int maxWordLength = 100;
-    public StringParameterGenerator(String maxWordLength, String alphabet) {
-        this.maxWordLength = Integer.parseInt(maxWordLength);
-        this.alphabet = alphabet.split(",");
-    }
+public class StringParameterGenerator implements ParameterGenerator<String> {
+    private static final int DEFAULT_MAX_WORD_LENGTH = 15;
+    private static final String DEFAULT_ALPHABET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_ ";
 
-    public StringParameterGenerator(String maxWordLength) {
-        this.maxWordLength = Integer.parseInt(maxWordLength);
-    }
+    private final Random random = new Random();
+    private final int maxWordLength;
+    private final String alphabet;
 
-    public StringParameterGenerator() {
+    public StringParameterGenerator(String configuration) {
+        if (configuration.isEmpty()) { // use default configuration
+            maxWordLength = DEFAULT_MAX_WORD_LENGTH;
+            alphabet = DEFAULT_ALPHABET;
+            return;
+        }
+        int firstCommaIndex = configuration.indexOf(':');
+        if (firstCommaIndex < 0) { // maxWordLength only
+            maxWordLength = Integer.parseInt(configuration);
+            alphabet = DEFAULT_ALPHABET;
+        } else { // maxWordLength:alphabet
+            maxWordLength = Integer.parseInt(configuration.substring(0, firstCommaIndex));
+            alphabet = configuration.substring(firstCommaIndex + 1);
+        }
     }
 
     public String generate() {
-        int l = Checker.r.nextInt(maxWordLength);
-        StringBuilder stringBuilder = new StringBuilder();
-        for (int j = 0; j < l; j++) {
-            stringBuilder.append(alphabet[Checker.r.nextInt(alphabet.length)]);
-        }
-        return stringBuilder.toString();
+        char[] cs = new char[random.nextInt(maxWordLength)];
+        for (int i = 0; i < cs.length; i++)
+            cs[i] = alphabet.charAt(random.nextInt(alphabet.length()));
+        return new String(cs);
     }
 }

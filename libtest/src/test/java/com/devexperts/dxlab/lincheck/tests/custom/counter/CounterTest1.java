@@ -18,7 +18,7 @@
 
 package com.devexperts.dxlab.lincheck.tests.custom.counter;
 
-import com.devexperts.dxlab.lincheck.Checker;
+import com.devexperts.dxlab.lincheck.LinChecker;
 import com.devexperts.dxlab.lincheck.annotations.*;
 import tests.custom.counter.Counter;
 import tests.custom.counter.CounterCorrect1;
@@ -29,7 +29,7 @@ import static junit.framework.TestCase.assertTrue;
 @CTest(iterations = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
 public class CounterTest1 {
-    public Counter counter;
+    private Counter counter;
 
     @Reset
     public void reload() {
@@ -42,8 +42,7 @@ public class CounterTest1 {
     }
 
     @Test
-    public void test() throws Exception {
-        Checker checker = new Checker();
-        assertTrue(checker.checkAnnotated(new CounterTest1()));
+    public void test() {
+        LinChecker.check(new CounterTest1());
     }
 }

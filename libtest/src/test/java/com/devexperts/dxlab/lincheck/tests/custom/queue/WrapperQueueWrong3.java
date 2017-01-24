@@ -18,10 +18,13 @@
 
 package com.devexperts.dxlab.lincheck.tests.custom.queue;
 
-import com.devexperts.dxlab.lincheck.Checker;
+import com.devexperts.dxlab.lincheck.LinChecker;
 import com.devexperts.dxlab.lincheck.annotations.*;
 import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
 import tests.custom.queue.Queue;
+import tests.custom.queue.QueueEmptyException;
+import tests.custom.queue.QueueFullException;
+import tests.custom.queue.QueueWrong2;
 import tests.custom.queue.QueueWrong3;
 import org.junit.Test;
 
@@ -30,7 +33,7 @@ import static org.junit.Assert.assertFalse;
 @CTest(iterations = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
 public class WrapperQueueWrong3 {
-    public Queue queue;
+    private Queue queue;
 
     @Reset
     public void reload() {
@@ -38,17 +41,19 @@ public class WrapperQueueWrong3 {
     }
 
     @Operation
+    @HandleExceptionAsResult(QueueFullException.class)
     public void put(@Param(generator = IntegerParameterGenerator.class)int args) throws Exception {
         queue.put(args);
     }
 
     @Operation
+    @HandleExceptionAsResult(QueueEmptyException.class)
     public int get() throws Exception {
         return queue.get();
     }
 
-    @Test
+    @Test(expected = AssertionError.class)
     public void test() throws Exception {
-        assertFalse(Checker.check(new WrapperQueueWrong3()));
+        LinChecker.check(new WrapperQueueWrong2());
     }
 }
