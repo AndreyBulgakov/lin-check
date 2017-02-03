@@ -26,7 +26,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
 
-@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
 public class CounterTest4 {
     private Counter counter;

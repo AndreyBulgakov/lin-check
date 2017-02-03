@@ -20,18 +20,19 @@ package com.devexperts.dxlab.lincheck.tests.juc.blocking_queue;
 
 import com.devexperts.dxlab.lincheck.LinChecker;
 import com.devexperts.dxlab.lincheck.annotations.CTest;
+import com.devexperts.dxlab.lincheck.annotations.HandleExceptionAsResult;
 import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.Param;
 import com.devexperts.dxlab.lincheck.annotations.ReadOnly;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
-import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
+import com.devexperts.dxlab.lincheck.generators.IntGen;
 import org.junit.Test;
 
+import java.util.NoSuchElementException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3"})
-@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
+@CTest(iterations = 100, actorsPerThread = {"1:3", "1:3", "1:3"})
 public class BlockingQueueTest1 {
     private BlockingQueue<Integer> q;
 
@@ -41,23 +42,26 @@ public class BlockingQueueTest1 {
     }
 
     @Operation
-    public boolean add(@Param(generator = IntegerParameterGenerator.class) Integer value) {
+    public boolean add(@Param(gen = IntGen.class) Integer value) {
         return q.add(value);
     }
 
     @ReadOnly
     @Operation
-    public int element() {
+    @HandleExceptionAsResult(NoSuchElementException.class)
+    public Integer element() {
         return q.element();
     }
 
     @Operation
-    public int remove() {
+    @HandleExceptionAsResult(NoSuchElementException.class)
+    public Integer remove() {
         return q.remove();
     }
 
     @Operation
-    public int poll() {
+    @HandleExceptionAsResult(NoSuchElementException.class)
+    public Integer poll() {
         return q.poll();
     }
 

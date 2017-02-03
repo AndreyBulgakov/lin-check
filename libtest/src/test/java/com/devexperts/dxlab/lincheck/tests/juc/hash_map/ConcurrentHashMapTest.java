@@ -20,19 +20,19 @@ package com.devexperts.dxlab.lincheck.tests.juc.hash_map;
 
 import com.devexperts.dxlab.lincheck.LinChecker;
 import com.devexperts.dxlab.lincheck.annotations.CTest;
+import com.devexperts.dxlab.lincheck.annotations.HandleExceptionAsResult;
 import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.Param;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
-import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
+import com.devexperts.dxlab.lincheck.generators.IntGen;
 import org.junit.Test;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @CTest(iterations = 300, actorsPerThread = {"1:3", "1:3"})
-@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
-@Param(name = "key", generator = IntegerParameterGenerator.class)
-@Param(name = "value", generator = IntegerParameterGenerator.class)
+@Param(name = "key", gen = IntGen.class)
+@Param(name = "value", gen = IntGen.class)
 public class ConcurrentHashMapTest {
     private Map<Integer, Integer> m;
 
@@ -42,11 +42,13 @@ public class ConcurrentHashMapTest {
     }
 
     @Operation(params = {"key", "value"})
+    @HandleExceptionAsResult(NullPointerException.class)
     public int put(Integer key, Integer value) {
         return m.put(key, value);
     }
 
     @Operation
+    @HandleExceptionAsResult(NullPointerException.class)
     public int get(@Param(name = "key") Integer key) {
         return m.get(key);
     }

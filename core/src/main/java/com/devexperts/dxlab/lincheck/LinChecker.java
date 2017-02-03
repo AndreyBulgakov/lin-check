@@ -125,7 +125,7 @@ public class LinChecker {
                 printActorsPerThread(actorsPerThread);
                 // Create TestThreadExecution's
                 List<TestThreadExecution> testThreadExecutions = actorsPerThread.stream()
-                    .map(actors -> TestThreadExecutionGenerator.create(testInstance, phaser, actors, true))
+                    .map(actors -> TestThreadExecutionGenerator.create(testInstance, phaser, actors, false))
                     .collect(Collectors.toList());
                 // Generate all possible results
                 Set<List<List<Result>>> possibleResultsSet = generateAllLinearizableExecutions(actorsPerThread).stream()
@@ -170,7 +170,7 @@ public class LinChecker {
                             possibleResults.forEach(System.out::println);
                             System.out.println();
                         });
-                        throw new AssertionError("Non-linearizable ezecution detected, see log for details");
+                        throw new AssertionError("Non-linearizable execution detected, see log for details");
                     }
                 }
             }

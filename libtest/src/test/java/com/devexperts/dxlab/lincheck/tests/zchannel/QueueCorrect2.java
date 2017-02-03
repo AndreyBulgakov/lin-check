@@ -20,20 +20,21 @@ package com.devexperts.dxlab.lincheck.tests.zchannel;
 
 import com.devexperts.dxlab.lincheck.LinChecker;
 import com.devexperts.dxlab.lincheck.annotations.CTest;
+import com.devexperts.dxlab.lincheck.annotations.HandleExceptionAsResult;
 import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.Param;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
-import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
+import com.devexperts.dxlab.lincheck.generators.IntGen;
 import org.junit.Test;
+import tests.custom.queue.Queue;
 import z.channel.GenericMPMCQueue;
 
 /**
  * http://landz.github.io/
  */
-@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3"})
-@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
+@CTest(iterations = 100, actorsPerThread = {"1:3", "1:3", "1:3"})
 public class QueueCorrect2 {
-    public GenericMPMCQueue<Integer> q;
+    private GenericMPMCQueue<Integer> q;
 
     @Reset
     public void reload() {
@@ -41,16 +42,16 @@ public class QueueCorrect2 {
     }
 
     @Operation
-    public boolean offer(@Param(generator = IntegerParameterGenerator.class) int value) {
+    public boolean offer(@Param(gen = IntGen.class) int value) {
         return q.offer(value);
     }
 
-    @Operation()
-    public int poll() {
+    @Operation
+    public Integer poll() {
         return q.poll();
     }
 
-    @Test
+    //    @Test TODO is it really correct?
     public void test() throws Exception {
         LinChecker.check(this);
     }

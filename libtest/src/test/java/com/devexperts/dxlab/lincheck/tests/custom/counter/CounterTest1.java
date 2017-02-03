@@ -21,19 +21,18 @@ package com.devexperts.dxlab.lincheck.tests.custom.counter;
 import com.devexperts.dxlab.lincheck.LinChecker;
 import com.devexperts.dxlab.lincheck.annotations.*;
 import tests.custom.counter.Counter;
-import tests.custom.counter.CounterCorrect1;
+import tests.custom.counter.CounterWrong0;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertTrue;
 
-@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3"})
-@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
+@CTest(iterations = 100, actorsPerThread = {"1:3", "1:3", "1:3"})
 public class CounterTest1 {
     private Counter counter;
 
     @Reset
     public void reload() {
-        counter = new CounterCorrect1();
+        counter = new CounterWrong0();
     }
 
     @Operation
@@ -41,7 +40,7 @@ public class CounterTest1 {
         return counter.incrementAndGet();
     }
 
-    @Test
+    @Test(expected = AssertionError.class)
     public void test() {
         LinChecker.check(new CounterTest1());
     }

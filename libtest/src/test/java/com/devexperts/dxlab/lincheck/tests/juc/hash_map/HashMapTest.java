@@ -24,7 +24,7 @@ import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.Param;
 import com.devexperts.dxlab.lincheck.annotations.ReadOnly;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
-import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
+import com.devexperts.dxlab.lincheck.generators.IntGen;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -32,8 +32,8 @@ import java.util.Map;
 
 @CTest(iterations = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
-@Param(name = "key", generator = IntegerParameterGenerator.class)
-@Param(name = "value", generator = IntegerParameterGenerator.class)
+@Param(name = "key", gen = IntGen.class)
+@Param(name = "value", gen = IntGen.class)
 public class HashMapTest {
     private Map<Integer, Integer> m;
 
@@ -43,13 +43,13 @@ public class HashMapTest {
     }
 
     @Operation(params = {"key", "value"})
-    public int put(Integer key, Integer value) {
+    public Integer put(Integer key, Integer value) {
         return m.put(key, value);
     }
 
     @ReadOnly
     @Operation
-    public int get(@Param(name = "key") Integer key) {
+    public Integer get(@Param(name = "key") Integer key) {
         return m.get(key);
     }
 

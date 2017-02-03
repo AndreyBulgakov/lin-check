@@ -31,7 +31,7 @@ public class TestThreadExecutionHelperTest {
         }, ex.call());
     }
 
-    @Test
+    @Test(expected = NoSuchElementException.class)
     public void testGlobalException() throws Exception {
         TestThreadExecution ex = TestThreadExecutionGenerator.create(new ArrayDeque<Integer>(), new Phaser(1),
             Arrays.asList(
@@ -40,25 +40,20 @@ public class TestThreadExecutionHelperTest {
                 new Actor(Queue.class.getMethod("remove"), Collections.emptyList(), Collections.emptyList()),
                 new Actor(Queue.class.getMethod("add", Object.class), Arrays.asList(2), Collections.emptyList())
             ), false);
-        Assert.assertArrayEquals(new Result[] {
-            Result.createValueResult(true),
-            Result.createValueResult(1),
-            Result.createExceptionResult(NoSuchElementException.class),
-            null
-        }, ex.call());
+        ex.call();
     }
 
     @Test
     public void testActorExceptionHandling() throws Exception {
         TestThreadExecution ex = TestThreadExecutionGenerator.create(new ArrayDeque<Integer>(), new Phaser(1),
             Arrays.asList(
-                new Actor(Queue.class.getMethod("add", Object.class), Arrays.asList(1), Collections.emptyList()),
+                new Actor(ArrayDeque.class.getMethod("addLast", Object.class), Arrays.asList(1), Collections.emptyList()),
                 new Actor(Queue.class.getMethod("remove"), Collections.emptyList(), Collections.emptyList()),
                 new Actor(Queue.class.getMethod("remove"), Collections.emptyList(), Arrays.asList(NoSuchElementException.class)),
                 new Actor(Queue.class.getMethod("remove"), Collections.emptyList(), Arrays.asList(Exception.class, NoSuchElementException.class))
             ), false);
         Assert.assertArrayEquals(new Result[] {
-            Result.createValueResult(true),
+            Result.createVoidResult(),
             Result.createValueResult(1),
             Result.createExceptionResult(NoSuchElementException.class),
             Result.createExceptionResult(NoSuchElementException.class)

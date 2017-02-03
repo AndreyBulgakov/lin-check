@@ -23,7 +23,7 @@ import com.devexperts.dxlab.lincheck.annotations.CTest;
 import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.Param;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
-import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
+import com.devexperts.dxlab.lincheck.generators.IntGen;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -32,9 +32,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.Assert.assertTrue;
 
-@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3"})
-@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
-@Param(name = "count", generator = IntegerParameterGenerator.class)
+@CTest(iterations = 100, actorsPerThread = {"1:3", "1:3", "1:3"})
+@Param(name = "key", gen = IntGen.class)
 public class SetCorrect1 {
     private Set<Integer> q;
 
@@ -43,12 +42,12 @@ public class SetCorrect1 {
         q = Collections.newSetFromMap(new ConcurrentHashMap<Integer, Boolean>());
     }
 
-    @Operation(params = {"count"})
+    @Operation(params = {"key"})
     public boolean add(Integer params) {
         return q.add(params);
     }
 
-    @Operation(params = {"count"})
+    @Operation(params = {"key"})
     public boolean remove(Integer params) {
         return q.remove(params);
     }

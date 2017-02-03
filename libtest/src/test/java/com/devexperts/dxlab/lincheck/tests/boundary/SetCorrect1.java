@@ -23,15 +23,14 @@ import com.devexperts.dxlab.lincheck.annotations.CTest;
 import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.Param;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
-import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
+import com.devexperts.dxlab.lincheck.generators.IntGen;
 import org.cliffc.high_scale_lib.NonBlockingHashSet;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
-@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
-@Param(name = "key", generator = IntegerParameterGenerator.class)
+@Param(name = "key", gen = IntGen.class)
 public class SetCorrect1 {
     private NonBlockingHashSet<Integer> q;
 
@@ -48,11 +47,6 @@ public class SetCorrect1 {
     @Operation(params = {"key"})
     public boolean remove(int key) {
         return q.remove(key);
-    }
-
-    @Operation
-    public int size() {
-        return q.size();
     }
 
     @Test

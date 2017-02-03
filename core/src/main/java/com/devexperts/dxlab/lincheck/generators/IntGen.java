@@ -4,7 +4,7 @@ import com.devexperts.dxlab.lincheck.ParameterGenerator;
 
 import java.util.Random;
 
-public class IntegerParameterGenerator implements ParameterGenerator<Integer> {
+public class IntGen implements ParameterGenerator<Integer> {
     private static final int DEFAULT_BEGIN = -10;
     private static final int DEFAULT_END = 10;
 
@@ -12,7 +12,7 @@ public class IntegerParameterGenerator implements ParameterGenerator<Integer> {
     private final int begin;
     private final int end;
 
-    public IntegerParameterGenerator(String configuration) {
+    public IntGen(String configuration) {
         if (configuration.isEmpty()) { // use default configuration
             begin = DEFAULT_BEGIN;
             end = DEFAULT_END;
@@ -31,6 +31,13 @@ public class IntegerParameterGenerator implements ParameterGenerator<Integer> {
     }
 
     public Integer generate() {
-        return begin + random.nextInt(end - begin);
+        return begin + random.nextInt(end - begin + 1);
+    }
+
+    void checkRange(int min, int max, String type) {
+        if (this.begin < min || this.end - 1 > max) {
+            throw new IllegalArgumentException("Illegal range for "
+                + type + " type: [" + begin + "; " + end + ")");
+        }
     }
 }

@@ -20,11 +20,10 @@ package com.devexperts.dxlab.lincheck.tests.custom.queue;
 
 import com.devexperts.dxlab.lincheck.LinChecker;
 import com.devexperts.dxlab.lincheck.annotations.*;
-import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
+import com.devexperts.dxlab.lincheck.generators.IntGen;
 import tests.custom.queue.Queue;
 import tests.custom.queue.QueueEmptyException;
 import tests.custom.queue.QueueFullException;
-import tests.custom.queue.QueueWrong2;
 import tests.custom.queue.QueueWrong3;
 import org.junit.Test;
 
@@ -42,7 +41,7 @@ public class WrapperQueueWrong3 {
 
     @Operation
     @HandleExceptionAsResult(QueueFullException.class)
-    public void put(@Param(generator = IntegerParameterGenerator.class)int args) throws Exception {
+    public void put(@Param(gen = IntGen.class)int args) throws Exception {
         queue.put(args);
     }
 

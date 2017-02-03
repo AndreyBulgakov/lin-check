@@ -18,10 +18,10 @@
 
 package tests.custom.counter;
 
-public class CounterCorrect1 implements Counter {
+public class CounterWrong0 implements Counter {
     private int c;
 
-    public CounterCorrect1() {
+    public CounterWrong0() {
         c = 0;
     }
 

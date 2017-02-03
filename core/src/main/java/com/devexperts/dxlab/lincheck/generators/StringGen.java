@@ -4,7 +4,7 @@ import com.devexperts.dxlab.lincheck.ParameterGenerator;
 
 import java.util.Random;
 
-public class StringParameterGenerator implements ParameterGenerator<String> {
+public class StringGen implements ParameterGenerator<String> {
     private static final int DEFAULT_MAX_WORD_LENGTH = 15;
     private static final String DEFAULT_ALPHABET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_ ";
 
@@ -12,7 +12,7 @@ public class StringParameterGenerator implements ParameterGenerator<String> {
     private final int maxWordLength;
     private final String alphabet;
 
-    public StringParameterGenerator(String configuration) {
+    public StringGen(String configuration) {
         if (configuration.isEmpty()) { // use default configuration
             maxWordLength = DEFAULT_MAX_WORD_LENGTH;
             alphabet = DEFAULT_ALPHABET;

@@ -9,6 +9,9 @@ import org.objectweb.asm.commons.Method;
 import org.objectweb.asm.commons.TryCatchBlockSorter;
 import org.objectweb.asm.util.CheckClassAdapter;
 
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Phaser;
@@ -119,13 +122,6 @@ class TestThreadExecutionGenerator {
         int iLocal = mv.newLocal(Type.INT_TYPE);
         mv.push(0);
         mv.storeLocal(iLocal);
-        // Start of try-catch block
-        Label globalTryCatchStart = mv.newLabel();
-        Label globalTryCatchEnd = mv.newLabel();
-        Label globalTryCatchHandler = mv.newLabel();
-        Label globalTryCatchHandlerEnd = mv.newLabel();
-        mv.visitTryCatchBlock(globalTryCatchStart, globalTryCatchEnd, globalTryCatchHandler, null);
-        mv.visitLabel(globalTryCatchStart);
         // Invoke actors
         for (int i = 0; i < actors.size(); i++) {
             Actor actor = actors.get(i);
@@ -164,7 +160,8 @@ class TestThreadExecutionGenerator {
             mv.invokeVirtual(testType, actorMethod);
             // Create result
             mv.box(actorMethod.getReturnType()); // box if needed
-            if (actor.getMethod().getReturnType() == null) {
+            if (actor.getMethod().getReturnType() == void.class) {
+                mv.pop();
                 mv.invokeStatic(RESULT_TYPE, RESULT_CREATE_VOID_RESULT);
             } else {
                 mv.invokeStatic(RESULT_TYPE, RESULT_CREATE_VALUE_RESULT);
@@ -182,14 +179,6 @@ class TestThreadExecutionGenerator {
             // Increment number of current operation
             mv.iinc(iLocal, 1);
         }
-        // End of try-catch block
-        mv.visitLabel(globalTryCatchEnd);
-        mv.goTo(globalTryCatchHandlerEnd);
-        mv.visitLabel(globalTryCatchHandler);
-        mv.dup();
-        mv.invokeVirtual(THROWABLE_TYPE, new Method("printStackTrace", Type.VOID_TYPE, NO_ARGS));
-        storeExceptionResultFromThrowable(mv, resLocal, iLocal);
-        mv.visitLabel(globalTryCatchHandlerEnd);
         // Return results as list
         mv.loadThis();
         mv.loadLocal(resLocal);

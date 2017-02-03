@@ -13,8 +13,8 @@ import java.lang.annotation.Target;
 @Repeatable(Param.Params.class)
 public @interface Param {
     String name() default "";
-    Class<? extends ParameterGenerator<?>> generator() default ParameterGenerator.Dummy.class;
-    String generatorConfiguration() default "";
+    Class<? extends ParameterGenerator<?>> gen() default ParameterGenerator.Dummy.class;
+    String conf() default "";
 
     /**
      * Holder annotation for {@link Param}.

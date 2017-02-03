@@ -24,7 +24,7 @@ import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.Param;
 import com.devexperts.dxlab.lincheck.annotations.ReadOnly;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
-import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
+import com.devexperts.dxlab.lincheck.generators.IntGen;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -37,9 +37,9 @@ import tests.custom.transfer.AccountsWrong4;
 import java.util.Arrays;
 import java.util.List;
 
-@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:2"})
-@Param(name = "id", generator = IntegerParameterGenerator.class)
-@Param(name = "amount", generator = IntegerParameterGenerator.class)
+@CTest(iterations = 500, actorsPerThread = {"2:5", "2:5"})
+@Param(name = "id", gen = IntGen.class, conf = "1:2")
+@Param(name = "amount", gen = IntGen.class)
 @RunWith(Parameterized.class)
 public class AccountsTest {
     private final Class<? extends Accounts> accountsClass;
@@ -47,7 +47,7 @@ public class AccountsTest {
 
     @Parameterized.Parameters
     public static List<Object[]> params() {
-        return Arrays.asList(
+        return Arrays.<Object[]>asList(
             new Object[] {AccountsWrong1.class},
             new Object[] {AccountsWrong2.class},
             new Object[] {AccountsWrong3.class},

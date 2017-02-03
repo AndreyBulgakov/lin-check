@@ -20,7 +20,7 @@ package com.devexperts.dxlab.lincheck.tests.custom.queue;
 
 import com.devexperts.dxlab.lincheck.LinChecker;
 import com.devexperts.dxlab.lincheck.annotations.*;
-import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
+import com.devexperts.dxlab.lincheck.generators.IntGen;
 import tests.custom.queue.Queue;
 import tests.custom.queue.QueueEmptyException;
 import tests.custom.queue.QueueFullException;
@@ -28,7 +28,6 @@ import tests.custom.queue.QueueWrong1;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
-@CTest(iterations = 300, actorsPerThread = {"1:5", "1:5"})
 @CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
 public class WrapperQueueWrong1 {
     private Queue queue;
@@ -40,7 +39,7 @@ public class WrapperQueueWrong1 {
 
     @Operation
     @HandleExceptionAsResult(QueueFullException.class)
-    public void put(@Param(generator = IntegerParameterGenerator.class)int x) throws Exception {
+    public void put(@Param(gen = IntGen.class)int x) throws Exception {
         queue.put(x);
     }
 

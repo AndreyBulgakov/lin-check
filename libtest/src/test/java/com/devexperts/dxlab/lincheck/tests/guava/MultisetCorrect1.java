@@ -23,16 +23,15 @@ import com.devexperts.dxlab.lincheck.annotations.CTest;
 import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.Param;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
-import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
+import com.devexperts.dxlab.lincheck.generators.IntGen;
 import com.google.common.collect.ConcurrentHashMultiset;
 import org.junit.Test;
 
-@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3"})
 @CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
-@Param(name = "value", generator = IntegerParameterGenerator.class)
-@Param(name = "count", generator = IntegerParameterGenerator.class)
+@Param(name = "value", gen = IntGen.class)
+@Param(name = "count", gen = IntGen.class, conf = "1:10")
 public class MultisetCorrect1 {
-    public ConcurrentHashMultiset<Integer> q;
+    private ConcurrentHashMultiset<Integer> q;
 
     @Reset
     public void reload() {

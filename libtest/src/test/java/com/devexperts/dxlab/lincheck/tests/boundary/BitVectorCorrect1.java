@@ -20,7 +20,7 @@ package com.devexperts.dxlab.lincheck.tests.boundary;
 
 import com.devexperts.dxlab.lincheck.LinChecker;
 import com.devexperts.dxlab.lincheck.annotations.*;
-import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
+import com.devexperts.dxlab.lincheck.generators.IntGen;
 import org.cliffc.high_scale_lib.NonBlockingSetInt;
 import org.junit.Test;
 
@@ -29,7 +29,7 @@ import java.util.Set;
 import static org.junit.Assert.assertTrue;
 
 @CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
-@Param(name = "key", generator = IntegerParameterGenerator.class, generatorConfiguration = "1:10")
+@Param(name = "key", gen = IntGen.class, conf = "1:10")
 public class BitVectorCorrect1 {
     private Set<Integer> q;
 

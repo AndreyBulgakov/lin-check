@@ -24,16 +24,15 @@ import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.Param;
 import com.devexperts.dxlab.lincheck.annotations.ReadOnly;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
-import com.devexperts.dxlab.lincheck.generators.IntegerParameterGenerator;
+import com.devexperts.dxlab.lincheck.generators.IntGen;
 import org.junit.Test;
 import romix.scala.collection.concurrent.TrieMap;
 
 import java.util.Map;
 
-@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3"})
-@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
-@Param(name = "key", generator = IntegerParameterGenerator.class)
-@Param(name = "value", generator = IntegerParameterGenerator.class)
+@CTest(iterations = 100, actorsPerThread = {"1:3", "1:3", "1:3"})
+@Param(name = "key", gen = IntGen.class)
+@Param(name = "value", gen = IntGen.class)
 public class TrieCorrect1 {
     private Map<Integer, Integer> m;
 
@@ -43,13 +42,13 @@ public class TrieCorrect1 {
     }
 
     @Operation(params = {"key", "value"})
-    public int put(int key, int value) {
+    public Integer put(Integer key, Integer value) {
         return m.put(key, value);
     }
 
     @ReadOnly
     @Operation(params = {"key"})
-    public int get(int key) {
+    public Integer get(Integer key) {
         return m.get(key);
     }
 

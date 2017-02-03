@@ -29,6 +29,7 @@ public class AccountsWrong4 implements Accounts {
         data = new HashMap<>();
     }
 
+    // This operation is not synchronized with other
     @Override
     public Integer getAmount(int id) {
         if (data.containsKey(id)) {
@@ -53,11 +54,6 @@ public class AccountsWrong4 implements Accounts {
         v1 -= value;
         v2 += value;
         data.put(id1, v1);
-//        try {
-//            Thread.sleep(10);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
         data.put(id2, v2);
     }
 

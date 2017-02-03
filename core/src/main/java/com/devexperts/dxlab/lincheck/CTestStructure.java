@@ -7,6 +7,7 @@ import com.devexperts.dxlab.lincheck.annotations.Param;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * Contains information about operations (see {@link Operation}) and reset method (see {@link Reset}).
@@ -32,57 +32,86 @@ class CTestStructure {
 
     static CTestStructure getFromTestClass(Class<?> testClass) {
         // Read named parameter generators (declared for class)
-        Map<String, ParameterGenerator<?>> namedPGs = new HashMap<>();
+        Map<String, ParameterGenerator<?>> namedGens = new HashMap<>();
         for (Param paramAnn : testClass.getAnnotationsByType(Param.class)) {
             if (paramAnn.name().isEmpty()) {
                 throw new IllegalArgumentException("@Param name in class declaration cannot be empty");
             }
-            namedPGs.put(paramAnn.name(), createParameterGenerator(paramAnn));
+            namedGens.put(paramAnn.name(), createGenerator(paramAnn));
         }
         // Create actor generators
         List<ActorGenerator> actorGenerators = new ArrayList<>();
         Method resetMethod = null;
         for (Method m : testClass.getDeclaredMethods()) {
+            // Reset
             if (m.isAnnotationPresent(Reset.class)) {
-                if (resetMethod != null) {
+                if (resetMethod != null)
                     throw new IllegalArgumentException("Only one @Reset method can be presented");
-                }
                 resetMethod = m;
             }
+            // Operation
             if (m.isAnnotationPresent(Operation.class)) {
                 Operation operationAnn = m.getAnnotation(Operation.class);
-                List<ParameterGenerator<?>> pgs;
-                if (operationAnn.params().length > 0) { // Use named parameter generators
-                    if (operationAnn.params().length != m.getParameterCount()) {
-                        throw new IllegalArgumentException("Invalid count of parameter " +
-                            "generators for " + m.toString() + " method");
-                    }
-                    pgs = Arrays.stream(operationAnn.params())
-                        .map(namedPGs::get)
-                        .collect(Collectors.toList());
-                } else {
-                    pgs = Arrays.stream(m.getParameters())
-                        .map(p -> p.getAnnotation(Param.class))
-                        .map(paramAnn -> paramAnn.name().isEmpty() ? createParameterGenerator(paramAnn) : namedPGs.get(paramAnn.name()))
-                        .collect(Collectors.toList());
+                // Check that params() in @Operation is empty or has the same size as the method
+                if (operationAnn.params().length > 0 && operationAnn.params().length != m.getParameterCount()) {
+                    throw new IllegalArgumentException("Invalid count of generators for " + m.toString()
+                        + " method in @Operation");
                 }
+                // Construct list of parameter generators
+                final List<ParameterGenerator<?>> gens = new ArrayList<>();
+                for (int i = 0; i < m.getParameterCount(); i++) {
+                    String nameInOperation = operationAnn.params().length > 0 ? operationAnn.params()[i] : null;
+                    gens.add(getOrCreateGenerator(m, m.getParameters()[i], nameInOperation, namedGens));
+                }
+                // Get list of handled exceptions if they are presented
                 HandleExceptionAsResult handleExceptionAsResultAnn = m.getAnnotation(HandleExceptionAsResult.class);
                 List<Class<? extends Throwable>> handledExceptions = handleExceptionAsResultAnn != null ?
                     Arrays.asList(handleExceptionAsResultAnn.value()) : Collections.emptyList();
-                actorGenerators.add(new ActorGenerator(m, pgs, handledExceptions));
+                actorGenerators.add(new ActorGenerator(m, gens, handledExceptions));
             }
         }
         // Create CTest class configuration
         return new CTestStructure(actorGenerators, resetMethod);
     }
 
-    private static ParameterGenerator<?> createParameterGenerator(Param paramAnn) {
-        try {
-            return paramAnn.generator().getConstructor(String.class)
-                .newInstance(paramAnn.generatorConfiguration());
-        } catch (Exception e) {
-            throw new IllegalStateException("Cannot create parameter generator", e);
+    private static ParameterGenerator<?> getOrCreateGenerator(Method m, Parameter p, String nameInOperation,
+        Map<String, ParameterGenerator<?>> namedGens)
+    {
+        // Read @Param annotation on the parameter
+        Param paramAnn = p.getAnnotation(Param.class);
+        // If this annotation not presented use named generator based on name presented in @Operation or parameter name.
+        if (paramAnn == null) {
+            // If name in @Operation is presented, return the generator with this name,
+            // otherwise return generator with parameter's name
+            String name = nameInOperation != null ? nameInOperation :
+                (p.isNamePresent() ? p.getName() : null);
+            if (name == null) {
+                throw new IllegalStateException("Generator for parameter \'" + p.getName() + "\" in method \""
+                    + m.getName() + "\" is missed. Try to specify it manually or enable parameter name feature in your " +
+                    "compiler (use \"-parameters\" javac option for this purpose).");
+            }
+            return checkAndGetNamedGenerator(namedGens, name);
         }
+        // If the @Param annotation is presented check it's correctness firstly
+        if (!paramAnn.name().isEmpty() && !(paramAnn.gen() == ParameterGenerator.Dummy.class))
+            throw new IllegalStateException("@Param should have either name or gen with optionally configuration");
+        // If @Param annotation specifies generator's name then return the specified generator
+        if (!paramAnn.name().isEmpty())
+            return checkAndGetNamedGenerator(namedGens, paramAnn.name());
+        // Otherwise create new parameter generator
+        return createGenerator(paramAnn);
+    }
+
+    private static ParameterGenerator<?> createGenerator(Param paramAnn) {
+        try {
+            return paramAnn.gen().getConstructor(String.class).newInstance(paramAnn.conf());
+        } catch (Exception e) {
+            throw new IllegalStateException("Cannot create parameter gen", e);
+        }
+    }
+
+    private static ParameterGenerator<?> checkAndGetNamedGenerator(Map<String, ParameterGenerator<?>> namedGens, String name) {
+        return Objects.requireNonNull(namedGens.get(name), "Unknown generator name: \"" + name + "\"");
     }
 
     List<ActorGenerator> getActorGenerators() {
