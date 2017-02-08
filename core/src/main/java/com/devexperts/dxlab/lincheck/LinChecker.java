@@ -92,6 +92,22 @@ public class LinChecker {
         actorsPerThread.forEach(System.out::println);
     }
 
+    private void printIterationInformation(int iterationsNum, int currentIter, List<List<Actor>> actorsPerThread) {
+        System.out.println("= Iteration " + currentIter + " / " + iterationsNum + " =");
+        System.out.println("Actors per thread:");
+        actorsPerThread.forEach(System.out::println);
+    }
+
+    private void printBadResultLog(Set<List<List<Result>>> possibleResultsSet, List<List<Result>> results){
+        System.out.println("\nNon-linearizable execution:");
+        results.forEach(System.out::println);
+        System.out.println("\nPossible linearizable executions:");
+        possibleResultsSet.forEach(possibleResults -> {
+            possibleResults.forEach(System.out::println);
+            System.out.println();
+        });
+    }
+
     private List<List<Actor>> generateAllLinearizableExecutions(List<List<Actor>> actorsPerThread) {
         List<List<Actor>> executions = new ArrayList<>();
         generateLinearizableExecutions0(executions, actorsPerThread, new ArrayList<>(), new int[actorsPerThread.size()],
@@ -118,6 +134,23 @@ public class LinChecker {
         }
     }
 
+    private Set<List<List<Result>>> generateLinearizeResults(List<List<Actor>> actorsPerThread){
+        return generateAllLinearizableExecutions(actorsPerThread).stream()
+                .map(linEx -> {
+                    List<Result> results = executeActors(linEx);
+                    Map<Actor, Result> resultMap = new IdentityHashMap<>();
+                    for (int i = 0; i < linEx.size(); i++) {
+                        resultMap.put(linEx.get(i), results.get(i));
+                    }
+                    return actorsPerThread.stream()
+                            .map(actors -> actors.stream()
+                                    .map(resultMap::get)
+                                    .collect(Collectors.toList())
+                            ).collect(Collectors.toList());
+                })
+                .collect(Collectors.toSet());
+    }
+
     private void checkImpl(CTestConfiguration testCfg) throws InterruptedException {
         // Fixed thread pool executor to run TestThreadExecution
         ExecutorService pool = Executors.newFixedThreadPool(testCfg.getThreads());
@@ -126,38 +159,22 @@ public class LinChecker {
             final Phaser phaser = new Phaser(testCfg.getThreads());
             // Run iterations
             for (int iteration = 1; iteration <= testCfg.getIterations(); iteration++) {
-                System.out.println("= Iteration " + iteration + " / " + testCfg.getIterations() + " =");
-                // Generate actors and print them to console
                 List<List<Actor>> actorsPerThread = generateActors(testCfg);
-                printActorsPerThread(actorsPerThread);
+
+                printIterationInformation(testCfg.getIterations(), iteration, actorsPerThread);
                 // Create TestThreadExecution's
                 List<TestThreadExecution> testThreadExecutions = actorsPerThread.stream()
                     .map(actors -> TestThreadExecutionGenerator.create(testInstance, phaser, actors, false))
                     .collect(Collectors.toList());
                 // Generate all possible results
-                Set<List<List<Result>>> possibleResultsSet = generateAllLinearizableExecutions(actorsPerThread).stream()
-                    .map(linEx -> {
-                        List<Result> results = executeActors(linEx);
-                        Map<Actor, Result> resultMap = new IdentityHashMap<>();
-                        for (int i = 0; i < linEx.size(); i++) {
-                            resultMap.put(linEx.get(i), results.get(i));
-                        }
-                        return actorsPerThread.stream()
-                            .map(actors -> actors.stream()
-                                .map(resultMap::get)
-                                .collect(Collectors.toList())
-                            ).collect(Collectors.toList());
-                    }).collect(Collectors.toSet());
+                Set<List<List<Result>>> possibleResultsSet = generateLinearizeResults(actorsPerThread);
                 // Run invocations
                 for (int invocation = 0; invocation < testCfg.getInvocationsPerIteration(); invocation++) {
                     // Reset the state of test
                     invokeReset();
                     // Specify waits
                     int maxWait = (int) ((float) invocation * MAX_WAIT / testCfg.getInvocationsPerIteration()) + 1;
-                    for (int i = 0; i < testThreadExecutions.size(); i++) {
-                        TestThreadExecution ex = testThreadExecutions.get(i);
-                        ex.waits = random.ints(actorsPerThread.get(i).size() - 1, 0, maxWait).toArray();
-                    }
+                    setWaits(actorsPerThread, testThreadExecutions, maxWait);
                     // Run multithreaded test and get operation results for each thread
                     List<List<Result>> results = pool.invokeAll(testThreadExecutions).stream() // get futures
                         .map(f -> {
@@ -166,17 +183,12 @@ public class LinChecker {
                             } catch (InterruptedException | ExecutionException e) {
                                 throw new IllegalStateException(e);
                             }
-                        }).collect(Collectors.toList()); // and store results as list
+                        })
+                        .collect(Collectors.toList()); // and store results as list
                     // Check correctness& Throw an AssertionError if current execution
                     // is not linearizable and log invalid execution
                     if (!possibleResultsSet.contains(results)) {
-                        System.out.println("\nNon-linearizable execution:");
-                        results.forEach(System.out::println);
-                        System.out.println("\nPossible linearizable executions:");
-                        possibleResultsSet.forEach(possibleResults -> {
-                            possibleResults.forEach(System.out::println);
-                            System.out.println();
-                        });
+                        printBadResultLog(possibleResultsSet, results);
                         throw new AssertionError("Non-linearizable execution detected, see log for details");
                     }
                 }
@@ -187,6 +199,13 @@ public class LinChecker {
     }
 
     private Phaser SINGLE_THREAD_PHASER = new Phaser(1);
+
+    private void setWaits(List<List<Actor>> actorsPerThread, List<TestThreadExecution> testThreadExecutions, int maxWait){
+        for (int i = 0; i < testThreadExecutions.size(); i++) {
+            TestThreadExecution ex = testThreadExecutions.get(i);
+            ex.waits = random.ints(actorsPerThread.get(i).size() - 1, 0, maxWait).toArray();
+        }
+    }
 
     private List<Result> executeActors(List<Actor> actors) {
         invokeReset();
