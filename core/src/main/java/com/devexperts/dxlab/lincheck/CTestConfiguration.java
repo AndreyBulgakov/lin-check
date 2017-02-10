@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 /**
  * Test configuration which is passed via {@link CTest} annotation.
  */
-class CTestConfiguration {
+public class CTestConfiguration {
     private final int iterations;
     private final int invocationsPerIteration;
     private final List<TestThreadConfiguration> threadConfigurations;
@@ -61,15 +61,15 @@ class CTestConfiguration {
             .collect(Collectors.toList());
     }
 
-    int getIterations() {
+    public int getIterations() {
         return iterations;
     }
 
-    int getThreads() {
+    public int getThreads() {
         return threadConfigurations.size();
     }
 
-    int getInvocationsPerIteration() {
+    public int getInvocationsPerIteration() {
         return invocationsPerIteration;
     }
 

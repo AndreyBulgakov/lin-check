@@ -22,14 +22,11 @@ package com.devexperts.dxlab.lincheck;
  * #L%
  */
 
+import com.devexperts.dxlab.lincheck.report.ConsolePrinter;
+import com.devexperts.dxlab.lincheck.report.Printer;
+
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -48,6 +45,7 @@ public class LinChecker {
     private final Object testInstance;
     private final List<CTestConfiguration> testConfigurations;
     private final CTestStructure testStructure;
+    private Printer printer;
 
     private LinChecker(Object testInstance) {
         this.testInstance = testInstance;
@@ -66,6 +64,7 @@ public class LinChecker {
     private void check() throws AssertionError {
         testConfigurations.forEach((testConfiguration) -> {
             try {
+                printer = new ConsolePrinter(testConfiguration.getIterations(), testConfiguration.getInvocationsPerIteration());
                 checkImpl(testConfiguration);
             } catch (InterruptedException e) {
                 throw new IllegalStateException(e);
@@ -85,27 +84,6 @@ public class LinChecker {
         return testConfiguration.getThreadConfigurations().stream()
             .map(this::generateActorsForThread)
             .collect(Collectors.toList());
-    }
-
-    private void printActorsPerThread(List<List<Actor>> actorsPerThread) {
-        System.out.println("Actors per thread:");
-        actorsPerThread.forEach(System.out::println);
-    }
-
-    private void printIterationInformation(int iterationsNum, int currentIter, List<List<Actor>> actorsPerThread) {
-        System.out.println("= Iteration " + currentIter + " / " + iterationsNum + " =");
-        System.out.println("Actors per thread:");
-        actorsPerThread.forEach(System.out::println);
-    }
-
-    private void printBadResultLog(Set<List<List<Result>>> possibleResultsSet, List<List<Result>> results){
-        System.out.println("\nNon-linearizable execution:");
-        results.forEach(System.out::println);
-        System.out.println("\nPossible linearizable executions:");
-        possibleResultsSet.forEach(possibleResults -> {
-            possibleResults.forEach(System.out::println);
-            System.out.println();
-        });
     }
 
     private List<List<Actor>> generateAllLinearizableExecutions(List<List<Actor>> actorsPerThread) {
@@ -160,16 +138,17 @@ public class LinChecker {
             // Run iterations
             for (int iteration = 1; iteration <= testCfg.getIterations(); iteration++) {
                 List<List<Actor>> actorsPerThread = generateActors(testCfg);
+                printer.addAlgoryrhm(iteration, actorsPerThread);
 
-                printIterationInformation(testCfg.getIterations(), iteration, actorsPerThread);
                 // Create TestThreadExecution's
                 List<TestThreadExecution> testThreadExecutions = actorsPerThread.stream()
                     .map(actors -> TestThreadExecutionGenerator.create(testInstance, phaser, actors, false))
                     .collect(Collectors.toList());
                 // Generate all possible results
                 Set<List<List<Result>>> possibleResultsSet = generateLinearizeResults(actorsPerThread);
+                printer.addLinearizeResults(iteration, possibleResultsSet);
                 // Run invocations
-                for (int invocation = 0; invocation < testCfg.getInvocationsPerIteration(); invocation++) {
+                for (int invocation = 1; invocation <= testCfg.getInvocationsPerIteration(); invocation++) {
                     // Reset the state of test
                     invokeReset();
                     // Specify waits
@@ -188,12 +167,14 @@ public class LinChecker {
                     // Check correctness& Throw an AssertionError if current execution
                     // is not linearizable and log invalid execution
                     if (!possibleResultsSet.contains(results)) {
-                        printBadResultLog(possibleResultsSet, results);
+                        printer.addResult(iteration, invocation, results);
                         throw new AssertionError("Non-linearizable execution detected, see log for details");
                     }
                 }
+                printer.addResult(iteration);
             }
         } finally {
+            printer.printReport();
             pool.shutdown();
         }
     }
