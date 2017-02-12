@@ -23,6 +23,7 @@ package com.devexperts.dxlab.lincheck;
  */
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.IdentityHashMap;
@@ -46,18 +47,40 @@ public class LinChecker {
 
     private final Random random = new Random();
     private final Object testInstance;
+    private final Class testClass;
     private final List<CTestConfiguration> testConfigurations;
     private final CTestStructure testStructure;
+    private final ExecutionClassLoader LOADER = ExecutionClassLoader.getInstance();
+
+    private LinChecker(Class testClass) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+        LOADER.setTestClassName(testClass.getCanonicalName().replace(".", "/"));
+        this.testInstance = LOADER.loadClass(testClass.getCanonicalName()).newInstance();
+//        Class<?> testClass = testInstance.getClass();
+        this.testClass = testInstance.getClass();
+        this.testConfigurations = CTestConfiguration.getFromTestClass(this.testClass);
+        this.testStructure = CTestStructure.getFromTestClass(this.testClass);
+    }
 
     private LinChecker(Object testInstance) {
         this.testInstance = testInstance;
         Class<?> testClass = testInstance.getClass();
+        LOADER.setTestClassName(testClass.getCanonicalName().replace(".", "/"));
+        this.testClass = testClass;
         this.testConfigurations = CTestConfiguration.getFromTestClass(testClass);
         this.testStructure = CTestStructure.getFromTestClass(testClass);
     }
 
+    public static void check(Class testClass) throws AssertionError {
+        try {
+            new LinChecker(testClass).check();
+        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+            throw new AssertionError("Can't load class", e);
+        }
+    }
+
     public static void check(Object testInstance) throws AssertionError {
-        new LinChecker(testInstance).check();
+            new LinChecker(testInstance).check();
+
     }
 
     /**
@@ -136,16 +159,18 @@ public class LinChecker {
                     .collect(Collectors.toList());
                 // Generate all possible results
                 Set<List<List<Result>>> possibleResultsSet = generateAllLinearizableExecutions(actorsPerThread).stream()
-                    .map(linEx -> {
+                    .map(linEx -> { // For each permutation
                         List<Result> results = executeActors(linEx);
                         Map<Actor, Result> resultMap = new IdentityHashMap<>();
                         for (int i = 0; i < linEx.size(); i++) {
                             resultMap.put(linEx.get(i), results.get(i));
                         }
+                        // Map result from single-execution permutation
+                        // to each non-execution actorsPerThread List
                         return actorsPerThread.stream()
                             .map(actors -> actors.stream()
-                                .map(resultMap::get)
-                                .collect(Collectors.toList())
+                                    .map(resultMap::get)
+                                    .collect(Collectors.toList())
                             ).collect(Collectors.toList());
                     }).collect(Collectors.toSet());
                 // Run invocations

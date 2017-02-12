@@ -22,7 +22,11 @@ package com.devexperts.dxlab.lincheck;
  * #L%
  */
 
+import org.objectweb.asm.Opcodes;
+
 public class Utils {
+    public static final int ASM_VERSION = Opcodes.ASM5;
+
     private static volatile int consumedCPU = (int) System.currentTimeMillis();
 
     public static void consumeCPU(int tokens) {
@@ -31,5 +35,7 @@ public class Utils {
             t += (t * 0x5DEECE66DL + 0xBL + i) & (0xFFFFFFFFFFFFL);
         if (t == 42)
             consumedCPU += t;
+//        System.out.println("Tokens: " + tokens);
+//        System.out.println("ConsumeCPU: " + consumedCPU);
     }
 }

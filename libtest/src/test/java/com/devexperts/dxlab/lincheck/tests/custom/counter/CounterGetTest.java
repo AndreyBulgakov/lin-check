@@ -72,6 +72,7 @@ public class CounterGetTest {
 
     @Test
     public void test() {
-        LinChecker.check(new CounterGetTest());
+        LinChecker.check(CounterGetTest.class);
+//        LinChecker.check(new CounterGetTest());
     }
 }

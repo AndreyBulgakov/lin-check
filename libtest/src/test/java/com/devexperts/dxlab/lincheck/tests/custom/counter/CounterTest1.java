@@ -64,6 +64,7 @@ public class CounterTest1 {
 
     @Test(expected = AssertionError.class)
     public void test() {
-        LinChecker.check(new CounterTest1());
+//        LinChecker.check(new CounterTest1());
+        LinChecker.check(CounterTest1.class);
     }
 }

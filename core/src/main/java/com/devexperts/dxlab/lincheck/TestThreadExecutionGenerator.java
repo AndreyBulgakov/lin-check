@@ -31,6 +31,9 @@ import org.objectweb.asm.commons.Method;
 import org.objectweb.asm.commons.TryCatchBlockSorter;
 import org.objectweb.asm.util.CheckClassAdapter;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Phaser;
@@ -41,7 +44,8 @@ import static org.objectweb.asm.Opcodes.*;
  * This class is used to generate {@link TestThreadExecution thread executions}.
  */
 class TestThreadExecutionGenerator {
-    private static final ExecutionClassLoader LOADER = new ExecutionClassLoader();
+//    private static final ExecutionClassLoader LOADER = new ExecutionClassLoader();
+    private static final ExecutionClassLoader LOADER = ExecutionClassLoader.getInstance();
 
     private static final Type[] NO_ARGS = new Type[] {};
 
@@ -89,8 +93,11 @@ class TestThreadExecutionGenerator {
         String className = TestThreadExecution.class.getCanonicalName() + generatedClassNumber++;
         String internalClassName = className.replace('.', '/');
         List<Object> objArgs = new ArrayList<>();
+
+
         Class<? extends TestThreadExecution> clz = LOADER.define(className,
             generateClass(internalClassName, Type.getType(testInstance.getClass()), actors, objArgs, waitsEnabled));
+
         try {
             TestThreadExecution execution = clz.newInstance();
             execution.phaser = phaser;
@@ -261,9 +268,18 @@ class TestThreadExecutionGenerator {
         }
     }
 
-    private static class ExecutionClassLoader extends ClassLoader {
-        private Class<? extends TestThreadExecution> define(String className, byte[] bytecode) {
-            return (Class<? extends TestThreadExecution>) super.defineClass(className, bytecode, 0, bytecode.length);
-        }
-    }
+//    private static class ExecutionClassLoader extends ClassLoader {
+//
+//        @Override
+//        protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+//            System.out.println(name);
+////            System.out.println();
+//            return super.loadClass(name, resolve);
+//        }
+//
+//        private Class<? extends TestThreadExecution> define(String className, byte[] bytecode) {
+////            System.out.println(className);
+//            return (Class<? extends TestThreadExecution>) super.defineClass(className, bytecode, 0, bytecode.length);
+//        }
+//    }
 }
