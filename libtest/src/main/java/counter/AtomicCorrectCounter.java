@@ -1,4 +1,4 @@
-package thesis_example;
+package counter;
 
 /*
  * #%L
@@ -22,6 +22,18 @@ package thesis_example;
  * #L%
  */
 
-public interface Counter {
-    public int incrementAndGet();
+import java.util.concurrent.atomic.AtomicInteger;
+
+
+public class AtomicCorrectCounter implements Counter {
+    private AtomicInteger c;
+
+    public AtomicCorrectCounter() {
+        c = new AtomicInteger();
+    }
+
+    @Override
+    public synchronized int incrementAndGet() {
+        return c.incrementAndGet();
+    }
 }

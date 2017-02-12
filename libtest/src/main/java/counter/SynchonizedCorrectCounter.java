@@ -1,4 +1,4 @@
-package thesis_example;
+package counter;
 
 /*
  * #%L
@@ -22,15 +22,12 @@ package thesis_example;
  * #L%
  */
 
-public class CounterCorrect1 {
+public class SynchonizedCorrectCounter implements Counter {
     private int c = 0;
 
+    @Override
     public synchronized int incrementAndGet() {
         c++;
         return c;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(new CounterCorrect1().incrementAndGet());
     }
 }

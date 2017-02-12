@@ -1,4 +1,4 @@
-package thesis_example;
+package counter;
 
 /*
  * #%L
@@ -22,15 +22,16 @@ package thesis_example;
  * #L%
  */
 
-public class CounterWrong2 implements Counter {
+public class SimpleWrongCounter1 implements Counter {
     private int c;
 
-    public CounterWrong2() {
+    public SimpleWrongCounter1() {
         c = 0;
     }
 
     @Override
     public int incrementAndGet() {
-        return ++c;
+        c++;
+        return c;
     }
 }
