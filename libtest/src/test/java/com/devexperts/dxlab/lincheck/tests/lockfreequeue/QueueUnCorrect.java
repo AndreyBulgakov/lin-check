@@ -41,18 +41,19 @@ package com.devexperts.dxlab.lincheck.tests.lockfreequeue;
  */
 
 import com.devexperts.dxlab.lincheck.LinChecker;
-import com.devexperts.dxlab.lincheck.annotations.*;
+import com.devexperts.dxlab.lincheck.annotations.CTest;
+import com.devexperts.dxlab.lincheck.annotations.Operation;
+import com.devexperts.dxlab.lincheck.annotations.Param;
+import com.devexperts.dxlab.lincheck.annotations.Reset;
 import com.devexperts.dxlab.lincheck.generators.IntGen;
 import com.github.lock.free.queue.LockFreeQueue;
 import org.junit.Test;
-
-import static org.junit.Assert.assertTrue;
 
 /**
  * https://github.com/yaitskov/lock-free-queue
  */
 @CTest(iterations = 100, actorsPerThread = {"1:2", "1:2"})
-public class QueueCorrect1 {
+public class QueueUnCorrect {
     private LockFreeQueue<Integer> q;
 
     @Reset
@@ -70,7 +71,7 @@ public class QueueCorrect1 {
         return q.takeOrNull();
     }
 
-    //    @Test TODO is it really correct?
+    @Test
     public void test() {
         LinChecker.check(this);
     }

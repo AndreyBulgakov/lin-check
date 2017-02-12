@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.devexperts.dxlab.lincheck.tests.zchannel;
+package com.devexperts.dxlab.lincheck.tests.high_scale_lib;
 
 /*
  * #%L
@@ -47,34 +47,40 @@ import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.Param;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
 import com.devexperts.dxlab.lincheck.generators.IntGen;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import org.junit.Test;
-import tests.custom.queue.Queue;
-import z.channel.GenericMPMCQueue;
 
-/**
- * http://landz.github.io/
- */
-@CTest(iterations = 100, actorsPerThread = {"1:3", "1:3", "1:3"})
-public class QueueCorrect2 {
-    private GenericMPMCQueue<Integer> q;
+import java.util.Map;
+
+@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
+@Param(name = "key", gen = IntGen.class)
+@Param(name = "value", gen = IntGen.class)
+public class NonBlockingHashMapTest {
+    private Map<Integer, Integer> map;
 
     @Reset
     public void reload() {
-        q = new GenericMPMCQueue<>(16);
+        map = new NonBlockingHashMap<>();
     }
 
-    @Operation
-    public boolean offer(@Param(gen = IntGen.class) int value) {
-        return q.offer(value);
+    @Operation(params = {"key", "value"})
+    public Integer put(Integer key, Integer value) {
+        return map.put(key, value);
     }
 
-    @Operation
-    public Integer poll() {
-        return q.poll();
+    @Operation(params = {"key"})
+    public Integer get(Integer key) {
+        return map.get(key);
     }
 
-    //    @Test TODO is it really correct?
-    public void test() throws Exception {
+    @Operation(params = {"key", "value"})
+    @HandleExceptionAsResult(NullPointerException.class)
+    public int putIfAbsent(int key, int value) {
+        return map.putIfAbsent(key, value);
+    }
+
+    @Test
+    public void test() {
         LinChecker.check(this);
     }
 }

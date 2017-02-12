@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.devexperts.dxlab.lincheck.tests.guava;
+package com.devexperts.dxlab.lincheck.tests.zchannel;
 
 /*
  * #%L
@@ -47,31 +47,28 @@ import com.devexperts.dxlab.lincheck.annotations.Param;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
 import com.devexperts.dxlab.lincheck.generators.IntGen;
 import org.junit.Test;
+import z.channel.GenericMPMCQueue;
 
-import java.util.Collections;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
-import static org.junit.Assert.assertTrue;
-
+/**
+ * http://landz.github.io/
+ */
 @CTest(iterations = 100, actorsPerThread = {"1:3", "1:3", "1:3"})
-@Param(name = "key", gen = IntGen.class)
-public class SetCorrect1 {
-    private Set<Integer> q;
+public class QueueUnCorrect2 {
+    private GenericMPMCQueue<Integer> q;
 
     @Reset
     public void reload() {
-        q = Collections.newSetFromMap(new ConcurrentHashMap<Integer, Boolean>());
+        q = new GenericMPMCQueue<>(16);
     }
 
-    @Operation(params = {"key"})
-    public boolean add(Integer params) {
-        return q.add(params);
+    @Operation
+    public boolean offer(@Param(gen = IntGen.class) int value) {
+        return q.offer(value);
     }
 
-    @Operation(params = {"key"})
-    public boolean remove(Integer params) {
-        return q.remove(params);
+    @Operation
+    public Integer poll() {
+        return q.poll();
     }
 
     @Test

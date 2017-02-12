@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.devexperts.dxlab.lincheck.tests.zchannel;
+package com.devexperts.dxlab.lincheck.tests.high_scale_lib;
 
 /*
  * #%L
@@ -46,33 +46,31 @@ import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.Param;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
 import com.devexperts.dxlab.lincheck.generators.IntGen;
+import org.cliffc.high_scale_lib.NonBlockingHashSet;
 import org.junit.Test;
-import z.channel.GenericMPMCQueue;
 
-/**
- * http://landz.github.io/
- */
-@CTest(iterations = 100, actorsPerThread = {"1:3", "1:3", "1:3"})
-public class QueueCorrect1 {
-    private GenericMPMCQueue<Integer> q;
+@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
+@Param(name = "key", gen = IntGen.class)
+public class NonBlockingHashSetTest {
+    private NonBlockingHashSet<Integer> q;
 
     @Reset
     public void reload() {
-        q = new GenericMPMCQueue<>(4);
+        q = new NonBlockingHashSet<>();
     }
 
-    @Operation
-    public boolean offer(@Param(gen = IntGen.class) int value) {
-        return q.offer(value);
+    @Operation(params = {"key"})
+    public boolean add(int key) {
+        return q.add(key);
     }
 
-    @Operation
-    public Integer poll() {
-        return q.poll();
+    @Operation(params = {"key"})
+    public boolean remove(int key) {
+        return q.remove(key);
     }
 
-//    @Test TODO is it really correct?
-    public void test() throws Exception {
+    @Test
+    public void test() {
         LinChecker.check(this);
     }
 }

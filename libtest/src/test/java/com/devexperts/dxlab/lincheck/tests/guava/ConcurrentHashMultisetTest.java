@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.devexperts.dxlab.lincheck.tests.boundary;
+package com.devexperts.dxlab.lincheck.tests.guava;
 
 /*
  * #%L
@@ -42,45 +42,36 @@ package com.devexperts.dxlab.lincheck.tests.boundary;
 
 import com.devexperts.dxlab.lincheck.LinChecker;
 import com.devexperts.dxlab.lincheck.annotations.CTest;
-import com.devexperts.dxlab.lincheck.annotations.HandleExceptionAsResult;
 import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.Param;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
 import com.devexperts.dxlab.lincheck.generators.IntGen;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import com.google.common.collect.ConcurrentHashMultiset;
 import org.junit.Test;
 
-import java.util.Map;
-
 @CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
-@Param(name = "key", gen = IntGen.class)
 @Param(name = "value", gen = IntGen.class)
-public class MapCorrect1 {
-    private Map<Integer, Integer> map;
+@Param(name = "count", gen = IntGen.class, conf = "1:10")
+public class ConcurrentHashMultisetTest {
+    private ConcurrentHashMultiset<Integer> q;
 
     @Reset
     public void reload() {
-        map = new NonBlockingHashMap<>();
+        q = ConcurrentHashMultiset.create();
     }
 
-    @Operation
-    public Integer put(Integer key, Integer value) {
-        return map.put(key, value);
+    @Operation(params = {"value", "count"})
+    public int add(int value, int count) {
+        return q.add(value, count);
     }
 
-    @Operation
-    public Integer get(Integer key) {
-        return map.get(key);
-    }
-
-    @Operation
-    @HandleExceptionAsResult(NullPointerException.class)
-    public int putIfAbsent(int key, int value) {
-        return map.putIfAbsent(key, value);
+    @Operation(params = {"value", "count"})
+    public int remove(int value, int count) {
+        return q.remove(value, count);
     }
 
     @Test
-    public void test() {
-        LinChecker.check(new MapCorrect1());
+    public void test() throws Exception {
+        LinChecker.check(this);
     }
 }

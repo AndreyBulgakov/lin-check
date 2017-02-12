@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.devexperts.dxlab.lincheck.tests.guava;
+package com.devexperts.dxlab.lincheck.tests.high_scale_lib;
 
 /*
  * #%L
@@ -46,32 +46,33 @@ import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.Param;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
 import com.devexperts.dxlab.lincheck.generators.IntGen;
-import com.google.common.collect.ConcurrentHashMultiset;
+import org.cliffc.high_scale_lib.NonBlockingSetInt;
 import org.junit.Test;
 
+import java.util.Set;
+
 @CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
-@Param(name = "value", gen = IntGen.class)
-@Param(name = "count", gen = IntGen.class, conf = "1:10")
-public class MultisetCorrect1 {
-    private ConcurrentHashMultiset<Integer> q;
+@Param(name = "key", gen = IntGen.class, conf = "1:10")
+public class NonBlockingSetIntTest {
+    private Set<Integer> q;
 
     @Reset
     public void reload() {
-        q = ConcurrentHashMultiset.create();
+        q = new NonBlockingSetInt();
     }
 
-    @Operation(params = {"value", "count"})
-    public int add(int value, int count) {
-        return q.add(value, count);
+    @Operation(params = {"key"})
+    public boolean add(int key) {
+        return q.add(key);
     }
 
-    @Operation(params = {"value", "count"})
-    public int remove(int value, int count) {
-        return q.remove(value, count);
+    @Operation(params = {"key"})
+    public boolean remove(int key) {
+        return q.remove(key);
     }
 
     @Test
-    public void test() throws Exception {
+    public void test() {
         LinChecker.check(this);
     }
 }

@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.devexperts.dxlab.lincheck.tests.boundary;
+package com.devexperts.dxlab.lincheck.tests.zchannel;
 
 /*
  * #%L
@@ -41,37 +41,38 @@ package com.devexperts.dxlab.lincheck.tests.boundary;
  */
 
 import com.devexperts.dxlab.lincheck.LinChecker;
-import com.devexperts.dxlab.lincheck.annotations.*;
+import com.devexperts.dxlab.lincheck.annotations.CTest;
+import com.devexperts.dxlab.lincheck.annotations.Operation;
+import com.devexperts.dxlab.lincheck.annotations.Param;
+import com.devexperts.dxlab.lincheck.annotations.Reset;
 import com.devexperts.dxlab.lincheck.generators.IntGen;
-import org.cliffc.high_scale_lib.NonBlockingSetInt;
 import org.junit.Test;
+import z.channel.GenericMPMCQueue;
 
-import java.util.Set;
-
-import static org.junit.Assert.assertTrue;
-
-@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
-@Param(name = "key", gen = IntGen.class, conf = "1:10")
-public class BitVectorCorrect1 {
-    private Set<Integer> q;
+/**
+ * http://landz.github.io/
+ */
+@CTest(iterations = 100, actorsPerThread = {"1:3", "1:3", "1:3"})
+public class QueueUnCorrect1 {
+    private GenericMPMCQueue<Integer> q;
 
     @Reset
     public void reload() {
-        q = new NonBlockingSetInt();
-    }
-
-    @Operation(params = {"key"})
-    public boolean add(int key) {
-        return q.add(key);
+        q = new GenericMPMCQueue<>(4);
     }
 
     @Operation
-    public boolean remove(@Param(name = "key") int key) {
-        return q.remove(key);
+    public boolean offer(@Param(gen = IntGen.class) int value) {
+        return q.offer(value);
+    }
+
+    @Operation
+    public Integer poll() {
+        return q.poll();
     }
 
     @Test
-    public void test() {
+    public void test() throws Exception {
         LinChecker.check(this);
     }
 }

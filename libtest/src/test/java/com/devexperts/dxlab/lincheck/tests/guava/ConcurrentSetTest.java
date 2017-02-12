@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.devexperts.dxlab.lincheck.tests.boundary;
+package com.devexperts.dxlab.lincheck.tests.guava;
 
 /*
  * #%L
@@ -46,33 +46,34 @@ import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.Param;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
 import com.devexperts.dxlab.lincheck.generators.IntGen;
-import org.cliffc.high_scale_lib.NonBlockingHashSet;
 import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
-@CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
+@CTest(iterations = 100, actorsPerThread = {"1:3", "1:3", "1:3"})
 @Param(name = "key", gen = IntGen.class)
-public class SetCorrect1 {
-    private NonBlockingHashSet<Integer> q;
+public class ConcurrentSetTest {
+    private Set<Integer> q;
 
     @Reset
     public void reload() {
-        q = new NonBlockingHashSet<>();
+        q = Collections.newSetFromMap(new ConcurrentHashMap<Integer, Boolean>());
     }
 
     @Operation(params = {"key"})
-    public boolean add(int key) {
-        return q.add(key);
+    public boolean add(Integer params) {
+        return q.add(params);
     }
 
     @Operation(params = {"key"})
-    public boolean remove(int key) {
-        return q.remove(key);
+    public boolean remove(Integer params) {
+        return q.remove(params);
     }
 
     @Test
-    public void test() {
-        LinChecker.check(new SetCorrect1());
+    public void test() throws Exception {
+        LinChecker.check(this);
     }
 }
