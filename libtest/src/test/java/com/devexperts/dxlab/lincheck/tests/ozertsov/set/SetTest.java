@@ -1,4 +1,4 @@
-package com.devexperts.dxlab.lincheck.tests.ozertsov.queue;
+package com.devexperts.dxlab.lincheck.tests.ozertsov.set;
 
 import com.devexperts.dxlab.lincheck.LinChecker;
 import com.devexperts.dxlab.lincheck.annotations.CTest;
@@ -7,27 +7,33 @@ import com.devexperts.dxlab.lincheck.annotations.Param;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
 import com.devexperts.dxlab.lincheck.generators.IntGen;
 import org.junit.Test;
-import ozertsov.queue.LockFreeQueue;
+import ozertsov.set.LockFreeSet;
+
 /**
- * Created by alexander on 13.02.17.
+ * Created by alexander on 18.02.17.
  */
-@CTest(iterations = 100, actorsPerThread = {"1:5", "1:5"}, invocationsPerIteration = 100_000)
-public class QueueTest {
-    private LockFreeQueue<Integer> q;
+@CTest(iterations = 10, actorsPerThread = {"1:3", "1:3"}, invocationsPerIteration = 100_000)
+public class SetTest {
+    private LockFreeSet<Integer> lfset;
 
     @Reset
     public void reload() {
-        q = new LockFreeQueue<>();
+        lfset = new LockFreeSet<>();
     }
 
     @Operation
     public void add(@Param(gen = IntGen.class) int value) {
-        q.add(value);
+        lfset.add(value);
     }
 
     @Operation
-    public int takeOrNull() {
-        return q.takeOrNull();
+    public boolean contains(@Param(gen = IntGen.class) int value) {
+        return lfset.contains(value);
+    }
+
+    @Operation
+    public int size() {
+        return lfset.size();
     }
 
     @Test
