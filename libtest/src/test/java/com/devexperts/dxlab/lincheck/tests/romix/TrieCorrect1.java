@@ -48,7 +48,7 @@ import com.devexperts.dxlab.lincheck.annotations.ReadOnly;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
 import com.devexperts.dxlab.lincheck.generators.IntGen;
 import org.junit.Test;
-import romix.scala.collection.concurrent.TrieMap;
+import java_concurrent_hash_trie_map.collection.concurrent.TrieMap;
 
 import java.util.Map;
 

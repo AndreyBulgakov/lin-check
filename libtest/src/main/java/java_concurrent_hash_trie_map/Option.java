@@ -1,4 +1,4 @@
-package romix.scala.collection.concurrent;
+package java_concurrent_hash_trie_map;
 
 /*
  * #%L
@@ -22,41 +22,27 @@ package romix.scala.collection.concurrent;
  * #L%
  */
 
-import java.util.Map;
-
-/***
- * Helper class simulating a tuple of 2 elements in Scala
- * 
+/**
+ * Mimic Option in Scala
+ *  
  * @author Roman Levenstein <romixlev@gmail.com>
  *
- * @param <K>
  * @param <V>
  */
-public class Pair<K, V> implements Map.Entry<K, V> {
-
-    final K k;
-    final V v;
-
-    Pair (K k, V v) {
-        this.k = k;
-        this.v = v;
+@SuppressWarnings({"rawtypes", "unchecked"})
+public class Option<V> {
+    static None none = new None();
+    public static <V> Option<V> makeOption(V o){
+        if(o!=null)
+            return new Some<V>(o);
+        else
+            return (Option<V>)none;
     }
 
-    @Override
-    public K getKey () {
-        // TODO Auto-generated method stub
-        return k;
+    public static <V> Option<V> makeOption(){
+        return (Option<V>)none;
     }
-
-    @Override
-    public V getValue () {
-        // TODO Auto-generated method stub
-        return v;
+    public boolean nonEmpty () {
+        return false;
     }
-
-    @Override
-    public V setValue (V value) {
-        throw new RuntimeException ("Operation not supported");
-    }
-
 }

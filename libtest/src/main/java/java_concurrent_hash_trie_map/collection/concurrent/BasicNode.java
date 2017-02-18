@@ -6,7 +6,7 @@
 **                          |/                                          **
 \*                                                                      */
 
-package romix.scala.collection.concurrent;
+package java_concurrent_hash_trie_map.collection.concurrent;
 
 /*
  * #%L
@@ -32,26 +32,11 @@ package romix.scala.collection.concurrent;
 
 
 
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 
 
-abstract class INodeBase<K, V> extends BasicNode {
+abstract class BasicNode {
     
-    public static final AtomicReferenceFieldUpdater<INodeBase, MainNode> updater = AtomicReferenceFieldUpdater.newUpdater(INodeBase.class, MainNode.class, "mainnode");
-    
-    public static final Object RESTART = new Object();
-    
-    public volatile MainNode<K, V> mainnode = null;
-    
-    public final Gen gen;
-    
-    public INodeBase(Gen generation) {
-    gen = generation;
-    }
-    
-    public BasicNode prev() {
-    return null;
-    }
+    public abstract String string(int lev);
     
 }

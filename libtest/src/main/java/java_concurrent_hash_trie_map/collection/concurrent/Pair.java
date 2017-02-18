@@ -1,12 +1,4 @@
-/*                     __                                               *\
-**     ________ ___   / /  ___     Scala API                            **
-**    / __/ __// _ | / /  / _ |    (c) 2003-2012, LAMP/EPFL             **
-**  __\ \/ /__/ __ |/ /__/ __ |    http://scala-lang.org/               **
-** /____/\___/_/ |_/____/_/ | |                                         **
-**                          |/                                          **
-\*                                                                      */
-
-package romix.scala.collection.concurrent;
+package java_concurrent_hash_trie_map.collection.concurrent;
 
 /*
  * #%L
@@ -30,13 +22,41 @@ package romix.scala.collection.concurrent;
  * #L%
  */
 
+import java.util.Map;
 
+/***
+ * Helper class simulating a tuple of 2 elements in Scala
+ * 
+ * @author Roman Levenstein <romixlev@gmail.com>
+ *
+ * @param <K>
+ * @param <V>
+ */
+public class Pair<K, V> implements Map.Entry<K, V> {
 
+    final K k;
+    final V v;
 
+    Pair (K k, V v) {
+        this.k = k;
+        this.v = v;
+    }
 
+    @Override
+    public K getKey () {
+        // TODO Auto-generated method stub
+        return k;
+    }
 
-abstract class BasicNode {
-    
-    public abstract String string(int lev);
-    
+    @Override
+    public V getValue () {
+        // TODO Auto-generated method stub
+        return v;
+    }
+
+    @Override
+    public V setValue (V value) {
+        throw new RuntimeException ("Operation not supported");
+    }
+
 }

@@ -6,7 +6,7 @@
  **                          |/                                          **
 \*                                                                      */
 
-package romix.scala.collection.concurrent;
+package java_concurrent_hash_trie_map.collection.concurrent;
 
 /*
  * #%L

@@ -1,4 +1,4 @@
-package romix.scala.collection.concurrent;
+package java_concurrent_hash_trie_map.collection.concurrent;
 
 /*
  * #%L
@@ -39,9 +39,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
-import romix.scala.None;
-import romix.scala.Option;
-import romix.scala.Some;
+import java_concurrent_hash_trie_map.None;
+import java_concurrent_hash_trie_map.Some;
+import java_concurrent_hash_trie_map.Option;
 
 /***
  * This is a port of Scala's TrieMap class from the Scala Collections library.

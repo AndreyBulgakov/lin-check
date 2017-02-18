@@ -1,4 +1,4 @@
-package romix.scala;
+package java_concurrent_hash_trie_map;
 
 /*
  * #%L
@@ -23,26 +23,12 @@ package romix.scala;
  */
 
 /**
- * Mimic Option in Scala
+ * Mimic None in Scala
  *  
  * @author Roman Levenstein <romixlev@gmail.com>
  *
  * @param <V>
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
-public class Option<V> {
-    static None none = new None();
-    public static <V> Option<V> makeOption(V o){
-        if(o!=null)
-            return new Some<V>(o);
-        else
-            return (Option<V>)none;
-    }
+public class None<V> extends Option<V> {
 
-    public static <V> Option<V> makeOption(){
-        return (Option<V>)none;
-    }
-    public boolean nonEmpty () {
-        return false;
-    }
 }

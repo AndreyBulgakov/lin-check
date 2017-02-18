@@ -1,4 +1,4 @@
-package romix.scala.collection.concurrent;
+package java_concurrent_hash_trie_map.collection.concurrent;
 
 /*
  * #%L
@@ -25,7 +25,7 @@ package romix.scala.collection.concurrent;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
-import romix.scala.Option;
+import java_concurrent_hash_trie_map.Option;
 
 /**
  * Mimic immutable ListMap in Scala

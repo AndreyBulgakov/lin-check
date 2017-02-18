@@ -1,4 +1,4 @@
-package romix.scala;
+package java_concurrent_hash_trie_map;
 
 /*
  * #%L
