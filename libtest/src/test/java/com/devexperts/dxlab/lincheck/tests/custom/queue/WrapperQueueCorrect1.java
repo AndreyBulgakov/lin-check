@@ -45,11 +45,9 @@ import com.devexperts.dxlab.lincheck.annotations.*;
 import com.devexperts.dxlab.lincheck.generators.IntGen;
 import org.junit.Test;
 import tests.custom.queue.Queue;
-import tests.custom.queue.QueueEmptyException;
-import tests.custom.queue.QueueFullException;
 import tests.custom.queue.QueueSynchronized;
-
-import static org.junit.Assert.assertTrue;
+import tests.custom.queue.exceptions.QueueEmptyException;
+import tests.custom.queue.exceptions.QueueFullException;
 
 @CTest(iterations = 100, actorsPerThread = {"1:3", "1:3", "1:3"})
 public class WrapperQueueCorrect1 {

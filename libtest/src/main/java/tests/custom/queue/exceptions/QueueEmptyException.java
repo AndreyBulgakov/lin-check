@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package tests.custom.queue;
+package tests.custom.queue.exceptions;
 
 /*
  * #%L
@@ -40,12 +40,12 @@ package tests.custom.queue;
  * #L%
  */
 
-public class QueueFullException extends Exception {
-    public QueueFullException(String message) {
+public class QueueEmptyException extends Exception {
+    public QueueEmptyException(String message) {
         super(message);
     }
 
-    public QueueFullException() {
+    public QueueEmptyException() {
 
     }
 }

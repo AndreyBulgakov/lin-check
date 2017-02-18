@@ -40,6 +40,9 @@ package tests.custom.queue;
  * #L%
  */
 
+import tests.custom.queue.exceptions.QueueEmptyException;
+import tests.custom.queue.exceptions.QueueFullException;
+
 public interface Queue {
     public void put(int x) throws QueueFullException;
     public int get() throws QueueEmptyException;

@@ -40,6 +40,9 @@ package tests.custom.queue;
  * #L%
  */
 
+import tests.custom.queue.exceptions.QueueEmptyException;
+import tests.custom.queue.exceptions.QueueFullException;
+
 import java.util.Arrays;
 
 public class QueueWrong1 implements Queue {

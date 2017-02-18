@@ -44,8 +44,8 @@ import com.devexperts.dxlab.lincheck.LinChecker;
 import com.devexperts.dxlab.lincheck.annotations.*;
 import com.devexperts.dxlab.lincheck.generators.IntGen;
 import tests.custom.queue.Queue;
-import tests.custom.queue.QueueEmptyException;
-import tests.custom.queue.QueueFullException;
+import tests.custom.queue.exceptions.QueueEmptyException;
+import tests.custom.queue.exceptions.QueueFullException;
 import tests.custom.queue.QueueWrong2;
 import org.junit.Test;
 

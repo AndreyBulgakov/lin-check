@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * Daneel Yaitskov
  */
-public class LockFreeQueue<T> implements SimpleQueue<T> {
+public class LockFreeQueue<T> {
 
     // never empty
     private final AtomicLong length = new AtomicLong(1L);
@@ -37,13 +37,11 @@ public class LockFreeQueue<T> implements SimpleQueue<T> {
     private final AtomicReference<Node<T>> head = new AtomicReference<Node<T>>(stub);
     private final AtomicReference<Node<T>> tail = new AtomicReference<Node<T>>(stub);
 
-    @Override
     public void add(T x) {
         addNode(new Node<T>(x));
         length.incrementAndGet();
     }
 
-    @Override
     public T takeOrNull() {
         while (true) {
             long l = length.get();
