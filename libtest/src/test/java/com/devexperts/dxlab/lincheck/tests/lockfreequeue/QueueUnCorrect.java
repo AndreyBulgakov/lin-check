@@ -46,7 +46,7 @@ import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.Param;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
 import com.devexperts.dxlab.lincheck.generators.IntGen;
-import com.github.lock.free.queue.LockFreeQueue;
+import lock_free_queue.LockFreeQueue;
 import org.junit.Test;
 
 /**

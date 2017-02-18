@@ -1,4 +1,4 @@
-package com.github.lock.free.queue;
+package lock_free_queue;
 
 /*
  * #%L
