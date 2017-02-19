@@ -486,7 +486,7 @@ public class Allocator {
 
     // addressTLPHEAD+TLPHEAD_NUMTLPS_OFFSET->addressTLPHEAD,
     //   in that TLPHEAD_NUMTLPS_OFFSET=0
-    onAddress(addressTLPHEAD).put(0);//initial num counter for TLPs
+    onAddress(addressTLPHEAD).put(0);//initial num com.devexperts.dxlab.lincheck.libtest.counter for TLPs
 
     addressTLPStates = addressTLPHEAD + TLPSTATES_TO_TLPHEAD_OFFSET;
     //initialize TLPStates

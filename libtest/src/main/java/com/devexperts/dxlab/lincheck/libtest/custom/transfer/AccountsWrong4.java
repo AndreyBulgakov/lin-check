@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package tests.custom.transfer;
+package com.devexperts.dxlab.lincheck.libtest.custom.transfer;
 
 /*
  * #%L
@@ -43,14 +43,15 @@ package tests.custom.transfer;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AccountsWrong3 implements Accounts {
+public class AccountsWrong4 implements Accounts {
 
     Map<Integer, Integer> data;
 
-    public AccountsWrong3() {
+    public AccountsWrong4() {
         data = new HashMap<>();
     }
 
+    // This operation is not synchronized with other
     @Override
     public Integer getAmount(int id) {
         if (data.containsKey(id)) {
@@ -61,12 +62,12 @@ public class AccountsWrong3 implements Accounts {
     }
 
     @Override
-    public void setAmount(int id, int value) {
+    public synchronized void setAmount(int id, int value) {
         data.put(id, value);
     }
 
     @Override
-    public void transfer(int id1, int id2, int value) {
+    public synchronized void transfer(int id1, int id2, int value) {
         if (id1 == id2) return;
         Integer v1 = data.get(id1);
         Integer v2 = data.get(id2);

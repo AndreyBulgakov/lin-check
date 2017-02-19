@@ -1,4 +1,4 @@
-package counter;
+package com.devexperts.dxlab.lincheck.libtest.counter;
 
 /*
  * #%L
@@ -22,16 +22,6 @@ package counter;
  * #L%
  */
 
-public class SimpleWrongCounter1 implements Counter {
-    private int c;
-
-    public SimpleWrongCounter1() {
-        c = 0;
-    }
-
-    @Override
-    public int incrementAndGet() {
-        c++;
-        return c;
-    }
+public interface Counter {
+    public int incrementAndGet();
 }

@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package tests.custom.queue;
+package com.devexperts.dxlab.lincheck.libtest.custom.queue;
 
 /*
  * #%L
@@ -40,8 +40,8 @@ package tests.custom.queue;
  * #L%
  */
 
-import tests.custom.queue.exceptions.QueueEmptyException;
-import tests.custom.queue.exceptions.QueueFullException;
+import com.devexperts.dxlab.lincheck.libtest.custom.queue.exceptions.QueueEmptyException;
+import com.devexperts.dxlab.lincheck.libtest.custom.queue.exceptions.QueueFullException;
 
 import java.util.Arrays;
 

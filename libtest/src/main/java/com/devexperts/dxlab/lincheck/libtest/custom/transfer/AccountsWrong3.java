@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package tests.custom.queue;
+package com.devexperts.dxlab.lincheck.libtest.custom.transfer;
 
 /*
  * #%L
@@ -40,59 +40,48 @@ package tests.custom.queue;
  * #L%
  */
 
-import tests.custom.queue.exceptions.QueueEmptyException;
-import tests.custom.queue.exceptions.QueueFullException;
+import java.util.HashMap;
+import java.util.Map;
 
-import java.util.Arrays;
+public class AccountsWrong3 implements Accounts {
 
-public class QueueWrong1 implements Queue {
-    private int indGet;
-    private int indPut;
-    private int countElements;
+    Map<Integer, Integer> data;
 
-    private int[] items;
-
-    private int inc(int i) {
-        return (++i == items.length ? 0 : i);
-    }
-
-    public QueueWrong1(int capacity) {
-        items = new int[capacity];
-
-        indPut = 0;
-        indGet = 0;
-        countElements = 0;
-
+    public AccountsWrong3() {
+        data = new HashMap<>();
     }
 
     @Override
-    public void put(int x) throws QueueFullException {
-        if (countElements == items.length) {
-            throw new QueueFullException();
+    public Integer getAmount(int id) {
+        if (data.containsKey(id)) {
+            return data.get(id);
+        } else {
+            return 0;
         }
-        items[indPut] = x;
-        indPut = inc(indPut);
-        countElements++;
     }
 
     @Override
-    public int get() throws QueueEmptyException {
-        if (countElements == 0) {
-            throw new QueueEmptyException();
-        }
-        int ret = items[indGet];
-        indGet = inc(indGet);
-        countElements--;
-        return ret;
+    public void setAmount(int id, int value) {
+        data.put(id, value);
+    }
+
+    @Override
+    public void transfer(int id1, int id2, int value) {
+        if (id1 == id2) return;
+        Integer v1 = data.get(id1);
+        Integer v2 = data.get(id2);
+        if (v1 == null) v1 = 0;
+        if (v2 == null) v2 = 0;
+        v1 -= value;
+        v2 += value;
+        data.put(id1, v1);
+        data.put(id2, v2);
     }
 
     @Override
     public String toString() {
-        return "QueueWithoutAnySync{" +
-                "indGet=" + indGet +
-                ", indPut=" + indPut +
-                ", countElements=" + countElements +
-                ", items=" + Arrays.toString(items) +
+        return "AccountsSynchronized{" +
+                "data=" + data +
                 '}';
     }
 }

@@ -43,10 +43,10 @@ package com.devexperts.dxlab.lincheck.tests.custom.queue;
 import com.devexperts.dxlab.lincheck.LinChecker;
 import com.devexperts.dxlab.lincheck.annotations.*;
 import com.devexperts.dxlab.lincheck.generators.IntGen;
-import tests.custom.queue.Queue;
-import tests.custom.queue.exceptions.QueueEmptyException;
-import tests.custom.queue.exceptions.QueueFullException;
-import tests.custom.queue.QueueWrong2;
+import com.devexperts.dxlab.lincheck.libtest.custom.queue.Queue;
+import com.devexperts.dxlab.lincheck.libtest.custom.queue.exceptions.QueueEmptyException;
+import com.devexperts.dxlab.lincheck.libtest.custom.queue.exceptions.QueueFullException;
+import com.devexperts.dxlab.lincheck.libtest.custom.queue.QueueWrong2;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;

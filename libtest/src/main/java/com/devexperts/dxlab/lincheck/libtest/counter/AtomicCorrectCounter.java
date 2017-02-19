@@ -1,4 +1,4 @@
-package counter;
+package com.devexperts.dxlab.lincheck.libtest.counter;
 
 /*
  * #%L
@@ -22,6 +22,18 @@ package counter;
  * #L%
  */
 
-public interface Counter {
-    public int incrementAndGet();
+import java.util.concurrent.atomic.AtomicInteger;
+
+
+public class AtomicCorrectCounter implements Counter {
+    private AtomicInteger c;
+
+    public AtomicCorrectCounter() {
+        c = new AtomicInteger();
+    }
+
+    @Override
+    public synchronized int incrementAndGet() {
+        return c.incrementAndGet();
+    }
 }

@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package tests.custom.queue.exceptions;
+package com.devexperts.dxlab.lincheck.libtest.custom.transfer;
 
 /*
  * #%L
@@ -40,12 +40,48 @@ package tests.custom.queue.exceptions;
  * #L%
  */
 
-public class QueueEmptyException extends Exception {
-    public QueueEmptyException(String message) {
-        super(message);
+import java.util.HashMap;
+import java.util.Map;
+
+public class AccountsWrong1 implements Accounts {
+
+    Map<Integer, Integer> data;
+
+    public AccountsWrong1() {
+        data = new HashMap<>();
     }
 
-    public QueueEmptyException() {
+    @Override
+    public Integer getAmount(int id) {
+        if (data.containsKey(id)) {
+            return data.get(id);
+        } else {
+            return 0;
+        }
+    }
 
+    @Override
+    public void setAmount(int id, int value) {
+        data.put(id, value);
+    }
+
+    @Override
+    public synchronized void transfer(int id1, int id2, int value) {
+        if (id1 == id2) return;
+        Integer v1 = data.get(id1);
+        Integer v2 = data.get(id2);
+        if (v1 == null) v1 = 0;
+        if (v2 == null) v2 = 0;
+        v1 -= value;
+        v2 += value;
+        data.put(id1, v1);
+        data.put(id2, v2);
+    }
+
+    @Override
+    public String toString() {
+        return "AccountsSynchronized{" +
+                "data=" + data +
+                '}';
     }
 }

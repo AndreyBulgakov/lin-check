@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package tests.custom.transfer;
+package com.devexperts.dxlab.lincheck.libtest.custom.transfer;
 
 /*
  * #%L

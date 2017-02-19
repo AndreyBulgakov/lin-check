@@ -16,7 +16,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package tests.custom.queue;
+package com.devexperts.dxlab.lincheck.libtest.custom.queue.exceptions;
 
 /*
  * #%L
@@ -40,59 +40,12 @@ package tests.custom.queue;
  * #L%
  */
 
-import tests.custom.queue.exceptions.QueueEmptyException;
-import tests.custom.queue.exceptions.QueueFullException;
-
-import java.util.Arrays;
-
-public class QueueWrong2 implements Queue {
-    private int indGet;
-    private int indPut;
-    private int countElements;
-
-    private int[] items;
-
-    private int inc(int i) {
-        return (++i == items.length ? 0 : i);
+public class QueueEmptyException extends Exception {
+    public QueueEmptyException(String message) {
+        super(message);
     }
 
-    public QueueWrong2(int capacity) {
-        items = new int[capacity];
+    public QueueEmptyException() {
 
-        indPut = 0;
-        indGet = 0;
-        countElements = 0;
-
-    }
-
-    @Override
-    public synchronized void put(int x) throws QueueFullException {
-        if (countElements == items.length) {
-            throw new QueueFullException();
-        }
-        items[indPut] = x;
-        indPut = inc(indPut);
-        countElements++;
-    }
-
-    @Override
-    public int get() throws QueueEmptyException {
-        if (countElements == 0) {
-            throw new QueueEmptyException();
-        }
-        int ret = items[indGet];
-        indGet = inc(indGet);
-        countElements--;
-        return ret;
-    }
-
-    @Override
-    public String toString() {
-        return "QueueWithoutAnySync{" +
-                "indGet=" + indGet +
-                ", indPut=" + indPut +
-                ", countElements=" + countElements +
-                ", items=" + Arrays.toString(items) +
-                '}';
     }
 }

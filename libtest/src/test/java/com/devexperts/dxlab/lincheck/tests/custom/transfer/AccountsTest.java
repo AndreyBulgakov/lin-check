@@ -50,11 +50,11 @@ import com.devexperts.dxlab.lincheck.generators.IntGen;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import tests.custom.transfer.Accounts;
-import tests.custom.transfer.AccountsWrong1;
-import tests.custom.transfer.AccountsWrong2;
-import tests.custom.transfer.AccountsWrong3;
-import tests.custom.transfer.AccountsWrong4;
+import com.devexperts.dxlab.lincheck.libtest.custom.transfer.Accounts;
+import com.devexperts.dxlab.lincheck.libtest.custom.transfer.AccountsWrong1;
+import com.devexperts.dxlab.lincheck.libtest.custom.transfer.AccountsWrong2;
+import com.devexperts.dxlab.lincheck.libtest.custom.transfer.AccountsWrong3;
+import com.devexperts.dxlab.lincheck.libtest.custom.transfer.AccountsWrong4;
 
 import java.util.Arrays;
 import java.util.List;
