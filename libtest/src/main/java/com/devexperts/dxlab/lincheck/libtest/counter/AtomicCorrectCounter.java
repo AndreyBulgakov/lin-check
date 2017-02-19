@@ -33,7 +33,7 @@ public class AtomicCorrectCounter implements Counter {
     }
 
     @Override
-    public synchronized int incrementAndGet() {
+    public int incrementAndGet() {
         return c.incrementAndGet();
     }
 }
