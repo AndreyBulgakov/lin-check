@@ -1,11 +1,11 @@
-package com.devexperts.dxlab.lincheck.tests.ozertsov.state;
+package com.devexperts.dxlab.lincheck.tests;
 
 import com.devexperts.dxlab.lincheck.LinChecker;
 import com.devexperts.dxlab.lincheck.annotations.CTest;
 import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
 import org.junit.Test;
-import com.devexperts.dxlab.lincheck.libtest.ozertsov.signal.State;
+import com.devexperts.dxlab.lincheck.libtest.State;
 
 /**
  * Created by alexander on 09.02.17.

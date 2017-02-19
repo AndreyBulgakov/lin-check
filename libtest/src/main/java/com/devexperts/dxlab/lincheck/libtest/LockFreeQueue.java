@@ -1,4 +1,4 @@
-package com.devexperts.dxlab.lincheck.libtest.ozertsov.queue;
+package com.devexperts.dxlab.lincheck.libtest;
 
 import java.util.concurrent.atomic.AtomicReference;
 /**

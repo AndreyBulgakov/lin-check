@@ -1,4 +1,4 @@
-package com.devexperts.dxlab.lincheck.tests.ozertsov.queue;
+package com.devexperts.dxlab.lincheck.tests;
 
 import com.devexperts.dxlab.lincheck.LinChecker;
 import com.devexperts.dxlab.lincheck.annotations.CTest;
@@ -7,7 +7,7 @@ import com.devexperts.dxlab.lincheck.annotations.Param;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
 import com.devexperts.dxlab.lincheck.generators.IntGen;
 import org.junit.Test;
-import com.devexperts.dxlab.lincheck.libtest.ozertsov.queue.LockFreeQueue;
+import com.devexperts.dxlab.lincheck.libtest.LockFreeQueue;
 /**
  * Created by alexander on 13.02.17.
  */

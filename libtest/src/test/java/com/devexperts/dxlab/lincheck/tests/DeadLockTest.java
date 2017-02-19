@@ -1,11 +1,11 @@
-package com.devexperts.dxlab.lincheck.tests.ozertsov.deadlock;
+package com.devexperts.dxlab.lincheck.tests;
 
 import com.devexperts.dxlab.lincheck.LinChecker;
 import com.devexperts.dxlab.lincheck.annotations.CTest;
 import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
 import org.junit.Test;
-import com.devexperts.dxlab.lincheck.libtest.ozertsov.deadlock.DeadLock;
+import com.devexperts.dxlab.lincheck.libtest.DeadLock;
 
 /**
  * Created by alexander on 09.02.17.
