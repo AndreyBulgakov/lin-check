@@ -22,8 +22,8 @@ package com.devexperts.dxlab.lincheck;
  * #L%
  */
 
-import com.devexperts.dxlab.lincheck.report.ConsolePrinter;
-import com.devexperts.dxlab.lincheck.report.Printer;
+import com.devexperts.dxlab.lincheck.report.ConsoleReporter;
+import com.devexperts.dxlab.lincheck.report.Reporter;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -45,7 +45,7 @@ public class LinChecker {
     private final Object testInstance;
     private final List<CTestConfiguration> testConfigurations;
     private final CTestStructure testStructure;
-    private Printer printer;
+    private Reporter reporter;
 
     private LinChecker(Object testInstance) {
         this.testInstance = testInstance;
@@ -64,7 +64,7 @@ public class LinChecker {
     private void check() throws AssertionError {
         testConfigurations.forEach((testConfiguration) -> {
             try {
-                printer = new ConsolePrinter(testConfiguration.getIterations(), testConfiguration.getInvocationsPerIteration());
+                reporter = new ConsoleReporter(testConfiguration.getIterations(), testConfiguration.getInvocationsPerIteration());
                 checkImpl(testConfiguration);
             } catch (InterruptedException e) {
                 throw new IllegalStateException(e);
@@ -138,7 +138,7 @@ public class LinChecker {
             // Run iterations
             for (int iteration = 1; iteration <= testCfg.getIterations(); iteration++) {
                 List<List<Actor>> actorsPerThread = generateActors(testCfg);
-                printer.addAlgoryrhm(iteration, actorsPerThread);
+                reporter.addActors(iteration, actorsPerThread);
 
                 // Create TestThreadExecution's
                 List<TestThreadExecution> testThreadExecutions = actorsPerThread.stream()
@@ -146,7 +146,7 @@ public class LinChecker {
                     .collect(Collectors.toList());
                 // Generate all possible results
                 Set<List<List<Result>>> possibleResultsSet = generateLinearizeResults(actorsPerThread);
-                printer.addLinearizeResults(iteration, possibleResultsSet);
+                reporter.addLinearizeResults(iteration, possibleResultsSet);
                 // Run invocations
                 for (int invocation = 1; invocation <= testCfg.getInvocationsPerIteration(); invocation++) {
                     // Reset the state of test
@@ -167,14 +167,14 @@ public class LinChecker {
                     // Check correctness& Throw an AssertionError if current execution
                     // is not linearizable and log invalid execution
                     if (!possibleResultsSet.contains(results)) {
-                        printer.addResult(iteration, invocation, results);
+                        reporter.addResult(iteration, invocation, results);
                         throw new AssertionError("Non-linearizable execution detected, see log for details");
                     }
                 }
-                printer.addResult(iteration);
+                reporter.addResult(iteration);
             }
         } finally {
-            printer.printReport();
+            reporter.printReport();
             pool.shutdown();
         }
     }
