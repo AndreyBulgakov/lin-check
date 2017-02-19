@@ -45,7 +45,7 @@ import static org.objectweb.asm.Opcodes.*;
  */
 class TestThreadExecutionGenerator {
 //    private static final ExecutionClassLoader LOADER = new ExecutionClassLoader();
-    private static final ExecutionClassLoader LOADER = ExecutionClassLoader.getInstance();
+    private static final ExecutionClassLoader LOADER = Utils.LOADER;
 
     private static final Type[] NO_ARGS = new Type[] {};
 
@@ -268,18 +268,4 @@ class TestThreadExecutionGenerator {
         }
     }
 
-//    private static class ExecutionClassLoader extends ClassLoader {
-//
-//        @Override
-//        protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-//            System.out.println(name);
-////            System.out.println();
-//            return super.loadClass(name, resolve);
-//        }
-//
-//        private Class<? extends TestThreadExecution> define(String className, byte[] bytecode) {
-////            System.out.println(className);
-//            return (Class<? extends TestThreadExecution>) super.defineClass(className, bytecode, 0, bytecode.length);
-//        }
-//    }
 }

@@ -8,28 +8,40 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Loads and transform classes
  */
-public class ExecutionClassLoader extends ClassLoader {
+class ExecutionClassLoader extends ClassLoader {
 
     private final Map<String, Class<?>> cash = new ConcurrentHashMap<>();
+    private final Map<String, byte[]> resources = new ConcurrentHashMap<>();
     private String testClassName = "";
+    private final List<String> excluded = Arrays.asList(
+            "com.devexperts.dxlab.lincheck",
+//            "com.devexperts.dxlab.lincheck.tests.",
+            "sun.",
+            "java.",
+            "org.junit."
 
-    private static final ExecutionClassLoader INSTANCE = new ExecutionClassLoader();
+    );
 
-    private ExecutionClassLoader() {
-    }
+//    private static final ExecutionClassLoader INSTANCE = new ExecutionClassLoader();
+//
+//    private ExecutionClassLoader() {
+//    }
+//
+//    public static ExecutionClassLoader getInstance() {
+//        return INSTANCE;
+//    }
 
-    public static ExecutionClassLoader getInstance() {
-        return INSTANCE;
-    }
-
-    public void setTestClassName(String testClassName) {
+    void setTestClassName(String testClassName) {
         this.testClassName = testClassName;
     }
 
@@ -48,13 +60,9 @@ public class ExecutionClassLoader extends ClassLoader {
             return result;
         }
 
-        // TODO Excluded list
         // TODO Need resolve?
         // Secure some packages
-        if (name != null &&
-                (name.startsWith("com.devexperts.dxlab.lincheck") &&
-                        !name.startsWith("com.devexperts.dxlab.lincheck.test") ||
-                        name.startsWith("sun.") || name.startsWith("java.") || name.startsWith("org.junit."))) {
+        if (shouldIgnoreClass(name)) {
             return super.loadClass(name);
         }
 
@@ -66,13 +74,16 @@ public class ExecutionClassLoader extends ClassLoader {
             //TODO maybe set all CV chain in Classloader?
             ClassVisitor cv = new ConsumeCPUClassVisitor(cw);
 //            ClassVisitor cv = new ThreadYieldClassVisitor(cw);
-            ClassVisitor cv0 = new IgnoreClassVisitor(cv, testClassName);
+            ClassVisitor cv0 = new IgnoreClassVisitor(cv, cw, testClassName);
             ClassReader cr = new ClassReader(name);
 
-            cr.accept(cv0, ClassReader.EXPAND_FRAMES);
+//            cr.accept(cv0, ClassReader.EXPAND_FRAMES);
+            cr.accept(cv0, ClassReader.SKIP_FRAMES);
+
             byte[] resultBytecode = cw.toByteArray();
             result = defineClass(name, resultBytecode, 0, resultBytecode.length);
 
+            resources.put(name, resultBytecode);
             cash.put(name, result);
             return result;
         } catch (SecurityException e) {
@@ -80,9 +91,36 @@ public class ExecutionClassLoader extends ClassLoader {
         } catch (IOException e) {
             throw new ClassNotFoundException(name, e);
         }
+        catch (LinkageError error){
+            System.out.println(name);
+            return Class.forName(name);
+        }
     }
 
-    public Class<? extends TestThreadExecution> define(String className, byte[] bytecode) {
+    @Override
+    public InputStream getResourceAsStream(String name) {
+        byte[] result = resources.get(name);
+        if (result != null){
+            return new ByteArrayInputStream(result);
+        }
+        else {
+            return super.getResourceAsStream(name);
+        }
+    }
+
+
+    static boolean shouldIgnoreClass(String name) {
+        return
+                name == null ||
+                name.startsWith("com.devexperts.dxlab.lincheck.") &&
+                        !name.startsWith("com.devexperts.dxlab.lincheck.tests.") ||
+                name.startsWith("sun.") ||
+                name.startsWith("java.") ||
+                name.startsWith("org.junit.");
+
+        }
+
+    Class<? extends TestThreadExecution> define(String className, byte[] bytecode) {
         return (Class<? extends TestThreadExecution>) super.defineClass(className, bytecode, 0, bytecode.length);
     }
 

@@ -50,10 +50,10 @@ public class LinChecker {
     private final Class testClass;
     private final List<CTestConfiguration> testConfigurations;
     private final CTestStructure testStructure;
-    private final ExecutionClassLoader LOADER = ExecutionClassLoader.getInstance();
+    private final ExecutionClassLoader LOADER = Utils.LOADER;
 
     private LinChecker(Class testClass) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-        LOADER.setTestClassName(testClass.getCanonicalName().replace(".", "/"));
+//        LOADER.setTestClassName(testClass.getCanonicalName());
         this.testInstance = LOADER.loadClass(testClass.getCanonicalName()).newInstance();
 //        Class<?> testClass = testInstance.getClass();
         this.testClass = testInstance.getClass();
@@ -64,7 +64,7 @@ public class LinChecker {
     private LinChecker(Object testInstance) {
         this.testInstance = testInstance;
         Class<?> testClass = testInstance.getClass();
-        LOADER.setTestClassName(testClass.getCanonicalName().replace(".", "/"));
+        LOADER.setTestClassName(testClass.getCanonicalName());
         this.testClass = testClass;
         this.testConfigurations = CTestConfiguration.getFromTestClass(testClass);
         this.testStructure = CTestStructure.getFromTestClass(testClass);
