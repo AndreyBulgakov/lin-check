@@ -1,4 +1,4 @@
-package ozertsov.list;
+package com.devexperts.dxlab.lincheck.libtest.ozertsov.list;
 
 import java.util.AbstractList;
 import java.util.concurrent.atomic.AtomicReference;

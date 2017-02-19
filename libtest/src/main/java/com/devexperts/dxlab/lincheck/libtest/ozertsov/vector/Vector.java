@@ -1,4 +1,4 @@
-package ozertsov.vector;
+package com.devexperts.dxlab.lincheck.libtest.ozertsov.vector;
 
 import sun.awt.Mutex;
 

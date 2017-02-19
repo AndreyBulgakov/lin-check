@@ -1,4 +1,4 @@
-package ozertsov.map;
+package com.devexperts.dxlab.lincheck.libtest.ozertsov.map;
 
 /**
  * Created by alexander on 18.02.17.

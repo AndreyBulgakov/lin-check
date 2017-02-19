@@ -1,4 +1,4 @@
-package ozertsov.set;
+package com.devexperts.dxlab.lincheck.libtest.ozertsov.set;
 
 /**
  * Created by alexander on 18.02.17.

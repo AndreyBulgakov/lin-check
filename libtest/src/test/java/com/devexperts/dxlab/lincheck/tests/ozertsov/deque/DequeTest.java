@@ -7,7 +7,7 @@ import com.devexperts.dxlab.lincheck.annotations.Param;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
 import com.devexperts.dxlab.lincheck.generators.IntGen;
 import org.junit.Test;
-import ozertsov.deque.LockFreeDeque;
+import com.devexperts.dxlab.lincheck.libtest.ozertsov.deque.LockFreeDeque;
 
 /**
  * Created by alexander on 18.02.17.

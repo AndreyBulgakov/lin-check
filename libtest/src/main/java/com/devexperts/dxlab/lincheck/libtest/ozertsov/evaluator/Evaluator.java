@@ -1,4 +1,4 @@
-package ozertsov.evaluator;
+package com.devexperts.dxlab.lincheck.libtest.ozertsov.evaluator;
 
 /**
  * Created by alexander on 08.02.17.

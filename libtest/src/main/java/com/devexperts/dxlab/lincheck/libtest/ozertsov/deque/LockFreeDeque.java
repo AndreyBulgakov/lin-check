@@ -1,4 +1,4 @@
-package ozertsov.deque;
+package com.devexperts.dxlab.lincheck.libtest.ozertsov.deque;
 
 /**
  * Created by alexander on 18.02.17.

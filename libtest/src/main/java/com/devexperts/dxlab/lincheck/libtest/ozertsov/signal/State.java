@@ -1,4 +1,4 @@
-package ozertsov.signal;
+package com.devexperts.dxlab.lincheck.libtest.ozertsov.signal;
 
 /**
  * Created by alexander on 09.02.17.

@@ -7,7 +7,7 @@ import com.devexperts.dxlab.lincheck.annotations.Param;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
 import com.devexperts.dxlab.lincheck.generators.IntGen;
 import org.junit.Test;
-import ozertsov.account.Account;
+import com.devexperts.dxlab.lincheck.libtest.ozertsov.account.Account;
 
 /**
  * Created by alexander on 09.02.17.

@@ -5,7 +5,7 @@ import com.devexperts.dxlab.lincheck.annotations.CTest;
 import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
 import org.junit.Test;
-import ozertsov.race.Race;
+import com.devexperts.dxlab.lincheck.libtest.ozertsov.race.Race;
 
 /**
  * Created by alexander on 09.02.17.

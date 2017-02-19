@@ -1,4 +1,4 @@
-package ozertsov.deadlock;
+package com.devexperts.dxlab.lincheck.libtest.ozertsov.deadlock;
 
 /**
  * Created by alexander on 09.02.17.
