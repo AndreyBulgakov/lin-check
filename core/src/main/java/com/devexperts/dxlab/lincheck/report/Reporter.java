@@ -10,7 +10,7 @@ import java.util.Set;
 /**
  * Created by alexander on 09.02.17.
  */
-public abstract class Reporter {
+public class Reporter {
 
     protected PrintStream printer;
 

@@ -22,7 +22,6 @@ package com.devexperts.dxlab.lincheck;
  * #L%
  */
 
-import com.devexperts.dxlab.lincheck.report.ConsoleReporter;
 import com.devexperts.dxlab.lincheck.report.Reporter;
 
 import java.lang.reflect.InvocationTargetException;
@@ -64,7 +63,7 @@ public class LinChecker {
     private void check() throws AssertionError {
         testConfigurations.forEach((testConfiguration) -> {
             try {
-                reporter = new ConsoleReporter(testConfiguration.getIterations(), testConfiguration.getInvocationsPerIteration());
+                reporter = new Reporter(testConfiguration.getIterations(), testConfiguration.getInvocationsPerIteration(), System.out);
                 checkImpl(testConfiguration);
             } catch (InterruptedException e) {
                 throw new IllegalStateException(e);
