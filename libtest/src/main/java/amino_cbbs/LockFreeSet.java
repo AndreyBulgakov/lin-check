@@ -1,8 +1,11 @@
-package com.devexperts.dxlab.lincheck.libtest.ozertsov.set;
+package amino_cbbs;
 
 /**
  * Created by alexander on 18.02.17.
  */
+import amino_cbbs.utility.Parallel;
+import amino_cbbs.utility.ParallelType;
+
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;

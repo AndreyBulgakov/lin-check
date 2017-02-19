@@ -1,4 +1,4 @@
-package com.devexperts.dxlab.lincheck.libtest.ozertsov.map;
+package amino_cbbs;
 
 /**
  * Created by alexander on 18.02.17.

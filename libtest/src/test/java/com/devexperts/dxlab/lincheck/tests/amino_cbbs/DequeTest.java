@@ -1,4 +1,4 @@
-package com.devexperts.dxlab.lincheck.tests.ozertsov.deque;
+package com.devexperts.dxlab.lincheck.tests.amino_cbbs;
 
 import com.devexperts.dxlab.lincheck.LinChecker;
 import com.devexperts.dxlab.lincheck.annotations.CTest;
@@ -7,7 +7,7 @@ import com.devexperts.dxlab.lincheck.annotations.Param;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
 import com.devexperts.dxlab.lincheck.generators.IntGen;
 import org.junit.Test;
-import com.devexperts.dxlab.lincheck.libtest.ozertsov.deque.LockFreeDeque;
+import amino_cbbs.LockFreeDeque;
 
 /**
  * Created by alexander on 18.02.17.

@@ -1,11 +1,11 @@
-package com.devexperts.dxlab.lincheck.tests.ozertsov.vector;
+package com.devexperts.dxlab.lincheck.tests.amino_cbbs;
 
 import com.devexperts.dxlab.lincheck.LinChecker;
 import com.devexperts.dxlab.lincheck.annotations.CTest;
 import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
 import org.junit.Test;
-import com.devexperts.dxlab.lincheck.libtest.ozertsov.vector.Vector;
+import amino_cbbs.Vector;
 
 /**
  * Created by alexander on 10.02.17.

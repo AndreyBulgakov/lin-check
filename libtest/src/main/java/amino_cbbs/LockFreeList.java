@@ -1,4 +1,4 @@
-package com.devexperts.dxlab.lincheck.libtest.ozertsov.list;
+package amino_cbbs;
 
 import java.util.AbstractList;
 import java.util.concurrent.atomic.AtomicReference;

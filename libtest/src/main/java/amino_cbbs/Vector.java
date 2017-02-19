@@ -1,4 +1,4 @@
-package com.devexperts.dxlab.lincheck.libtest.ozertsov.vector;
+package amino_cbbs;
 
 import sun.awt.Mutex;
 
