@@ -41,14 +41,10 @@ package com.devexperts.dxlab.lincheck.tests.romix;
  */
 
 import com.devexperts.dxlab.lincheck.LinChecker;
-import com.devexperts.dxlab.lincheck.annotations.CTest;
-import com.devexperts.dxlab.lincheck.annotations.Operation;
-import com.devexperts.dxlab.lincheck.annotations.Param;
-import com.devexperts.dxlab.lincheck.annotations.ReadOnly;
-import com.devexperts.dxlab.lincheck.annotations.Reset;
+import com.devexperts.dxlab.lincheck.annotations.*;
 import com.devexperts.dxlab.lincheck.generators.IntGen;
+import com.romix.scala.collection.concurrent.TrieMap;
 import org.junit.Test;
-import java_concurrent_hash_trie_map.collection.concurrent.TrieMap;
 
 import java.util.Map;
 
