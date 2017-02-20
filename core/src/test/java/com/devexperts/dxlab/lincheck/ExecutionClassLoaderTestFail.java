@@ -1,17 +1,13 @@
 package com.devexperts.dxlab.lincheck;
 
 
-import com.devexperts.dxlab.lincheck.transformers.ThreadYieldClassVisitor;
 import com.devexperts.dxlab.lincheck.utils.InvokeMethodCounter;
 import com.devexperts.dxlab.transformigclasses.A;
 import com.devexperts.dxlab.lincheck.utils.AParrent;
-import com.devexperts.dxlab.transformigclasses.B;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.ClassWriter;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,32 +15,29 @@ import java.lang.reflect.InvocationTargetException;
 
 //TODO I dont know how to solve LingakeError (Example in testMultipleLoaders)
 // Run each test separated from others
-public class ExecutionClassLoaderTest {
+
+public class ExecutionClassLoaderTestFail {
     ExecutionClassLoader cl;
 
     @Before
-    public void initialize(){
-//        cl = new ExecutionClassLoader();
-        cl = Utils.LOADER;
+    public void initialize() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+        cl = new ExecutionClassLoader();
     }
+    @Test
+    public void testMultipleLoaders() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+        ExecutionClassLoader cl1 = new ExecutionClassLoader();
+        Class<? extends AParrent> aClass = (Class<? extends AParrent>) cl1.loadClass(A.class.getCanonicalName());
+        AParrent aParrent1 = aClass.newInstance();
 
-//    @Test
-//    public void testMultipleLoaders() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-//        ExecutionClassLoader cl1 = new ExecutionClassLoader();
-//        Class<? extends AParrent> aClass = (Class<? extends AParrent>) cl1.loadClass(A.class.getCanonicalName());
-//        AParrent aParrent1 = aClass.newInstance();
-//
-//        ExecutionClassLoader cl2 = new ExecutionClassLoader();
-//        Class<? extends AParrent> aClass2 = (Class<? extends AParrent>) cl2.loadClass(A.class.getCanonicalName());
-////        Class<? extends AParrent> aClass2 = (Class<? extends AParrent>) cl2.;
-//
-//        AParrent aParrent2 = aClass2.newInstance();
-//
-////        cl = new ExecutionClassLoader();
-//        ClassLoader bClassLoader1 = aParrent1.getB().getClass().getClassLoader();
-//        ClassLoader bClassLoader2 = aParrent2.getB().getClass().getClassLoader();
-//        Assert.assertNotEquals(bClassLoader1, bClassLoader2);
-//    }
+        ExecutionClassLoader cl2 = new ExecutionClassLoader();
+        Class<? extends AParrent> aClass2 = (Class<? extends AParrent>) cl2.loadClass(A.class.getCanonicalName());
+        AParrent aParrent2 = aClass2.newInstance();
+
+//        cl = new ExecutionClassLoader();
+        ClassLoader bClassLoader1 = aParrent1.getB().getClass().getClassLoader();
+        ClassLoader bClassLoader2 = aParrent2.getB().getClass().getClassLoader();
+        Assert.assertNotEquals(bClassLoader1, bClassLoader2);
+    }
 
     @Test(expected = NullPointerException.class)
     public void testNullLoadClass() throws ClassNotFoundException {

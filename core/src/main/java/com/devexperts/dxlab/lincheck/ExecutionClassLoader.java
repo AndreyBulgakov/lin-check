@@ -12,6 +12,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.instrument.Instrumentation;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -19,27 +20,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * Loads and transform classes
  */
 class ExecutionClassLoader extends ClassLoader {
-
     private final Map<String, Class<?>> cash = new ConcurrentHashMap<>();
     private final Map<String, byte[]> resources = new ConcurrentHashMap<>();
     private String testClassName = "";
-    private final List<String> excluded = Arrays.asList(
-            "com.devexperts.dxlab.lincheck",
-//            "com.devexperts.dxlab.lincheck.tests.",
-            "sun.",
-            "java.",
-            "org.junit."
-
-    );
-
-//    private static final ExecutionClassLoader INSTANCE = new ExecutionClassLoader();
-//
-//    private ExecutionClassLoader() {
-//    }
-//
-//    public static ExecutionClassLoader getInstance() {
-//        return INSTANCE;
-//    }
 
     void setTestClassName(String testClassName) {
         this.testClassName = testClassName;
@@ -65,7 +48,6 @@ class ExecutionClassLoader extends ClassLoader {
         if (shouldIgnoreClass(name)) {
             return super.loadClass(name);
         }
-
         //Transform and save class
         try {
 //            System.out.println(name);
@@ -91,10 +73,9 @@ class ExecutionClassLoader extends ClassLoader {
         } catch (IOException e) {
             throw new ClassNotFoundException(name, e);
         }
-        catch (LinkageError error){
-            System.out.println(name);
-            return Class.forName(name);
-        }
+//        catch (LinkageError error){
+//
+//        }
     }
 
     @Override

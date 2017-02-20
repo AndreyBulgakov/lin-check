@@ -6,7 +6,7 @@ import com.devexperts.dxlab.lincheck.utils.AParrent;
 /**
  * Created by andrey on 2/18/17.
  */
-public class A extends AParrent {
+public class A extends AParrent{
 
     private B b = new B();
     private String securityString = "Security string";
@@ -20,12 +20,10 @@ public class A extends AParrent {
         Utils.consumeCPU(2);
     }
 
-    @Override
     public B getB() {
         return b;
     }
 
-    @Override
     public String getSecutityString() {
         return securityString;
     }
