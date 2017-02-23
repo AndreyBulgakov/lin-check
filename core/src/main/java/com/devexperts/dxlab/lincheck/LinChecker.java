@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 public class LinChecker {
     private static final int MAX_WAIT = 1000;
 
-    private final Random random = new Random();
+    private final Random random = new Random(0);
     private final Object testInstance;
     private final List<CTestConfiguration> testConfigurations;
     private final CTestStructure testStructure;
