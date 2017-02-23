@@ -173,7 +173,6 @@ public class LinChecker {
                 reporter.addResult(iteration);
             }
         } finally {
-            reporter.printReport();
             pool.shutdown();
         }
     }
