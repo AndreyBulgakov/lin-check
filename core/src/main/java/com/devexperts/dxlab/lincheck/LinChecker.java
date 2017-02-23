@@ -23,7 +23,6 @@ package com.devexperts.dxlab.lincheck;
  */
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.IdentityHashMap;
@@ -47,7 +46,7 @@ public class LinChecker {
 
     private final Random random = new Random();
     private final Object testInstance;
-    private final Class testClass;
+    private final Class testClass; // TODO class name only
     private final List<CTestConfiguration> testConfigurations;
     private final CTestStructure testStructure;
     private final ExecutionClassLoader LOADER = Utils.LOADER;
@@ -149,6 +148,8 @@ public class LinChecker {
             final Phaser phaser = new Phaser(testCfg.getThreads());
             // Run iterations
             for (int iteration = 1; iteration <= testCfg.getIterations(); iteration++) {
+                // TODO new classloader per iteration
+                // TODO create test instance here
                 System.out.println("= Iteration " + iteration + " / " + testCfg.getIterations() + " =");
                 // Generate actors and print them to console
                 List<List<Actor>> actorsPerThread = generateActors(testCfg);
