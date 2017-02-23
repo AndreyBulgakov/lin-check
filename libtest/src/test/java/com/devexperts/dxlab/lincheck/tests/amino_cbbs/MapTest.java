@@ -1,10 +1,7 @@
 package com.devexperts.dxlab.lincheck.tests.amino_cbbs;
 
 import com.devexperts.dxlab.lincheck.LinChecker;
-import com.devexperts.dxlab.lincheck.annotations.CTest;
-import com.devexperts.dxlab.lincheck.annotations.Operation;
-import com.devexperts.dxlab.lincheck.annotations.Param;
-import com.devexperts.dxlab.lincheck.annotations.Reset;
+import com.devexperts.dxlab.lincheck.annotations.*;
 import com.devexperts.dxlab.lincheck.generators.IntGen;
 import org.junit.Test;
 import amino_cbbs.LockFreeMap;
@@ -42,10 +39,9 @@ public class MapTest {
     }
 
     @Operation
+    @HandleExceptionAsResult(NullPointerException.class)
     public int get(@Param(gen = IntGen.class) int key) {
-        if (lfmap.containsKey(key))
-            return lfmap.get(key);
-        return -1000;
+        return lfmap.get(key);
     }
 
     @Test

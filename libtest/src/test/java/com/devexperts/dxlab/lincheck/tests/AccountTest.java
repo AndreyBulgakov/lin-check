@@ -1,10 +1,7 @@
 package com.devexperts.dxlab.lincheck.tests;
 
 import com.devexperts.dxlab.lincheck.LinChecker;
-import com.devexperts.dxlab.lincheck.annotations.CTest;
-import com.devexperts.dxlab.lincheck.annotations.Operation;
-import com.devexperts.dxlab.lincheck.annotations.Param;
-import com.devexperts.dxlab.lincheck.annotations.Reset;
+import com.devexperts.dxlab.lincheck.annotations.*;
 import com.devexperts.dxlab.lincheck.generators.IntGen;
 import org.junit.Test;
 import com.devexperts.dxlab.lincheck.libtest.Account;
@@ -24,14 +21,18 @@ public class AccountTest {
     }
 
     @Operation(params = {"value"})
-    public int withdraw(int value){
+    public void withdraw(int value){
         account.withdraw(value);
-        return account.read();
     }
 
     @Operation(params = {"value"})
-    public int deposit(int value){
+    public void deposit(int value){
         account.deposit(value);
+    }
+
+    @Operation
+    @ReadOnly
+    public int result(){
         return account.read();
     }
 

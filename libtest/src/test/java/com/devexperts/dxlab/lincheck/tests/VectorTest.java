@@ -1,16 +1,17 @@
-package com.devexperts.dxlab.lincheck.tests.amino_cbbs;
+package com.devexperts.dxlab.lincheck.tests;
 
 import com.devexperts.dxlab.lincheck.LinChecker;
 import com.devexperts.dxlab.lincheck.annotations.CTest;
 import com.devexperts.dxlab.lincheck.annotations.Operation;
+import com.devexperts.dxlab.lincheck.annotations.ReadOnly;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
 import org.junit.Test;
-import amino_cbbs.Vector;
+import com.devexperts.dxlab.lincheck.libtest.Vector;
 
 /**
  * Created by alexander on 10.02.17.
  */
-@CTest(iterations = 30, actorsPerThread = {"1:2", "1:2"})
+@CTest(iterations = 60, actorsPerThread = {"1:2", "1:2"})
 public class VectorTest {
 
     private Vector v1;
@@ -25,15 +26,25 @@ public class VectorTest {
     }
 
     @Operation
-    public int addv1Tov3() {
+    public void addv1Tov3() {
         v3.addAll(v1);
+    }
+
+    @Operation
+    public void addv2Tov3() {
+        v3.addAll(v2);
+    }
+
+    @Operation
+    @ReadOnly
+    public int size(){
         return v3.getSize();
     }
 
     @Operation
-    public int addv2Tov3() {
-        v3.addAll(v2);
-        return v3.getSize();
+    @ReadOnly
+    public int length(){
+        return v3.getLength();
     }
 
     @Test(timeout = 1000000)

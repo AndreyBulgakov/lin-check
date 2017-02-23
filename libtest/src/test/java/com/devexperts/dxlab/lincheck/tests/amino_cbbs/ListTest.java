@@ -1,10 +1,7 @@
 package com.devexperts.dxlab.lincheck.tests.amino_cbbs;
 
 import com.devexperts.dxlab.lincheck.LinChecker;
-import com.devexperts.dxlab.lincheck.annotations.CTest;
-import com.devexperts.dxlab.lincheck.annotations.Operation;
-import com.devexperts.dxlab.lincheck.annotations.Param;
-import com.devexperts.dxlab.lincheck.annotations.Reset;
+import com.devexperts.dxlab.lincheck.annotations.*;
 import com.devexperts.dxlab.lincheck.generators.IntGen;
 import org.junit.Test;
 import amino_cbbs.LockFreeList;
@@ -37,12 +34,9 @@ public class ListTest {
     }
 
     @Operation
-    public int get(@Param(gen = IntGen.class) int value) {
-        if (lflist.contains(value)) {
-            int index = lflist.indexOf(value);
-            return lflist.get(index);
-        }
-        return -1000;
+    @HandleExceptionAsResult(NullPointerException.class)
+    public int get(@Param(gen = IntGen.class) int index) {
+        return lflist.get(index);
     }
 
     @Operation
@@ -51,9 +45,9 @@ public class ListTest {
     }
 
     @Operation
+    @HandleExceptionAsResult(IndexOutOfBoundsException.class)
     public void set(@Param(gen = IntGen.class) int index, @Param(gen = IntGen.class) int value) {
-        if (index > -1 && lflist.size() > index)
-            lflist.set(index, value);
+        lflist.set(index, value);
     }
 
     @Test

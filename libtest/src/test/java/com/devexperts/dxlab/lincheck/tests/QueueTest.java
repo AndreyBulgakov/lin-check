@@ -26,7 +26,7 @@ public class QueueTest {
     }
 
     @Operation
-    public int takeOrNull() {
+    public Integer takeOrNull() {
         return q.takeOrNull();
     }
 

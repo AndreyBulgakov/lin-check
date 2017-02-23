@@ -67,7 +67,7 @@ public class QueueUnCorrect {
     }
 
     @Operation
-    public Object takeOrNull() {
+    public Integer takeOrNull() {
         return q.takeOrNull();
     }
 

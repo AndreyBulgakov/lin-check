@@ -3,6 +3,7 @@ package com.devexperts.dxlab.lincheck.tests;
 import com.devexperts.dxlab.lincheck.LinChecker;
 import com.devexperts.dxlab.lincheck.annotations.CTest;
 import com.devexperts.dxlab.lincheck.annotations.Operation;
+import com.devexperts.dxlab.lincheck.annotations.ReadOnly;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
 import org.junit.Test;
 import com.devexperts.dxlab.lincheck.libtest.Evaluator;
@@ -21,14 +22,18 @@ public class EvaluatorTest {
     }
 
     @Operation
-    public int add3(){
+    public void add3(){
         evaluator.addThree2Times();
-        return evaluator.getValue();
     }
 
     @Operation
-    public int mult3(){
+    public void mult3(){
         evaluator.multThree();
+    }
+
+    @Operation
+    @ReadOnly
+    public int getVal(){
         return evaluator.getValue();
     }
 

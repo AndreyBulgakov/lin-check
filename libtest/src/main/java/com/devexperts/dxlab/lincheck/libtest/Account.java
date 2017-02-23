@@ -22,11 +22,7 @@ public class Account {
 
     public int read()
     {
-        int r;
-        synchronized (this){
-            r = balance;
-        }
-        return r;
+        return balance;
     }
 
     public void deposit(int n)

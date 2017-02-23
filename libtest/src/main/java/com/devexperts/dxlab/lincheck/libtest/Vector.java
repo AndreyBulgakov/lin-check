@@ -1,4 +1,4 @@
-package amino_cbbs;
+package com.devexperts.dxlab.lincheck.libtest;
 
 import sun.awt.Mutex;
 
@@ -39,7 +39,7 @@ public class Vector {
             this.length = numElem * 2;
         }
         data.addAll(v.data);
-        this.size = v.size + this.size;
+        this.size = numElem;
         mutex.unlock();
         return size;
     }
