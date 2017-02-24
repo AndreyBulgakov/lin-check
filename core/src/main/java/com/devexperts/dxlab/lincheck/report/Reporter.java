@@ -24,6 +24,7 @@ public class Reporter {
         this.strategyName = strategyName;
 
         File file = new File("TestResult");
+
         try {
             if (!file.exists()) {
                 filestream = new FileWriter(file, true);
@@ -90,5 +91,14 @@ public class Reporter {
         this.maxInv = invokation;
         printer.println("Number iterations: " + maxIter);
         printer.println("Number invocations per iteration: " + maxInv + "\n");
+    }
+
+    public void close(){
+        printer.close();
+        try {
+            filestream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

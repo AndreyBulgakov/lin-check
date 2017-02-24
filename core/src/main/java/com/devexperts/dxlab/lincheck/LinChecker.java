@@ -175,6 +175,7 @@ public class LinChecker {
                 reporter.addResult(iteration, testCfg.getInvocationsPerIteration());
             }
         } finally {
+            reporter.close();
             pool.shutdown();
         }
     }
