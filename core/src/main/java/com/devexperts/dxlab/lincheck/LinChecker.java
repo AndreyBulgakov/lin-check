@@ -42,6 +42,7 @@ public class LinChecker {
 
     private final Random random = new Random(0);
     private final Object testInstance;
+    private String testStructureName;
     private final List<CTestConfiguration> testConfigurations;
     private final CTestStructure testStructure;
     private Reporter reporter;
@@ -53,7 +54,7 @@ public class LinChecker {
         this.testStructure = CTestStructure.getFromTestClass(testClass);
     }
 
-    public static void check(Object testInstance) throws AssertionError {
+    public static void check(Object testInstance) throws AssertionError{
         new LinChecker(testInstance).check();
     }
 
@@ -61,9 +62,10 @@ public class LinChecker {
      * @throws AssertionError if atomicity violation is detected
      */
     private void check() throws AssertionError {
+        reporter = new Reporter(testInstance.getClass().getSimpleName(), "RandomInvokation", System.out);
         testConfigurations.forEach((testConfiguration) -> {
             try {
-                reporter = new Reporter(testConfiguration.getIterations(), testConfiguration.getInvocationsPerIteration(), System.out);
+                reporter.setMaxIterAndInv(testConfiguration.getIterations(), testConfiguration.getInvocationsPerIteration());
                 checkImpl(testConfiguration);
             } catch (InterruptedException e) {
                 throw new IllegalStateException(e);
@@ -170,7 +172,7 @@ public class LinChecker {
                         throw new AssertionError("Non-linearizable execution detected, see log for details");
                     }
                 }
-                reporter.addResult(iteration);
+                reporter.addResult(iteration, testCfg.getInvocationsPerIteration());
             }
         } finally {
             pool.shutdown();
