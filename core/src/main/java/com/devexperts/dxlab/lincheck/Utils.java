@@ -26,7 +26,6 @@ import org.objectweb.asm.Opcodes;
 
 public class Utils {
     public static final int ASM_VERSION = Opcodes.ASM5;
-    public static final ExecutionClassLoader LOADER = new ExecutionClassLoader();
 
     private static volatile int consumedCPU = (int) System.currentTimeMillis();
 

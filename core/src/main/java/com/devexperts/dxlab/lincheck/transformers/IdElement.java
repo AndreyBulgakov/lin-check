@@ -5,12 +5,12 @@ package com.devexperts.dxlab.lincheck.transformers;
  */
 public class IdElement {
 
-    private String classLoader;
+    private ClassLoader classLoader;
     private String declaringClass;
     private String methodName;
     private int    lineNumber;
 
-    public IdElement(String classLoader, String declaringClass, String methodName, int lineNumber) {
+    public IdElement(ClassLoader classLoader, String declaringClass, String methodName, int lineNumber) {
         this.classLoader = classLoader;
         this.declaringClass = declaringClass;
         this.methodName = methodName;

@@ -43,7 +43,7 @@ public class TestThreadExecutionHelperTest {
                 new Actor(Queue.class.getMethod("remove"), Collections.emptyList(), Collections.emptyList()),
                 new Actor(Queue.class.getMethod("element"), Collections.emptyList(), Collections.emptyList()),
                 new Actor(Queue.class.getMethod("peek"), Collections.emptyList(), Collections.emptyList())
-            ), false);
+            ), false, new ExecutionClassLoader());
         Assert.assertArrayEquals(new Result[] {
             Result.createValueResult(true),
             Result.createValueResult(true),
@@ -61,7 +61,7 @@ public class TestThreadExecutionHelperTest {
                 new Actor(Queue.class.getMethod("remove"), Collections.emptyList(), Collections.emptyList()),
                 new Actor(Queue.class.getMethod("remove"), Collections.emptyList(), Collections.emptyList()),
                 new Actor(Queue.class.getMethod("add", Object.class), Arrays.asList(2), Collections.emptyList())
-            ), false);
+            ), false, new ExecutionClassLoader());
         ex.call();
     }
 
@@ -73,7 +73,7 @@ public class TestThreadExecutionHelperTest {
                 new Actor(Queue.class.getMethod("remove"), Collections.emptyList(), Collections.emptyList()),
                 new Actor(Queue.class.getMethod("remove"), Collections.emptyList(), Arrays.asList(NoSuchElementException.class)),
                 new Actor(Queue.class.getMethod("remove"), Collections.emptyList(), Arrays.asList(Exception.class, NoSuchElementException.class))
-            ), false);
+            ), false, new ExecutionClassLoader());
         Assert.assertArrayEquals(new Result[] {
             Result.createVoidResult(),
             Result.createValueResult(1),
@@ -89,7 +89,7 @@ public class TestThreadExecutionHelperTest {
                 new Actor(Queue.class.getMethod("add", Object.class), Arrays.asList(1), Collections.emptyList()),
                 new Actor(Queue.class.getMethod("remove"), Collections.emptyList(), Collections.emptyList()),
                 new Actor(Queue.class.getMethod("remove"), Collections.emptyList(), Arrays.asList(NoSuchElementException.class))
-            ), true);
+            ), true, new ExecutionClassLoader());
         ex.waits = new int[] {15, 100};
         Assert.assertArrayEquals(new Result[] {
             Result.createValueResult(true),

@@ -22,6 +22,9 @@ package com.devexperts.dxlab.lincheck;
  * #L%
  */
 
+import com.devexperts.dxlab.lincheck.strategy.ConsumeCPUStrategy;
+import com.devexperts.dxlab.lincheck.strategy.StrategyHolder;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,26 +48,26 @@ public class LinChecker {
     private static final int MAX_WAIT = 1000;
 
     private final Random random = new Random();
-    private final Object testInstance;
-    private final Class testClass; // TODO class name only
+//    private final Object testInstance;
+    private final String testClassName; // TODO class name only
     private final List<CTestConfiguration> testConfigurations;
     private final CTestStructure testStructure;
-    private final ExecutionClassLoader LOADER = Utils.LOADER;
+//    private final ExecutionClassLoader LOADER = Utils.LOADER;
 
     private LinChecker(Class testClass) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-//        LOADER.setTestClassName(testClass.getCanonicalName());
-        this.testInstance = LOADER.loadClass(testClass.getCanonicalName()).newInstance();
-//        Class<?> testClass = testInstance.getClass();
-        this.testClass = testInstance.getClass();
-        this.testConfigurations = CTestConfiguration.getFromTestClass(this.testClass);
-        this.testStructure = CTestStructure.getFromTestClass(this.testClass);
+//        LOADER.setTestClassName(testClassName.getCanonicalName());
+        this.testClassName = testClass.getCanonicalName();
+//        this.testInstance = LOADER.loadClass(testClass.getCanonicalName()).newInstance();
+//        Class<?> testClassName = testInstance.getClass();
+        this.testConfigurations = CTestConfiguration.getFromTestClass(testClass);
+        this.testStructure = CTestStructure.getFromTestClass(testClass);
     }
 
     private LinChecker(Object testInstance) {
-        this.testInstance = testInstance;
+        this.testClassName = testInstance.getClass().getCanonicalName();
+//        this.testInstance = testInstance;
         Class<?> testClass = testInstance.getClass();
-        LOADER.setTestClassName(testClass.getCanonicalName());
-        this.testClass = testClass;
+//        LOADER.setTestClassName(testClass.getCanonicalName());
         this.testConfigurations = CTestConfiguration.getFromTestClass(testClass);
         this.testStructure = CTestStructure.getFromTestClass(testClass);
     }
@@ -89,7 +92,7 @@ public class LinChecker {
         testConfigurations.forEach((testConfiguration) -> {
             try {
                 checkImpl(testConfiguration);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException | ClassNotFoundException | IllegalAccessException | InstantiationException e) {
                 throw new IllegalStateException(e);
             }
         });
@@ -140,7 +143,7 @@ public class LinChecker {
         }
     }
 
-    private void checkImpl(CTestConfiguration testCfg) throws InterruptedException {
+    private void checkImpl(CTestConfiguration testCfg) throws InterruptedException, ClassNotFoundException, IllegalAccessException, InstantiationException {
         // Fixed thread pool executor to run TestThreadExecution
         ExecutorService pool = Executors.newFixedThreadPool(testCfg.getThreads());
         try {
@@ -148,20 +151,24 @@ public class LinChecker {
             final Phaser phaser = new Phaser(testCfg.getThreads());
             // Run iterations
             for (int iteration = 1; iteration <= testCfg.getIterations(); iteration++) {
-                // TODO new classloader per iteration
-                // TODO create test instance here
+
+                //Set strategy and initialize transformation in classes
+                StrategyHolder.setCurrentStrategy(new ConsumeCPUStrategy());
+                final ExecutionClassLoader loader = new ExecutionClassLoader(testClassName);
+                final Object testInstance = loader.loadClass(testClassName).newInstance();
+
                 System.out.println("= Iteration " + iteration + " / " + testCfg.getIterations() + " =");
                 // Generate actors and print them to console
                 List<List<Actor>> actorsPerThread = generateActors(testCfg);
                 printActorsPerThread(actorsPerThread);
                 // Create TestThreadExecution's
                 List<TestThreadExecution> testThreadExecutions = actorsPerThread.stream()
-                    .map(actors -> TestThreadExecutionGenerator.create(testInstance, phaser, actors, false))
+                    .map(actors -> TestThreadExecutionGenerator.create(testInstance, phaser, actors, false, loader))
                     .collect(Collectors.toList());
                 // Generate all possible results
                 Set<List<List<Result>>> possibleResultsSet = generateAllLinearizableExecutions(actorsPerThread).stream()
                     .map(linEx -> { // For each permutation
-                        List<Result> results = executeActors(linEx);
+                        List<Result> results = executeActors(linEx, testInstance, loader);
                         Map<Actor, Result> resultMap = new IdentityHashMap<>();
                         for (int i = 0; i < linEx.size(); i++) {
                             resultMap.put(linEx.get(i), results.get(i));
@@ -177,7 +184,7 @@ public class LinChecker {
                 // Run invocations
                 for (int invocation = 0; invocation < testCfg.getInvocationsPerIteration(); invocation++) {
                     // Reset the state of test
-                    invokeReset();
+                    invokeReset(testInstance);
                     // Specify waits
                     int maxWait = (int) ((float) invocation * MAX_WAIT / testCfg.getInvocationsPerIteration()) + 1;
                     for (int i = 0; i < testThreadExecutions.size(); i++) {
@@ -214,15 +221,19 @@ public class LinChecker {
 
     private Phaser SINGLE_THREAD_PHASER = new Phaser(1);
 
-    private List<Result> executeActors(List<Actor> actors) {
-        invokeReset();
-        return Arrays.asList(TestThreadExecutionGenerator.create(testInstance, SINGLE_THREAD_PHASER, actors, false).call());
+    private List<Result> executeActors(List<Actor> actors, Object testInstance, ExecutionClassLoader loader) {
+        invokeReset(testInstance);
+        return Arrays.asList(TestThreadExecutionGenerator.create(testInstance, SINGLE_THREAD_PHASER, actors, false, loader).call());
     }
 
-    private void invokeReset() {
+    private void invokeReset(Object testInstance) {
         try {
-            testStructure.getResetMethod().invoke(testInstance);
-        } catch (IllegalAccessException | InvocationTargetException e) {
+            testInstance
+                    .getClass()
+                    .getMethod(testStructure.getResetMethod().getName(),
+                            testStructure.getResetMethod().getParameterTypes()).invoke(testInstance);
+//            testStructure.getResetMethod().invoke(testInstance);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new IllegalStateException("Unable to call method annotated with @Reset", e);
         }
     }

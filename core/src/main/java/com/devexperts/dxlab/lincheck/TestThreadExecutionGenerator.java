@@ -45,7 +45,7 @@ import static org.objectweb.asm.Opcodes.*;
  */
 class TestThreadExecutionGenerator {
 //    private static final ExecutionClassLoader LOADER = new ExecutionClassLoader();
-    private static final ExecutionClassLoader LOADER = Utils.LOADER;
+//    private static final ExecutionClassLoader LOADER = Utils.LOADER;
 
     private static final Type[] NO_ARGS = new Type[] {};
 
@@ -89,13 +89,12 @@ class TestThreadExecutionGenerator {
      * @param actors the actors to be executed in the test.
      * @return {@link TestThreadExecution} instance with specified {@link TestThreadExecution#call()} implementation.
      */
-    static TestThreadExecution create(Object testInstance, Phaser phaser, List<Actor> actors, boolean waitsEnabled) {
+    static TestThreadExecution create(Object testInstance, Phaser phaser, List<Actor> actors, boolean waitsEnabled, ExecutionClassLoader loader) {
         String className = TestThreadExecution.class.getCanonicalName() + generatedClassNumber++;
         String internalClassName = className.replace('.', '/');
         List<Object> objArgs = new ArrayList<>();
 
-
-        Class<? extends TestThreadExecution> clz = LOADER.define(className,
+        Class<? extends TestThreadExecution> clz = loader.define(className,
             generateClass(internalClassName, Type.getType(testInstance.getClass()), actors, objArgs, waitsEnabled));
 
         try {

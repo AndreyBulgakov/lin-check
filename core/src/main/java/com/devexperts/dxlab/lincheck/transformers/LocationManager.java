@@ -20,9 +20,9 @@ public class LocationManager {
         locations.add(null);
     }
 
-    public int getLocationId(String className, String methodName, int line) {
+    public int getLocationId(ClassLoader loader, String className, String methodName, int line) {
         // TODO classLoader field?
-        IdElement location = new IdElement("ExecutionClassLoader", className, methodName, line);
+        IdElement location = new IdElement(loader, className, methodName, line);
         Integer id = locationIds.get(location);
         if (id != null)
             return id;

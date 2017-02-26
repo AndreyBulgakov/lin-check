@@ -1,8 +1,7 @@
 package com.devexperts.dxlab.lincheck;
 
-import com.devexperts.dxlab.lincheck.transformers.ConsumeCPUClassVisitor;
+import com.devexperts.dxlab.lincheck.transformers.BeforeSharedVariableClassVisitor;
 import com.devexperts.dxlab.lincheck.transformers.IgnoreClassVisitor;
-import com.devexperts.dxlab.lincheck.transformers.ThreadYieldClassVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -11,8 +10,6 @@ import org.objectweb.asm.ClassWriter;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.instrument.Instrumentation;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,9 +19,14 @@ import java.util.concurrent.ConcurrentHashMap;
 class ExecutionClassLoader extends ClassLoader {
     private final Map<String, Class<?>> cash = new ConcurrentHashMap<>();
     private final Map<String, byte[]> resources = new ConcurrentHashMap<>();
-    private String testClassName = "";
+    private final String testClassName;
 
-    void setTestClassName(String testClassName) {
+
+    ExecutionClassLoader(){
+        testClassName = "";
+    }
+
+    ExecutionClassLoader(String testClassName) {
         this.testClassName = testClassName;
     }
 
@@ -38,6 +40,7 @@ class ExecutionClassLoader extends ClassLoader {
     @Override
     public Class<?> loadClass(String name) throws ClassNotFoundException {
         // Load transformed class from cash if it exists
+//        System.out.println("Loading: " + name);
         Class result = cash.get(name);
         if (result != null) {
             return result;
@@ -46,20 +49,19 @@ class ExecutionClassLoader extends ClassLoader {
         // TODO Need resolve?
         // Secure some packages
         if (shouldIgnoreClass(name)) {
+//            System.out.println("Loaded by super:" + name);
             return super.loadClass(name);
         }
+
         //Transform and save class
         try {
-//            System.out.println(name);
+//            System.out.println("Loaded by exec:" + name);
             ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
-            //TODO Strategy choose
             //TODO maybe set all CV chain in Classloader?
-            ClassVisitor cv = new ConsumeCPUClassVisitor(cw);
-//            ClassVisitor cv = new ThreadYieldClassVisitor(cw);
+            ClassVisitor cv = new BeforeSharedVariableClassVisitor(cw, this);
             ClassVisitor cv0 = new IgnoreClassVisitor(cv, cw, testClassName);
             ClassReader cr = new ClassReader(name);
 
-//            cr.accept(cv0, ClassReader.EXPAND_FRAMES);
             cr.accept(cv0, ClassReader.SKIP_FRAMES);
 
             byte[] resultBytecode = cw.toByteArray();
@@ -73,9 +75,7 @@ class ExecutionClassLoader extends ClassLoader {
         } catch (IOException e) {
             throw new ClassNotFoundException(name, e);
         }
-//        catch (LinkageError error){
-//
-//        }
+
     }
 
     @Override
@@ -89,8 +89,7 @@ class ExecutionClassLoader extends ClassLoader {
         }
     }
 
-
-    static boolean shouldIgnoreClass(String name) {
+    private static boolean shouldIgnoreClass(String name) {
         return
                 name == null ||
                 name.startsWith("com.devexperts.dxlab.lincheck.") &&
@@ -98,9 +97,9 @@ class ExecutionClassLoader extends ClassLoader {
                 name.startsWith("sun.") ||
                 name.startsWith("java.") ||
                 name.startsWith("org.junit.");
-
         }
 
+    //TODO need to transform?
     Class<? extends TestThreadExecution> define(String className, byte[] bytecode) {
         return (Class<? extends TestThreadExecution>) super.defineClass(className, bytecode, 0, bytecode.length);
     }

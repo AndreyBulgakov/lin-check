@@ -77,7 +77,6 @@ public class ExecutionClassLoaderTestFail {
         cleanCrCounter.accept(cleanCPUCounter, ClassReader.SKIP_FRAMES);
 
 
-        cl.setTestClassName(aName);
         Class<? extends AParrent> aClass = (Class<? extends AParrent>) cl.loadClass(aName);
         AParrent aParrent1 = aClass.newInstance();
         ClassLoader aClassLoader = aParrent1.getClass().getClassLoader();
