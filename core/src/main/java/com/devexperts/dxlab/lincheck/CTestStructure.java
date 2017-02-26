@@ -22,21 +22,12 @@ package com.devexperts.dxlab.lincheck;
  * #L%
  */
 
-import com.devexperts.dxlab.lincheck.annotations.CTest;
-import com.devexperts.dxlab.lincheck.annotations.HandleExceptionAsResult;
-import com.devexperts.dxlab.lincheck.annotations.Operation;
-import com.devexperts.dxlab.lincheck.annotations.Param;
-import com.devexperts.dxlab.lincheck.annotations.Reset;
+import com.devexperts.dxlab.lincheck.annotations.*;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Contains information about operations (see {@link Operation}) and reset method (see {@link Reset}).
@@ -60,6 +51,11 @@ class CTestStructure {
                 throw new IllegalArgumentException("@Param name in class declaration cannot be empty");
             }
             namedGens.put(paramAnn.name(), createGenerator(paramAnn));
+        }
+        //check that constructor has not arguments
+        for (Constructor c : testClass.getDeclaredConstructors()) {
+            if (c.getParameterCount() > 0)
+                throw new IllegalArgumentException("Constructor has some parameters");
         }
         // Create actor generators
         List<ActorGenerator> actorGenerators = new ArrayList<>();
