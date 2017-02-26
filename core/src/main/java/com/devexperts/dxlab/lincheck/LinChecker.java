@@ -42,7 +42,6 @@ public class LinChecker {
 
     private final Random random = new Random(0);
     private final Object testInstance;
-    private String testStructureName;
     private final List<CTestConfiguration> testConfigurations;
     private final CTestStructure testStructure;
     private Reporter reporter;
@@ -137,6 +136,7 @@ public class LinChecker {
             // Reusable phaser
             final Phaser phaser = new Phaser(testCfg.getThreads());
             // Run iterations
+            reporter.setCurrentTime();
             for (int iteration = 1; iteration <= testCfg.getIterations(); iteration++) {
                 List<List<Actor>> actorsPerThread = generateActors(testCfg);
                 reporter.addActors(iteration, actorsPerThread);

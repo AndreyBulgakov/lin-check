@@ -3,7 +3,10 @@ package com.devexperts.dxlab.lincheck.report;
 import com.devexperts.dxlab.lincheck.Actor;
 import com.devexperts.dxlab.lincheck.Result;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
@@ -25,9 +28,7 @@ public class Reporter {
     public Reporter(String testName, String strategyName, PrintStream outputstream){
         this.testName = testName;
         this.strategyName = strategyName;
-        time = time.now();
         File file = new File("TestResult");
-
         try {
             if (!file.exists()) {
                 filestream = new FileWriter(file, true);
@@ -40,30 +41,34 @@ public class Reporter {
             e.printStackTrace();
         }
         printer = outputstream;
+        time = Instant.now();
     }
 
     public void addActors(int iteration, List<List<Actor>> actorsPerThread){
+        Instant printTime = Instant.now();
         printer.println("for iteration №" + iteration + " genered algorythm:");
         actorsPerThread.forEach(printer::println);
+        time = Instant.ofEpochMilli(Instant.now().toEpochMilli() - printTime.toEpochMilli() + time.toEpochMilli());
     }
 
     public void addLinearizeResults(int iteration, Set<List<List<Result>>> results){
+        Instant printTime = Instant.now();
         printer.println("Linearizable results:");
         results.forEach(possibleResults -> {
             possibleResults.forEach(printer::println);
             printer.println();
         });
+        time = Instant.ofEpochMilli(Instant.now().toEpochMilli() - printTime.toEpochMilli() + time.toEpochMilli());
     }
 
     public void addResult(int iteration, int invokation){
+        Instant printTime = Instant.now();
         printer.println("Iteration №" + iteration +" completed with number invokations = " + invokation);
         addTotalInvocations(invokation);
+        time = Instant.ofEpochMilli(Instant.now().toEpochMilli() - printTime.toEpochMilli() + time.toEpochMilli());
         try {
             if (iteration == maxIter) {
-                filestream.write(testName + "," + strategyName + "," + maxIter + "," + maxInv + "," + iteration + "," +
-                        totalInvokations + "," + (time.now().toEpochMilli() - time.toEpochMilli()) + "," + "Completed\n");
-                filestream.flush();
-                time = time.now();
+                writeToFile(iteration, "Completed");
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -71,15 +76,14 @@ public class Reporter {
     }
 
     public void addResult(int iteration, int invokation, List<List<Result>> nonLinearizeResults){
+        Instant printTime = Instant.now();
         StringBuilder result = new StringBuilder();
         nonLinearizeResults.forEach(res -> result.append(res.toString()));
         printer.println("For invocation" + invokation + "result was " + result);
         addTotalInvocations(invokation);
+        time = Instant.ofEpochMilli(Instant.now().toEpochMilli() - printTime.toEpochMilli() + time.toEpochMilli());
         try {
-            filestream.write(testName + "," + strategyName + "," + maxIter+ "," + maxInv+ "," + iteration +
-                    "," + (time.now().toEpochMilli() - time.toEpochMilli()) + "," + totalInvokations + "," + "Failed\n");
-            filestream.flush();
-            time = time.now();
+            writeToFile(iteration, "Failed");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -109,7 +113,19 @@ public class Reporter {
         }
     }
 
+    public void setCurrentTime(){
+        time = Instant.now();
+    }
+
     protected void addTotalInvocations(int completedInv){
         totalInvokations += completedInv;
+    }
+
+    protected void writeToFile(int iteration, String result) throws IOException {
+        long passedTime = Instant.now().toEpochMilli() - time.toEpochMilli();
+        filestream.write(testName + "," + strategyName + "," + maxIter+ "," + maxInv+ "," + iteration +
+                "," + totalInvokations + "," + passedTime + "," + result + "\n");
+        filestream.flush();
+        setCurrentTime();
     }
 }
