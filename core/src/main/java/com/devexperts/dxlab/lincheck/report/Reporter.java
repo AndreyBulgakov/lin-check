@@ -105,7 +105,6 @@ public class Reporter {
     }
 
     public void close(){
-        printer.close();
         try {
             filestream.close();
         } catch (IOException e) {
