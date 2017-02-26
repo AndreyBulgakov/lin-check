@@ -4,6 +4,7 @@ import com.devexperts.dxlab.lincheck.Actor;
 import com.devexperts.dxlab.lincheck.Result;
 
 import java.io.*;
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 
@@ -18,17 +19,19 @@ public class Reporter {
     protected String strategyName;
     protected int maxIter;
     protected int maxInv;
+    protected int totalInvokations;
+    protected Instant time;
 
     public Reporter(String testName, String strategyName, PrintStream outputstream){
         this.testName = testName;
         this.strategyName = strategyName;
-
+        time = time.now();
         File file = new File("TestResult");
 
         try {
             if (!file.exists()) {
                 filestream = new FileWriter(file, true);
-                filestream.write("TestName, StrategyName, MaxIterations, MaxInvocations, WasIterations, WasInvokations, Result\n");
+                filestream.write("TestName, StrategyName, MaxIterations, MaxInvocations, WasIterations, WasInvokations, PassedTime, Result\n");
             } else {
                 filestream = new FileWriter(file, true);
             }
@@ -54,28 +57,32 @@ public class Reporter {
 
     public void addResult(int iteration, int invokation){
         printer.println("Iteration №" + iteration +" completed with number invokations = " + invokation);
+        addTotalInvocations(invokation);
         try {
             if (iteration == maxIter) {
-                filestream.write(testName + "," + strategyName + "," + maxIter + "," + maxInv + "," + iteration + "," + invokation + "," + "Ok\n");
+                filestream.write(testName + "," + strategyName + "," + maxIter + "," + maxInv + "," + iteration + "," +
+                        totalInvokations + "," + (time.now().toEpochMilli() - time.toEpochMilli()) + "," + "Completed\n");
                 filestream.flush();
+                time = time.now();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     public void addResult(int iteration, int invokation, List<List<Result>> nonLinearizeResults){
         StringBuilder result = new StringBuilder();
         nonLinearizeResults.forEach(res -> result.append(res.toString()));
         printer.println("For invocation" + invokation + "result was " + result);
+        addTotalInvocations(invokation);
         try {
-            filestream.write(testName + "," + strategyName + "," + maxIter+ "," + maxInv+ "," + iteration + "," + invokation + "," + "Crushed\n");
+            filestream.write(testName + "," + strategyName + "," + maxIter+ "," + maxInv+ "," + iteration +
+                    "," + (time.now().toEpochMilli() - time.toEpochMilli()) + "," + totalInvokations + "," + "Failed\n");
             filestream.flush();
+            time = time.now();
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     public void setTestName(String name){
@@ -100,5 +107,9 @@ public class Reporter {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    protected void addTotalInvocations(int completedInv){
+        totalInvokations += completedInv;
     }
 }
