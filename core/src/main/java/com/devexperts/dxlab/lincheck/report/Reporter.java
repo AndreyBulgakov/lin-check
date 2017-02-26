@@ -1,6 +1,7 @@
 package com.devexperts.dxlab.lincheck.report;
 
 import com.devexperts.dxlab.lincheck.Actor;
+import com.devexperts.dxlab.lincheck.CTestConfiguration;
 import com.devexperts.dxlab.lincheck.Result;
 
 import java.io.File;
@@ -24,6 +25,7 @@ public class Reporter {
     protected int maxInv;
     protected int totalInvokations;
     protected Instant time;
+    protected String threadsConfigString;
 
     public Reporter(String testName, String strategyName, PrintStream outputstream){
         this.testName = testName;
@@ -32,7 +34,7 @@ public class Reporter {
         try {
             if (!file.exists()) {
                 filestream = new FileWriter(file, true);
-                filestream.write("TestName, StrategyName, MaxIterations, MaxInvocations, WasIterations, WasInvokations, PassedTime, Result\n");
+                filestream.write("TestName, StrategyName, MaxIterations, MaxInvocations, ThreadConfig, WasIterations, WasInvokations, PassedTime, Result\n");
             } else {
                 filestream = new FileWriter(file, true);
             }
@@ -97,11 +99,12 @@ public class Reporter {
         this.strategyName = strategyName;
     }
 
-    public void setMaxIterAndInv(int iterations, int invokation){
-        this.maxIter = iterations;
-        this.maxInv = invokation;
+    public void setConfiguratuon(CTestConfiguration configuration) {
+        this.maxIter = configuration.getIterations();
+        this.maxInv = configuration.getInvocationsPerIteration();
         printer.println("Number iterations: " + maxIter);
         printer.println("Number invocations per iteration: " + maxInv + "\n");
+        this.threadsConfigString = configuration.getThreadConfigurations().toString();
     }
 
     public void close(){
@@ -122,8 +125,8 @@ public class Reporter {
 
     protected void writeToFile(int iteration, String result) throws IOException {
         long passedTime = Instant.now().toEpochMilli() - time.toEpochMilli();
-        filestream.write(testName + "," + strategyName + "," + maxIter+ "," + maxInv+ "," + iteration +
-                "," + totalInvokations + "," + passedTime + "," + result + "\n");
+        filestream.write(testName + "," + strategyName + "," + maxIter+ "," + maxInv+ "," + threadsConfigString + ","
+                + iteration + "," + totalInvokations + "," + passedTime + "," + result + "\n");
         filestream.flush();
         setCurrentTime();
     }

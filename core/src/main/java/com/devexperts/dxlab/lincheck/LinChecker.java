@@ -64,7 +64,7 @@ public class LinChecker {
         reporter = new Reporter(testInstance.getClass().getSimpleName(), "RandomInvokation", System.out);
         testConfigurations.forEach((testConfiguration) -> {
             try {
-                reporter.setMaxIterAndInv(testConfiguration.getIterations(), testConfiguration.getInvocationsPerIteration());
+                reporter.setConfiguratuon(testConfiguration);
                 checkImpl(testConfiguration);
             } catch (InterruptedException e) {
                 throw new IllegalStateException(e);

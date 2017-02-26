@@ -73,7 +73,7 @@ public class CTestConfiguration {
         return invocationsPerIteration;
     }
 
-    List<TestThreadConfiguration> getThreadConfigurations() {
+    public List<TestThreadConfiguration> getThreadConfigurations() {
         return threadConfigurations;
     }
 
@@ -84,6 +84,11 @@ public class CTestConfiguration {
         private TestThreadConfiguration(int minActors, int maxActors) {
             this.minActors = minActors;
             this.maxActors = maxActors;
+        }
+
+        @Override
+        public String toString(){
+            return minActors + ":" + maxActors;
         }
     }
 }
