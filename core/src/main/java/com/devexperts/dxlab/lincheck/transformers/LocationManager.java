@@ -6,10 +6,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 
+// TODO public?
 public class LocationManager {
 
     private static final LocationManager INSTANCE = new LocationManager();
+    // TODO dynamic growth
     private final ArrayList<IdElement> locations = new ArrayList<>(10_000);
+    // TODO current implementation doesn't need in concurrent map
     private final Map<IdElement, Integer> locationIds = new ConcurrentHashMap<>();
 
     public static LocationManager getInstance() {
@@ -20,6 +23,7 @@ public class LocationManager {
         locations.add(null);
     }
 
+    // TODO synchronized
     public int getLocationId(ClassLoader loader, String className, String methodName, int line) {
         // TODO classLoader field?
         IdElement location = new IdElement(loader, className, methodName, line);

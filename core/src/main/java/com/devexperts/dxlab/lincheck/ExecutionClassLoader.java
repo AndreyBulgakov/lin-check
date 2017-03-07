@@ -14,6 +14,9 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * // TODO fix javadoc style + use Grammarly to check fo
+ * TODO remove commented code
+ * // TODO make documentation more complete
  * Loads and transform classes
  */
 class ExecutionClassLoader extends ClassLoader {
@@ -30,7 +33,7 @@ class ExecutionClassLoader extends ClassLoader {
         this.testClassName = testClassName;
     }
 
-    /***
+    /**
      * Transform class if it is not in excluded list and load it by this Loader
      * else delegate load to parent loader
      * @param name name of class
@@ -96,7 +99,8 @@ class ExecutionClassLoader extends ClassLoader {
                         !name.startsWith("com.devexperts.dxlab.lincheck.tests.") ||
                 name.startsWith("sun.") ||
                 name.startsWith("java.") ||
-                name.startsWith("org.junit.");
+                    // TODO let's transform java.util.concurrent
+                name.startsWith("org.junit."); // TODO why?
         }
 
     //TODO need to transform?

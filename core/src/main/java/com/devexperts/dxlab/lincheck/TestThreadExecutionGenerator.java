@@ -44,6 +44,7 @@ import static org.objectweb.asm.Opcodes.*;
  * This class is used to generate {@link TestThreadExecution thread executions}.
  */
 class TestThreadExecutionGenerator {
+    // TODO remove commented code
 //    private static final ExecutionClassLoader LOADER = new ExecutionClassLoader();
 //    private static final ExecutionClassLoader LOADER = Utils.LOADER;
 
@@ -93,10 +94,8 @@ class TestThreadExecutionGenerator {
         String className = TestThreadExecution.class.getCanonicalName() + generatedClassNumber++;
         String internalClassName = className.replace('.', '/');
         List<Object> objArgs = new ArrayList<>();
-
         Class<? extends TestThreadExecution> clz = loader.define(className,
             generateClass(internalClassName, Type.getType(testInstance.getClass()), actors, objArgs, waitsEnabled));
-
         try {
             TestThreadExecution execution = clz.newInstance();
             execution.phaser = phaser;

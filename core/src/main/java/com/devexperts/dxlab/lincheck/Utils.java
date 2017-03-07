@@ -35,6 +35,7 @@ public class Utils {
             t += (t * 0x5DEECE66DL + 0xBL + i) & (0xFFFFFFFFFFFFL);
         if (t == 42)
             consumedCPU += t;
+        // TODO commented code, remove it
 //        System.out.println("Tokens: " + tokens);
 //        System.out.println("ConsumeCPU: " + consumedCPU);
     }

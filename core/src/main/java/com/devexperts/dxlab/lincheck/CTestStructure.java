@@ -45,7 +45,7 @@ import java.util.Objects;
  */
 class CTestStructure {
     private final List<ActorGenerator> actorGenerators;
-    private final Method resetMethod;
+    private final Method resetMethod; // TODO change to name
 
     private CTestStructure(List<ActorGenerator> actorGenerators, Method resetMethod) {
         this.actorGenerators = actorGenerators;

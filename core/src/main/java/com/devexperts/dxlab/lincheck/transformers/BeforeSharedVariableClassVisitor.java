@@ -4,9 +4,14 @@ import com.devexperts.dxlab.lincheck.Utils;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+
 import static org.objectweb.asm.Opcodes.ACC_NATIVE;
 
 /**
+ * TODO public?
+ * TODO strange documentation :)
  * ClassVisitor that don't visit ACC_NATIVE and constructor method.
  */
 public class BeforeSharedVariableClassVisitor extends ClassVisitor {
@@ -22,13 +27,16 @@ public class BeforeSharedVariableClassVisitor extends ClassVisitor {
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         this.className = name;
+        // TODO remove commented code
 //        System.out.println("ConsumeCPU className: " + name);
         super.visit(version, access, name, signature, superName, interfaces);
     }
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        if ((access & ACC_NATIVE) == 0 && (!name.equals("<init>"))) {
+        // TODO use Modifier.isXXX(access)
+        // TODO why constructor shouldn't be transformed?
+        if (!Modifier.isNative(access) && !name.equals("<init>")) {
             MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
             return new BeforeSharedVariableMethodTransformer(api, mv, access, name, desc, className, loader);
         }

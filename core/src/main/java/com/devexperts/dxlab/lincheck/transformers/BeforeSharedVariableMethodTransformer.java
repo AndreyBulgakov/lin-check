@@ -11,12 +11,15 @@ import org.objectweb.asm.commons.Method;
 
 import static org.objectweb.asm.Opcodes.ALOAD;
 
-public class BeforeSharedVariableMethodTransformer extends GeneratorAdapter{
+// TODO rename class
+// TODO public?
+public class BeforeSharedVariableMethodTransformer extends GeneratorAdapter {
 
     private static final Type STRATEGYHOLDER_TYPE = Type.getType(StrategyHolder.class);
     private static final Method STRATEGYHOLDER_GET = new Method("getCurrentStrategy", Type.getType(Strategy.class), new Type[]{});
     private static final Type STRATEGY_ITF_TYPE = Type.getType(Strategy.class);
     private static final Method STRATEGY_ITF_METHOD = new Method("onSharedVariableAccess", Type.VOID_TYPE, new Type[]{Type.INT_TYPE});
+    // TODO remove commented code
 //    private static final Type STRATEGYHOLDER_TYPE = Type.getType(Utils.class);
 //    private static final Method STRATEGYHOLDER_GET = new Method("consumeCPU", Type.VOID_TYPE, new Type[]{Type.INT_TYPE});
 
@@ -29,6 +32,7 @@ public class BeforeSharedVariableMethodTransformer extends GeneratorAdapter{
 
     private int line;
 
+    // TODO remove unused constructors
     public BeforeSharedVariableMethodTransformer(MethodVisitor mv, int access, String name, String desc, String className, ClassLoader loader) {
         super(mv, access, name, desc);
         this.className = className;
@@ -36,6 +40,7 @@ public class BeforeSharedVariableMethodTransformer extends GeneratorAdapter{
         this.loader = loader;
     }
 
+    // TODO is it really needful to pass all these parameters?
     public BeforeSharedVariableMethodTransformer(int api, MethodVisitor mv, int access, String name, String desc, String className, ClassLoader loader) {
         super(api, mv, access, name, desc);
         this.className = className;
@@ -65,7 +70,7 @@ public class BeforeSharedVariableMethodTransformer extends GeneratorAdapter{
 
     @Override
     public void visitVarInsn(int opcode, int var) {
-        if (!(opcode == ALOAD && var == 0)) {
+        if (!(opcode == ALOAD && var == 0)) { // TODO hard to read
             int id = lm.getLocationId(loader, className, methodName, line);
             super.invokeStatic(STRATEGYHOLDER_TYPE, STRATEGYHOLDER_GET);
             super.push(id);
@@ -77,6 +82,7 @@ public class BeforeSharedVariableMethodTransformer extends GeneratorAdapter{
     @Override
     public void visitFieldInsn(int opcode, String owner, String name, String desc) {
         int id = lm.getLocationId(loader, className, methodName, line);
+        // TODO use mv instead of super (it's simplier to read)
         super.invokeStatic(STRATEGYHOLDER_TYPE, STRATEGYHOLDER_GET);
         super.push(id);
         super.invokeInterface(STRATEGY_ITF_TYPE, STRATEGY_ITF_METHOD);

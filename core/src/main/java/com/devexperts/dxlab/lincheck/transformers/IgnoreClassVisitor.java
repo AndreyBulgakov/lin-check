@@ -4,7 +4,7 @@ import com.devexperts.dxlab.lincheck.Utils;
 import org.objectweb.asm.ClassVisitor;
 
 /**
- * Ignore class with given name
+ * TODO is this class really needful?
  */
 public class IgnoreClassVisitor extends ClassVisitor{
 

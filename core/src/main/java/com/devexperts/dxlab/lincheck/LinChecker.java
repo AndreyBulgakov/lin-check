@@ -54,6 +54,8 @@ public class LinChecker {
     private final CTestStructure testStructure;
 //    private final ExecutionClassLoader LOADER = Utils.LOADER;
 
+    // TODO many commented code!
+
     private LinChecker(Class testClass) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
 //        LOADER.setTestClassName(testClassName.getCanonicalName());
         this.testClassName = testClass.getCanonicalName();
@@ -63,6 +65,7 @@ public class LinChecker {
         this.testStructure = CTestStructure.getFromTestClass(testClass);
     }
 
+    // TODO use class name as parameter
     private LinChecker(Object testInstance) {
         this.testClassName = testInstance.getClass().getCanonicalName();
 //        this.testInstance = testInstance;
@@ -80,6 +83,7 @@ public class LinChecker {
         }
     }
 
+    // TODO remove this method
     public static void check(Object testInstance) throws AssertionError {
             new LinChecker(testInstance).check();
 
@@ -93,6 +97,7 @@ public class LinChecker {
             try {
                 checkImpl(testConfiguration);
             } catch (InterruptedException | ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+                // TODO checkImpl should catch these exceptions
                 throw new IllegalStateException(e);
             }
         });
@@ -228,11 +233,8 @@ public class LinChecker {
 
     private void invokeReset(Object testInstance) {
         try {
-            testInstance
-                    .getClass()
-                    .getMethod(testStructure.getResetMethod().getName(),
-                            testStructure.getResetMethod().getParameterTypes()).invoke(testInstance);
-//            testStructure.getResetMethod().invoke(testInstance);
+            testInstance.getClass().getMethod(testStructure.getResetMethod().getName()).invoke(testInstance);
+//            testStructure.getResetMethod().invoke(testInstance); // TODO commented code should be removed
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new IllegalStateException("Unable to call method annotated with @Reset", e);
         }

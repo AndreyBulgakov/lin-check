@@ -1,6 +1,8 @@
 package com.devexperts.dxlab.lincheck.transformers;
 
 /**
+ * TODO rename to ElementId
+ * TODO public?
  * Id class for mapping
  */
 public class IdElement {
@@ -8,7 +10,7 @@ public class IdElement {
     private ClassLoader classLoader;
     private String declaringClass;
     private String methodName;
-    private int    lineNumber;
+    private int lineNumber;
 
     public IdElement(ClassLoader classLoader, String declaringClass, String methodName, int lineNumber) {
         this.classLoader = classLoader;
