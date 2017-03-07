@@ -40,6 +40,9 @@ import java.util.stream.Collectors;
 public class LinChecker {
     private static final int MAX_WAIT = 1000;
 
+    // TODO a lot of structure changes: why? Let's remove such changes.
+    // TODO They can introduce problems with merging and history.
+
     private final Random random = new Random(0);
     private final Object testInstance;
     private final List<CTestConfiguration> testConfigurations;

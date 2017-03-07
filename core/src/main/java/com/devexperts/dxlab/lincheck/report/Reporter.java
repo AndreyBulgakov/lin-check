@@ -1,4 +1,5 @@
 package com.devexperts.dxlab.lincheck.report;
+// TODO new package for one class?
 
 import com.devexperts.dxlab.lincheck.Actor;
 import com.devexperts.dxlab.lincheck.CTestConfiguration;
@@ -13,11 +14,16 @@ import java.util.List;
 import java.util.Set;
 
 /**
+ * // TODO remove such comments
+ * TODO documentation
+ * TODO make it Closable
+ * TODO introduce TestReport class
  * Created by alexander on 09.02.17.
  */
 public class Reporter {
-
-    protected PrintStream printer;
+    // TODO why protected?
+    // TODO what these parameters are doing here?
+    protected PrintStream printer; // TODO why are you insert "logging" in report class?
     protected FileWriter filestream;
     protected String testName;
     protected String strategyName;
@@ -34,12 +40,12 @@ public class Reporter {
         try {
             if (!file.exists()) {
                 filestream = new FileWriter(file, true);
+                // TODO Do not inline fields in code, use list/array of constants instead
                 filestream.write("TestName, StrategyName, MaxIterations, MaxInvocations, ThreadConfig, WasIterations, WasInvokations, PassedTime, Result\n");
             } else {
                 filestream = new FileWriter(file, true);
             }
-        }
-        catch (IOException e){
+        } catch (IOException e){
             e.printStackTrace();
         }
         printer = outputstream;
@@ -99,10 +105,11 @@ public class Reporter {
         this.strategyName = strategyName;
     }
 
+    // TODO What about storing CTestConfiguration?
     public void setConfiguratuon(CTestConfiguration configuration) {
         this.maxIter = configuration.getIterations();
         this.maxInv = configuration.getInvocationsPerIteration();
-        printer.println("Number iterations: " + maxIter);
+        printer.println("Number iterations: " + maxIter); // TODO why should we print it?
         printer.println("Number invocations per iteration: " + maxInv + "\n");
         this.threadsConfigString = configuration.getThreadConfigurations().toString();
     }
@@ -115,10 +122,12 @@ public class Reporter {
         }
     }
 
+    // TODO should this method exists?
     public void setCurrentTime(){
         time = Instant.now();
     }
 
+    // TODO why these methods are protected?
     protected void addTotalInvocations(int completedInv){
         totalInvokations += completedInv;
     }

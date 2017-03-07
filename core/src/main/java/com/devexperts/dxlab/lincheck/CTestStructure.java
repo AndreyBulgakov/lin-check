@@ -52,6 +52,7 @@ class CTestStructure {
             }
             namedGens.put(paramAnn.name(), createGenerator(paramAnn));
         }
+        // TODO you should check that class has constructor without arguments instead of checking that all constructors have no arguments
         //check that constructor has not arguments
         for (Constructor c : testClass.getDeclaredConstructors()) {
             if (c.getParameterCount() > 0)
