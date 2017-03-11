@@ -33,8 +33,6 @@ import java.util.concurrent.Phaser;
 import java.util.stream.Collectors;
 
 /**
- * TODO documentation
- * TODO logging
  * TODO avoid executions without write operations
  */
 public class LinChecker {
@@ -64,7 +62,7 @@ public class LinChecker {
      * @throws AssertionError if atomicity violation is detected
      */
     private void check() throws AssertionError {
-        reporter = new Reporter(testInstance.getClass().getSimpleName(), "RandomInvokation", System.out);
+        reporter = new Reporter(testInstance.getClass().getSimpleName(), "RandomInvokation");
         testConfigurations.forEach((testConfiguration) -> {
             try {
                 reporter.setConfiguratuon(testConfiguration);
@@ -136,13 +134,16 @@ public class LinChecker {
         // Fixed thread pool executor to run TestThreadExecution
         ExecutorService pool = Executors.newFixedThreadPool(testCfg.getThreads());
         try {
+            System.out.println("Number iterations: " + testCfg.getIterations());
+            System.out.println("Number invocations per iteration: " + testCfg.getInvocationsPerIteration() + "\n");
             // Reusable phaser
             final Phaser phaser = new Phaser(testCfg.getThreads());
             // Run iterations
             reporter.setCurrentTime();
             for (int iteration = 1; iteration <= testCfg.getIterations(); iteration++) {
                 List<List<Actor>> actorsPerThread = generateActors(testCfg);
-                reporter.addActors(iteration, actorsPerThread);
+                System.out.println("for iteration №" + iteration + " genered algorythm:");
+                actorsPerThread.forEach(System.out::println);
 
                 // Create TestThreadExecution's
                 List<TestThreadExecution> testThreadExecutions = actorsPerThread.stream()
@@ -150,7 +151,11 @@ public class LinChecker {
                     .collect(Collectors.toList());
                 // Generate all possible results
                 Set<List<List<Result>>> possibleResultsSet = generateLinearizeResults(actorsPerThread);
-                reporter.addLinearizeResults(iteration, possibleResultsSet);
+                System.out.println("Linearizable results:");
+                possibleResultsSet.forEach(possibleResults -> {
+                    possibleResults.forEach(System.out::println);
+                    System.out.println();
+                });
                 // Run invocations
                 for (int invocation = 1; invocation <= testCfg.getInvocationsPerIteration(); invocation++) {
                     // Reset the state of test
@@ -171,11 +176,16 @@ public class LinChecker {
                     // Check correctness& Throw an AssertionError if current execution
                     // is not linearizable and log invalid execution
                     if (!possibleResultsSet.contains(results)) {
-                        reporter.addResult(iteration, invocation, results);
+                        System.out.println("Iteration №" + iteration +" completed with number invokations = " +
+                                testCfg.getInvocationsPerIteration());
+                        StringBuilder result = new StringBuilder();
+                        results.forEach(res -> result.append(res.toString()));
+                        System.out.println("For invocation" + testCfg.getInvocationsPerIteration() + "result was " + result);
+                        reporter.addFailedResult(iteration, invocation);
                         throw new AssertionError("Non-linearizable execution detected, see log for details");
                     }
                 }
-                reporter.addResult(iteration, testCfg.getInvocationsPerIteration());
+                reporter.addCompletedResult(iteration, testCfg.getInvocationsPerIteration());
             }
         } finally {
             reporter.close();
