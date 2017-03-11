@@ -1,81 +1,62 @@
 package com.devexperts.dxlab.lincheck.report;
 // TODO new package for one class?
 
-import com.devexperts.dxlab.lincheck.Actor;
 import com.devexperts.dxlab.lincheck.CTestConfiguration;
-import com.devexperts.dxlab.lincheck.Result;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
-/**
- * // TODO remove such comments
- * TODO documentation
- * TODO make it Closable
- * TODO introduce TestReport class
- * Created by alexander on 09.02.17.
- */
-public class Reporter {
-    // TODO why protected?
-    // TODO what these parameters are doing here?
-    protected PrintStream printer; // TODO why are you insert "logging" in report class?
-    protected FileWriter filestream;
-    protected String testName;
-    protected String strategyName;
-    protected int maxIter;
-    protected int maxInv;
-    protected int totalInvokations;
+//TODO introduce TestReport class
+public class Reporter implements Closeable {
+    public static final List<String> list = Collections.unmodifiableList(
+            new ArrayList<String>() {{
+                add("TestName");
+                add("StrategyName");
+                add("MaxIteraions");
+                add("MaxInvocations");
+                add("ThreadConfig");
+                add("WasIterations");
+                add("WasInvokations");
+                add("PassedTime");
+                add("Result");
+            }});
+    private FileWriter filestream;
+    private String testName;
+    private String strategyName;
+    private CTestConfiguration testConfig;
+    private int totalInvokations;
     protected Instant time;
-    protected String threadsConfigString;
 
-    public Reporter(String testName, String strategyName, PrintStream outputstream){
+    public Reporter(String testName, String strategyName){
         this.testName = testName;
         this.strategyName = strategyName;
         File file = new File("TestResult");
         try {
             if (!file.exists()) {
                 filestream = new FileWriter(file, true);
-                // TODO Do not inline fields in code, use list/array of constants instead
-                filestream.write("TestName, StrategyName, MaxIterations, MaxInvocations, ThreadConfig, WasIterations, WasInvokations, PassedTime, Result\n");
+                filestream.write(list + "\n");
             } else {
                 filestream = new FileWriter(file, true);
             }
         } catch (IOException e){
             e.printStackTrace();
         }
-        printer = outputstream;
-        time = Instant.now();
     }
 
-    public void addActors(int iteration, List<List<Actor>> actorsPerThread){
-        Instant printTime = Instant.now();
-        printer.println("for iteration №" + iteration + " genered algorythm:");
-        actorsPerThread.forEach(printer::println);
-        time = Instant.ofEpochMilli(Instant.now().toEpochMilli() - printTime.toEpochMilli() + time.toEpochMilli());
-    }
 
-    public void addLinearizeResults(int iteration, Set<List<List<Result>>> results){
-        Instant printTime = Instant.now();
-        printer.println("Linearizable results:");
-        results.forEach(possibleResults -> {
-            possibleResults.forEach(printer::println);
-            printer.println();
-        });
-        time = Instant.ofEpochMilli(Instant.now().toEpochMilli() - printTime.toEpochMilli() + time.toEpochMilli());
-    }
 
-    public void addResult(int iteration, int invokation){
-        Instant printTime = Instant.now();
-        printer.println("Iteration №" + iteration +" completed with number invokations = " + invokation);
+    /**
+    * Printing test result "OK"
+    * @param iteration Number of current iteration
+    * @param invokation Number of current invokation
+     */
+    public void addCompletedResult(int iteration, int invokation){
         addTotalInvocations(invokation);
-        time = Instant.ofEpochMilli(Instant.now().toEpochMilli() - printTime.toEpochMilli() + time.toEpochMilli());
         try {
-            if (iteration == maxIter) {
+            if (iteration == testConfig.getIterations()) {
                 writeToFile(iteration, "Completed");
             }
         } catch (IOException e) {
@@ -83,13 +64,13 @@ public class Reporter {
         }
     }
 
-    public void addResult(int iteration, int invokation, List<List<Result>> nonLinearizeResults){
-        Instant printTime = Instant.now();
-        StringBuilder result = new StringBuilder();
-        nonLinearizeResults.forEach(res -> result.append(res.toString()));
-        printer.println("For invocation" + invokation + "result was " + result);
+    /**
+    * Printing test result "Bad" with printing nonlinearize result
+    * @param iteration Number of current iteration
+    * @param invokation Number of current invokation
+     */
+    public void addFailedResult(int iteration, int invokation){
         addTotalInvocations(invokation);
-        time = Instant.ofEpochMilli(Instant.now().toEpochMilli() - printTime.toEpochMilli() + time.toEpochMilli());
         try {
             writeToFile(iteration, "Failed");
         } catch (IOException e) {
@@ -97,21 +78,8 @@ public class Reporter {
         }
     }
 
-    public void setTestName(String name){
-        testName = name;
-    }
-
-    public void setStrategyName(String strategyName) {
-        this.strategyName = strategyName;
-    }
-
-    // TODO What about storing CTestConfiguration?
     public void setConfiguratuon(CTestConfiguration configuration) {
-        this.maxIter = configuration.getIterations();
-        this.maxInv = configuration.getInvocationsPerIteration();
-        printer.println("Number iterations: " + maxIter); // TODO why should we print it?
-        printer.println("Number invocations per iteration: " + maxInv + "\n");
-        this.threadsConfigString = configuration.getThreadConfigurations().toString();
+        testConfig = configuration;
     }
 
     public void close(){
@@ -121,20 +89,19 @@ public class Reporter {
             e.printStackTrace();
         }
     }
-
-    // TODO should this method exists?
+    
     public void setCurrentTime(){
         time = Instant.now();
     }
 
-    // TODO why these methods are protected?
-    protected void addTotalInvocations(int completedInv){
+    private void addTotalInvocations(int completedInv){
         totalInvokations += completedInv;
     }
 
     protected void writeToFile(int iteration, String result) throws IOException {
         long passedTime = Instant.now().toEpochMilli() - time.toEpochMilli();
-        filestream.write(testName + "," + strategyName + "," + maxIter+ "," + maxInv+ "," + threadsConfigString + ","
+        filestream.write(testName + "," + strategyName + "," + testConfig.getIterations() + "," + testConfig.getInvocationsPerIteration() +
+                "," + testConfig.getThreadConfigurations() + ","
                 + iteration + "," + totalInvokations + "," + passedTime + "," + result + "\n");
         filestream.flush();
         setCurrentTime();
