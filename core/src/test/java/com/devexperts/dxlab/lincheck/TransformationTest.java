@@ -13,15 +13,13 @@ import org.objectweb.asm.ClassWriter;
 
 import java.io.IOException;
 
-/**
- * Created by andrey on 2/19/17.
- */
+
 public class TransformationTest {
 
     @Test
     public void TestConsumeCPU() throws IOException {
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
-        StrategyHolder.setCurrentStrategy(new ConsumeCPUStrategy());
+        StrategyHolder.setCurrentStrategy(new ConsumeCPUStrategy(100));
         ClassVisitor cv = new BeforeSharedVariableClassVisitor(cw, this.getClass().getClassLoader());
         ClassReader cr = new ClassReader(A.class.getCanonicalName());
         cr.accept(cv, ClassReader.EXPAND_FRAMES);

@@ -11,8 +11,7 @@ import static org.objectweb.asm.Opcodes.ACC_NATIVE;
 
 /**
  * TODO public?
- * TODO strange documentation :)
- * ClassVisitor that don't visit ACC_NATIVE and constructor method.
+ * ClassVisitor that inserts StrategyHolder before each access to shared variable.
  */
 public class BeforeSharedVariableClassVisitor extends ClassVisitor {
 
@@ -27,16 +26,14 @@ public class BeforeSharedVariableClassVisitor extends ClassVisitor {
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         this.className = name;
-        // TODO remove commented code
-//        System.out.println("ConsumeCPU className: " + name);
         super.visit(version, access, name, signature, superName, interfaces);
     }
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        // TODO use Modifier.isXXX(access)
-        // TODO why constructor shouldn't be transformed?
-        if (!Modifier.isNative(access) && !name.equals("<init>")) {
+        // TODO why constructor shouldn't be transformed? -- Question is still open
+//        if (!Modifier.isNative(access) && !name.equals("<init>")) {
+        if (!Modifier.isNative(access)) {
             MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
             return new BeforeSharedVariableMethodTransformer(api, mv, access, name, desc, className, loader);
         }

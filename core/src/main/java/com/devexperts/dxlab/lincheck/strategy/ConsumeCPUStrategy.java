@@ -7,10 +7,14 @@ import java.util.Random;
 // TODO javadoc
 public class ConsumeCPUStrategy implements Strategy {
     private final Random random = new Random();
+    private final int maxTokens;
+
+    public ConsumeCPUStrategy(int maxTokens) {
+        this.maxTokens = maxTokens;
+    }
 
     @Override
     public void onSharedVariableAccess(int location) {
-        // TODO Why 100? Add 'maxTokens' prameter to constructor
-        Utils.consumeCPU(random.nextInt(100));
+        Utils.consumeCPU(random.nextInt(maxTokens));
     }
 }

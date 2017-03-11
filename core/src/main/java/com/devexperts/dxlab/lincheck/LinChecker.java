@@ -158,7 +158,7 @@ public class LinChecker {
             for (int iteration = 1; iteration <= testCfg.getIterations(); iteration++) {
 
                 //Set strategy and initialize transformation in classes
-                StrategyHolder.setCurrentStrategy(new ConsumeCPUStrategy());
+                StrategyHolder.setCurrentStrategy(new ConsumeCPUStrategy(100));
                 final ExecutionClassLoader loader = new ExecutionClassLoader(testClassName);
                 final Object testInstance = loader.loadClass(testClassName).newInstance();
 

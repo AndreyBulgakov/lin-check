@@ -70,6 +70,7 @@ public class BeforeSharedVariableMethodTransformer extends GeneratorAdapter {
 
     @Override
     public void visitVarInsn(int opcode, int var) {
+        // If not ALOAD 0 (this)
         if (!(opcode == ALOAD && var == 0)) { // TODO hard to read
             int id = lm.getLocationId(loader, className, methodName, line);
             super.invokeStatic(STRATEGYHOLDER_TYPE, STRATEGYHOLDER_GET);
@@ -82,7 +83,7 @@ public class BeforeSharedVariableMethodTransformer extends GeneratorAdapter {
     @Override
     public void visitFieldInsn(int opcode, String owner, String name, String desc) {
         int id = lm.getLocationId(loader, className, methodName, line);
-        // TODO use mv instead of super (it's simplier to read)
+        // TODO use mv instead of super (it's simplier to read) - mv is not GeneratorAdapter
         super.invokeStatic(STRATEGYHOLDER_TYPE, STRATEGYHOLDER_GET);
         super.push(id);
         super.invokeInterface(STRATEGY_ITF_TYPE, STRATEGY_ITF_METHOD);

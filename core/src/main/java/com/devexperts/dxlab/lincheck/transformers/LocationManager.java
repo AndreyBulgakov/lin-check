@@ -10,9 +10,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class LocationManager {
 
     private static final LocationManager INSTANCE = new LocationManager();
-    // TODO dynamic growth
+    // TODO dynamic growth - ArrayList already has dynamic growth
     private final ArrayList<IdElement> locations = new ArrayList<>(10_000);
-    // TODO current implementation doesn't need in concurrent map
+    // TODO current implementation doesn't need in concurrent map - And further?
     private final Map<IdElement, Integer> locationIds = new ConcurrentHashMap<>();
 
     public static LocationManager getInstance() {
@@ -23,9 +23,8 @@ public class LocationManager {
         locations.add(null);
     }
 
-    // TODO synchronized
-    public int getLocationId(ClassLoader loader, String className, String methodName, int line) {
-        // TODO classLoader field?
+    synchronized int getLocationId(ClassLoader loader, String className, String methodName, int line) {
+        // TODO classLoader field? - Delete classloader fielld
         IdElement location = new IdElement(loader, className, methodName, line);
         Integer id = locationIds.get(location);
         if (id != null)
