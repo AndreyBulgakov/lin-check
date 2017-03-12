@@ -1,9 +1,9 @@
 package com.devexperts.dxlab.lincheck;
 
 
+import com.devexperts.dxlab.lincheck.utils.AParrent;
 import com.devexperts.dxlab.lincheck.utils.InvokeMethodCounter;
 import com.devexperts.dxlab.transformigclasses.A;
-import com.devexperts.dxlab.lincheck.utils.AParrent;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 
-//TODO I dont know how to solve LingakeError (Example in testMultipleLoaders)
+//TODO I dont know how to solve LinkageError (Example in testMultipleLoaders)
 // Run each test separated from others
 
 public class ExecutionClassLoaderTestFail {

@@ -6,17 +6,13 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * // TODO fix javadoc style + use Grammarly to check fo
- * TODO remove commented code
- * // TODO make documentation more complete
  * Loads and transform classes
  */
 class ExecutionClassLoader extends ClassLoader {
@@ -25,7 +21,7 @@ class ExecutionClassLoader extends ClassLoader {
     private final String testClassName;
 
 
-    ExecutionClassLoader(){
+    ExecutionClassLoader() {
         testClassName = "";
     }
 
@@ -36,6 +32,7 @@ class ExecutionClassLoader extends ClassLoader {
     /**
      * Transform class if it is not in excluded list and load it by this Loader
      * else delegate load to parent loader
+     *
      * @param name name of class
      * @return transformed class loaded by this loader or by parent loader
      * @throws ClassNotFoundException if IOException
@@ -49,7 +46,6 @@ class ExecutionClassLoader extends ClassLoader {
             return result;
         }
 
-        // TODO Need resolve?
         // Secure some packages
         if (shouldIgnoreClass(name)) {
 //            System.out.println("Loaded by super:" + name);
@@ -60,7 +56,6 @@ class ExecutionClassLoader extends ClassLoader {
         try {
 //            System.out.println("Loaded by exec:" + name);
             ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
-            //TODO maybe set all CV chain in Classloader?
             ClassVisitor cv = new BeforeSharedVariableClassVisitor(cw, this);
             ClassVisitor cv0 = new IgnoreClassVisitor(cv, cw, testClassName);
             ClassReader cr = new ClassReader(name);
@@ -84,24 +79,29 @@ class ExecutionClassLoader extends ClassLoader {
     @Override
     public InputStream getResourceAsStream(String name) {
         byte[] result = resources.get(name);
-        if (result != null){
+        if (result != null) {
             return new ByteArrayInputStream(result);
-        }
-        else {
+        } else {
             return super.getResourceAsStream(name);
         }
     }
 
-    private static boolean shouldIgnoreClass(String name) {
+    /***
+     * Check if class should be ignored for transforming and defining
+     * @param className checing class name
+     * @return result of checking class
+     */
+    private static boolean shouldIgnoreClass(String className) {
         return
-                name == null ||
-                name.startsWith("com.devexperts.dxlab.lincheck.") &&
-                        !name.startsWith("com.devexperts.dxlab.lincheck.tests.") ||
-                name.startsWith("sun.") ||
-                name.startsWith("java.") ||
-                    // TODO let's transform java.util.concurrent
-                name.startsWith("org.junit."); // TODO why?
-        }
+                className == null ||
+                        className.startsWith("com.devexperts.dxlab.lincheck.") &&
+                                !className.startsWith("com.devexperts.dxlab.lincheck.tests.") ||
+                        className.startsWith("sun.") ||
+                        className.startsWith("java.") ||
+                        // TODO let's transform java.util.concurrent
+                        // TODO check if org.junit is still transforming?
+                        className.startsWith("org.junit.");
+    }
 
     //TODO need to transform?
     Class<? extends TestThreadExecution> define(String className, byte[] bytecode) {

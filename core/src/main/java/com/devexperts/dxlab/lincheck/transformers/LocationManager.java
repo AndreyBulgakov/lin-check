@@ -3,17 +3,12 @@ package com.devexperts.dxlab.lincheck.transformers;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
-
-// TODO public?
 public class LocationManager {
 
     private static final LocationManager INSTANCE = new LocationManager();
-    // TODO dynamic growth - ArrayList already has dynamic growth
-    private final ArrayList<IdElement> locations = new ArrayList<>(10_000);
-    // TODO current implementation doesn't need in concurrent map - And further?
-    private final Map<IdElement, Integer> locationIds = new ConcurrentHashMap<>();
+    private final ArrayList<ElementId> locations = new ArrayList<>(10_000);
+    private final Map<ElementId, Integer> locationIds = new HashMap<>();
 
     public static LocationManager getInstance() {
         return INSTANCE;
@@ -23,15 +18,23 @@ public class LocationManager {
         locations.add(null);
     }
 
-    synchronized int getLocationId(ClassLoader loader, String className, String methodName, int line) {
-        // TODO classLoader field? - Delete classloader fielld
-        IdElement location = new IdElement(loader, className, methodName, line);
-        Integer id = locationIds.get(location);
-        if (id != null)
+    synchronized int getLocationId(String className, String methodName, String methodDesc, int line) {
+        ElementId location = new ElementId(className, methodName, methodDesc, line);
+        return getOrSetLocationId(location);
+    }
+
+    synchronized int getLocationId(ElementId elementId) {
+        return getOrSetLocationId(elementId);
+    }
+
+    private int getOrSetLocationId(ElementId locationId){
+        Integer id = locationIds.get(locationId);
+        if (id != null) {
             return id;
+        }
         id = locations.size();
-        locations.add(location);
-        locationIds.put(location, id);
+        locations.add(locationId);
+        locationIds.put(locationId, id);
         return id;
     }
 

@@ -4,7 +4,9 @@ import com.devexperts.dxlab.lincheck.Utils;
 
 import java.util.Random;
 
-// TODO javadoc
+/**
+ * Strategy that inserts Utils.consumeCPU before each shared variable access
+ */
 public class ConsumeCPUStrategy implements Strategy {
     private final Random random = new Random();
     private final int maxTokens;

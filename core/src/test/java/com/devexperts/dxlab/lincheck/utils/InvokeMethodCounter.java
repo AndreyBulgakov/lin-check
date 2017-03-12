@@ -4,9 +4,7 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
-/**
- * Created by andrey on 2/19/17.
- */
+
 public class InvokeMethodCounter extends ClassVisitor{
     private int count = 0;
     private final String methodName;
