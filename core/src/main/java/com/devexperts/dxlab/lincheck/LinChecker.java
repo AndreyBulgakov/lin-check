@@ -62,7 +62,7 @@ public class LinChecker {
      * @throws AssertionError if atomicity violation is detected
      */
     private void check() throws AssertionError {
-        reporter = new Reporter(testInstance.getClass().getSimpleName(), "RandomInvokation");
+        reporter = new Reporter(testInstance.getClass().getSimpleName(), "RandomInvocation");
         testConfigurations.forEach((testConfiguration) -> {
             try {
                 reporter.setConfiguratuon(testConfiguration);
@@ -142,7 +142,7 @@ public class LinChecker {
             reporter.setCurrentTime();
             for (int iteration = 1; iteration <= testCfg.getIterations(); iteration++) {
                 List<List<Actor>> actorsPerThread = generateActors(testCfg);
-                System.out.println("for iteration №" + iteration + " genered algorythm:");
+                System.out.println("for iteration №" + iteration + " generated algorithm:");
                 actorsPerThread.forEach(System.out::println);
 
                 // Create TestThreadExecution's
@@ -176,13 +176,13 @@ public class LinChecker {
                     // Check correctness& Throw an AssertionError if current execution
                     // is not linearizable and log invalid execution
                     if (!possibleResultsSet.contains(results)) {
-                        System.out.println("Iteration №" + iteration +" completed with number invokations = " +
+                        System.out.println("Iteration №" + iteration +" completed with number invocations = " +
                                 testCfg.getInvocationsPerIteration());
                         StringBuilder result = new StringBuilder();
                         results.forEach(res -> result.append(res.toString()));
                         System.out.println("For invocation" + testCfg.getInvocationsPerIteration() + "result was " + result);
                         reporter.addFailedResult(iteration, invocation);
-                        throw new AssertionError("Non-linearizable execution detected, see log for details");
+                        throw new AssertionError("Not linearizable execution detected, see log for details");
                     }
                 }
                 reporter.addCompletedResult(iteration, testCfg.getInvocationsPerIteration());
