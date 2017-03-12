@@ -8,30 +8,25 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-//TODO introduce TestReport class
 public class Reporter implements Closeable {
     public static final List<String> list = Collections.unmodifiableList(
             new ArrayList<String>() {{
                 add("TestName");
                 add("StrategyName");
-                add("MaxIteraions");
+                add("MaxIterations");
                 add("MaxInvocations");
                 add("ThreadConfig");
                 add("WasIterations");
-                add("WasInvokations");
+                add("WasInvocations");
                 add("PassedTime");
                 add("Result");
             }});
     private FileWriter filestream;
-    private String testName;
-    private String strategyName;
-    private CTestConfiguration testConfig;
-    private int totalInvokations;
+    private TestReport report;
     protected Instant time;
 
     public Reporter(String testName, String strategyName){
-        this.testName = testName;
-        this.strategyName = strategyName;
+        report = new TestReport(testName, strategyName);
         File file = new File("TestResult");
         try {
             if (!file.exists()) {
@@ -45,17 +40,15 @@ public class Reporter implements Closeable {
         }
     }
 
-
-
     /**
     * Printing test result "OK"
     * @param iteration Number of current iteration
     * @param invokation Number of current invokation
      */
     public void addCompletedResult(int iteration, int invokation){
-        addTotalInvocations(invokation);
+        report.addInvokations(invokation);
         try {
-            if (iteration == testConfig.getIterations()) {
+            if (iteration == report.getMaxIterations()) {
                 writeToFile(iteration, "Completed");
             }
         } catch (IOException e) {
@@ -69,7 +62,7 @@ public class Reporter implements Closeable {
     * @param invokation Number of current invokation
      */
     public void addFailedResult(int iteration, int invokation){
-        addTotalInvocations(invokation);
+        report.addInvokations(invokation);
         try {
             writeToFile(iteration, "Failed");
         } catch (IOException e) {
@@ -78,7 +71,8 @@ public class Reporter implements Closeable {
     }
 
     public void setConfiguratuon(CTestConfiguration configuration) {
-        testConfig = configuration;
+        report.setConfiguration(configuration.getIterations(), configuration.getInvocationsPerIteration(),
+                configuration.getThreadConfigurations().toString());
     }
 
     public void close(){
@@ -93,15 +87,12 @@ public class Reporter implements Closeable {
         time = Instant.now();
     }
 
-    private void addTotalInvocations(int completedInv){
-        totalInvokations += completedInv;
-    }
-
     protected void writeToFile(int iteration, String result) throws IOException {
         long passedTime = Instant.now().toEpochMilli() - time.toEpochMilli();
-        filestream.write(testName + "," + strategyName + "," + testConfig.getIterations() + "," + testConfig.getInvocationsPerIteration() +
-                "," + testConfig.getThreadConfigurations() + ","
-                + iteration + "," + totalInvokations + "," + passedTime + "," + result + "\n");
+        report.setPassedTime(passedTime);
+        report.setResult(result);
+        report.setWasIterations(iteration);
+        filestream.write(report.toString());
         filestream.flush();
         setCurrentTime();
     }
