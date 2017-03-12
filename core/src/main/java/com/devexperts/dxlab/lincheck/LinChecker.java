@@ -23,7 +23,9 @@ package com.devexperts.dxlab.lincheck;
  */
 
 import com.devexperts.dxlab.lincheck.report.Reporter;
+import com.devexperts.dxlab.lincheck.report.TestReport;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -45,7 +47,6 @@ public class LinChecker {
     private final Object testInstance;
     private final List<CTestConfiguration> testConfigurations;
     private final CTestStructure testStructure;
-    private Reporter reporter;
 
     private LinChecker(Object testInstance) {
         this.testInstance = testInstance;
@@ -62,10 +63,8 @@ public class LinChecker {
      * @throws AssertionError if atomicity violation is detected
      */
     private void check() throws AssertionError {
-        reporter = new Reporter(testInstance.getClass().getSimpleName(), "RandomInvocation");
         testConfigurations.forEach((testConfiguration) -> {
             try {
-                reporter.setConfiguratuon(testConfiguration);
                 checkImpl(testConfiguration);
             } catch (InterruptedException e) {
                 throw new IllegalStateException(e);
@@ -133,31 +132,32 @@ public class LinChecker {
     private void checkImpl(CTestConfiguration testCfg) throws InterruptedException {
         // Fixed thread pool executor to run TestThreadExecution
         ExecutorService pool = Executors.newFixedThreadPool(testCfg.getThreads());
+        // Store start time for counting performance metrics
+        long startTime = System.currentTimeMillis();
+        // Create report builder
+        TestReport.Builder reportBuilder = new TestReport.Builder()
+            .withName(testInstance.getClass().getCanonicalName()) // use fully-qualified name
+            .maxIterations(testCfg.getIterations()); // TODO other properties
         try {
             System.out.println("Number iterations: " + testCfg.getIterations());
             System.out.println("Number invocations per iteration: " + testCfg.getInvocationsPerIteration() + "\n");
             // Reusable phaser
             final Phaser phaser = new Phaser(testCfg.getThreads());
             // Run iterations
-            reporter.setCurrentTime();
             for (int iteration = 1; iteration <= testCfg.getIterations(); iteration++) {
+                reportBuilder.incIterations();
                 List<List<Actor>> actorsPerThread = generateActors(testCfg);
-                System.out.println("for iteration №" + iteration + " generated algorithm:");
                 actorsPerThread.forEach(System.out::println);
-
                 // Create TestThreadExecution's
                 List<TestThreadExecution> testThreadExecutions = actorsPerThread.stream()
                     .map(actors -> TestThreadExecutionGenerator.create(testInstance, phaser, actors, false))
                     .collect(Collectors.toList());
                 // Generate all possible results
                 Set<List<List<Result>>> possibleResultsSet = generateLinearizeResults(actorsPerThread);
-                System.out.println("Linearizable results:");
-                possibleResultsSet.forEach(possibleResults -> {
-                    possibleResults.forEach(System.out::println);
-                    System.out.println();
-                });
+                printPossibleResults(possibleResultsSet);
                 // Run invocations
                 for (int invocation = 1; invocation <= testCfg.getInvocationsPerIteration(); invocation++) {
+                    // TODO reportBuilder.incInvocations();
                     // Reset the state of test
                     invokeReset();
                     // Specify waits
@@ -176,21 +176,30 @@ public class LinChecker {
                     // Check correctness& Throw an AssertionError if current execution
                     // is not linearizable and log invalid execution
                     if (!possibleResultsSet.contains(results)) {
-                        System.out.println("Iteration №" + iteration +" completed with number invocations = " +
-                                testCfg.getInvocationsPerIteration());
-                        StringBuilder result = new StringBuilder();
-                        results.forEach(res -> result.append(res.toString()));
-                        System.out.println("For invocation" + testCfg.getInvocationsPerIteration() + "result was " + result);
-                        reporter.addFailedResult(iteration, invocation);
-                        throw new AssertionError("Not linearizable execution detected, see log for details");
+                        // TODO use reportBuilder
+                        throw new AssertionError("Non-linearizable execution detected, see log for details");
                     }
                 }
-                reporter.addCompletedResult(iteration, testCfg.getInvocationsPerIteration());
+                // TODO use reportBuilder
             }
         } finally {
-            reporter.close();
             pool.shutdown();
+            // Print report
+            try (Reporter reporter = new Reporter("report.scv")){
+                reporter.report(reportBuilder.build());
+            } catch (IOException e) {
+                System.out.println("Unable to write report:");
+                e.printStackTrace();
+            }
         }
+    }
+
+    private void printPossibleResults(Set<List<List<Result>>> possibleResultsSet) {
+        System.out.println("Linearizable results:");
+        possibleResultsSet.forEach(possibleResults -> {
+            possibleResults.forEach(System.out::println);
+            System.out.println();
+        });
     }
 
     private Phaser SINGLE_THREAD_PHASER = new Phaser(1);

@@ -1,50 +1,68 @@
 package com.devexperts.dxlab.lincheck.report;
 
+import java.util.Objects;
+
 public class TestReport {
-    private String testName;
-    private String strategyName;
-    private int maxIteraions;
-    private int maxInvocations;
-    private String threadConfig;
-    private int wasIterations;
-    private int wasInvokations;
-    private long passedTime;
-    private String result;
+    private final String testName;
+    private final int maxIterations;
+    private final int maxInvocations;
+    private final String threadConfig;
+    private final int iterations;
+    private final int invocations;
+    private final long time;
+    private final Result result;
 
-    public TestReport(String testName, String strategyName){
-        this.testName = testName;
-        this.strategyName = strategyName;
-    }
-
-    public void addInvokations(int inv) {
-        wasInvokations += inv;
-    }
-
-    public void setWasIterations(int iterations) {
-        wasIterations = iterations;
-    }
-
-    public void setPassedTime(long time) {
-        passedTime = time;
-    }
-
-    public void setConfiguration(int maxIteraions, int maxInvocations, String threadConfig) {
-        this.maxIteraions = maxIteraions;
-        this.maxInvocations = maxInvocations;
-        this.threadConfig = threadConfig;
-    }
-
-    public void setResult(String result) {
-        this.result = result;
-    }
-
-    public int getMaxIteraions() {
-        return maxIteraions;
+    private TestReport(Builder builder) {
+        this.testName = Objects.requireNonNull(builder.testName);
+        // TODO initialize other fields
     }
 
     @Override
     public String toString() {
-        return testName + "," + strategyName + "," + maxIteraions + "," + maxInvocations +
-                "," + threadConfig + "," + wasIterations + "," + wasInvokations + "," + passedTime + "," + result + "\n";
+        return "TestReport{" +
+            "testName='" + testName + '\'' +
+            ", maxIterations=" + maxIterations +
+            ", maxInvocations=" + maxInvocations +
+            ", threadConfig='" + threadConfig + '\'' +
+            ", iterations=" + iterations +
+            ", invocations=" + invocations +
+            ", time=" + time +
+            ", result=" + result +
+            '}';
+    }
+
+    public enum Result {
+        SUCCESS, FAILURE
+    }
+
+    public static class Builder {
+        private String testName;
+        private int maxIterations;
+        private int maxInvocations;
+        private String threadConfig;
+        private int iterations;
+        private int invocations;
+        private long time;
+        private Result result;
+
+        public Builder withName(String testName) {
+            this.testName = testName;
+            return this;
+        }
+
+        public Builder maxIterations(int maxIterations) {
+            this.maxIterations = maxIterations;
+            return this;
+        }
+
+        public Builder incIterations() {
+            this.iterations++;
+        }
+
+        // TODO add other methods
+
+        public TestReport build() {
+            return new TestReport(this);
+        }
     }
 }

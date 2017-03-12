@@ -52,17 +52,6 @@ class CTestStructure {
             }
             namedGens.put(paramAnn.name(), createGenerator(paramAnn));
         }
-        //check that constructor has not arguments
-        boolean hasEmptyConstructor = false;
-        for (Constructor c : testClass.getDeclaredConstructors()) {
-            if (c.getParameterCount() == 0) {
-                hasEmptyConstructor = true;
-                break;
-            }
-        }
-        if (!hasEmptyConstructor){
-            throw new IllegalArgumentException("Has no constructor without parameters");
-        }
         // Create actor generators
         List<ActorGenerator> actorGenerators = new ArrayList<>();
         Method resetMethod = null;

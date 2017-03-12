@@ -1,99 +1,40 @@
 package com.devexperts.dxlab.lincheck.report;
 
-import com.devexperts.dxlab.lincheck.CTestConfiguration;
+import com.devexperts.dxlab.lincheck.Utils;
 
-import java.io.*;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 
+import static java.nio.file.StandardOpenOption.APPEND;
+
 public class Reporter implements Closeable {
-    public static final List<String> list = Collections.unmodifiableList(
-            new ArrayList<String>() {{
-                add("TestName");
-                add("StrategyName");
-                add("MaxIteraions");
-                add("MaxInvocations");
-                add("ThreadConfig");
-                add("WasIterations");
-                add("WasInvokations");
-                add("PassedTime");
-                add("Result");
-            }});
-    private FileWriter filestream;
-    private TestReport report;
-    protected Instant time;
 
-    public Reporter(String testName, String strategyName){
-        report = new TestReport(testName, strategyName);
-        File file = new File("TestResult");
-        try {
-            if (!file.exists()) {
-                filestream = new FileWriter(file, true);
-                filestream.write(list + "\n");
-            } else {
-                filestream = new FileWriter(file, true);
-            }
-        } catch (IOException e){
-            e.printStackTrace();
+    public static final List<String> list = Arrays.asList("TestName", "MaxIteraions", "MaxInvocations", "ThreadConfig",
+        "Iterations", "Invocations", "Time", "Result");
+    private PrintStream out;
+
+    public Reporter(String filename) throws IOException {
+        Path p = Paths.get(filename);
+        if (Files.exists(p)) {
+            out = new PrintStream(Files.newOutputStream(p, APPEND));
+        } else {
+            Utils.createMissingDirectories(p);
+            out = new PrintStream(Files.newOutputStream(p));
         }
     }
 
-    /**
-    * Printing test result "OK"
-    * @param iteration Number of current iteration
-    * @param invokation Number of current invokation
-     */
-    public void addCompletedResult(int iteration, int invokation){
-        report.addInvokations(invokation);
-        try {
-            if (iteration == report.getMaxIteraions()) {
-                writeToFile(iteration, "Completed");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    @Override
+    public void close() throws IOException {
+        out.close();
     }
 
-    /**
-    * Printing test result "Bad" with printing nonlinearize result
-    * @param iteration Number of current iteration
-    * @param invokation Number of current invokation
-     */
-    public void addFailedResult(int iteration, int invokation){
-        report.addInvokations(invokation);
-        try {
-            writeToFile(iteration, "Failed");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void setConfiguratuon(CTestConfiguration configuration) {
-        report.setConfiguration(configuration.getIterations(), configuration.getInvocationsPerIteration(),
-                configuration.getThreadConfigurations().toString());
-    }
-
-    public void close(){
-        try {
-            filestream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    
-    public void setCurrentTime(){
-        time = Instant.now();
-    }
-
-    protected void writeToFile(int iteration, String result) throws IOException {
-        long passedTime = Instant.now().toEpochMilli() - time.toEpochMilli();
-        report.setPassedTime(passedTime);
-        report.setResult(result);
-        report.setWasIterations(iteration);
-        filestream.write(report.toString());
-        filestream.flush();
-        setCurrentTime();
+    public void report(TestReport report) {
+        // TODO print it to out
     }
 }
