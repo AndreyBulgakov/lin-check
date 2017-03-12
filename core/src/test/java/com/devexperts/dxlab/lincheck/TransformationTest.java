@@ -16,6 +16,7 @@ import java.io.IOException;
 
 public class TransformationTest {
 
+    // TODO rename it, you do not test ConsumeCPU here
     @Test
     public void TestConsumeCPU() throws IOException {
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
