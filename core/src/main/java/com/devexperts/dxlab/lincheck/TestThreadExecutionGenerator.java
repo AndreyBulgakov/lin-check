@@ -31,9 +31,6 @@ import org.objectweb.asm.commons.Method;
 import org.objectweb.asm.commons.TryCatchBlockSorter;
 import org.objectweb.asm.util.CheckClassAdapter;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Phaser;
@@ -44,9 +41,6 @@ import static org.objectweb.asm.Opcodes.*;
  * This class is used to generate {@link TestThreadExecution thread executions}.
  */
 class TestThreadExecutionGenerator {
-    // TODO remove commented code
-//    private static final ExecutionClassLoader LOADER = new ExecutionClassLoader();
-//    private static final ExecutionClassLoader LOADER = Utils.LOADER;
 
     private static final Type[] NO_ARGS = new Type[] {};
 

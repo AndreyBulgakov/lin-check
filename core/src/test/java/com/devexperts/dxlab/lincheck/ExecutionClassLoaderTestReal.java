@@ -1,10 +1,8 @@
 package com.devexperts.dxlab.lincheck;
 
-import com.devexperts.dxlab.lincheck.utils.AParrent;
 import com.devexperts.dxlab.lincheck.utils.FakeTestAbstract;
-import com.devexperts.dxlab.transformigclasses.FakeTestClass;
 import com.devexperts.dxlab.lincheck.utils.InvokeMethodCounter;
-import com.devexperts.dxlab.transformigclasses.A;
+import com.devexperts.dxlab.transformigclasses.FakeTestClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;

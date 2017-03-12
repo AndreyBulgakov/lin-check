@@ -3,9 +3,6 @@ package com.devexperts.dxlab.transformigclasses;
 import com.devexperts.dxlab.lincheck.Utils;
 import com.devexperts.dxlab.lincheck.utils.AParrent;
 
-/**
- * Created by andrey on 2/18/17.
- */
 public class A extends AParrent{
 
     private B b = new B();

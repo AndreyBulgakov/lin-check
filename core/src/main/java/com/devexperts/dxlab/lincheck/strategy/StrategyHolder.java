@@ -1,8 +1,11 @@
 package com.devexperts.dxlab.lincheck.strategy;
 
-// TODO javadoc
-public class StrategyHolder {
-    private static Strategy currentStrategy; // TODO curent -> current
+
+/**
+ * Current strategy container
+ */
+public abstract class StrategyHolder {
+    private static Strategy currentStrategy;
 
     public static void setCurrentStrategy(Strategy curentStrategy) {
         StrategyHolder.currentStrategy = curentStrategy;

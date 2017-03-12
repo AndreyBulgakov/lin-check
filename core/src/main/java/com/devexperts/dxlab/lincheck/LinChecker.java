@@ -26,13 +26,7 @@ import com.devexperts.dxlab.lincheck.strategy.ConsumeCPUStrategy;
 import com.devexperts.dxlab.lincheck.strategy.StrategyHolder;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -48,42 +42,37 @@ public class LinChecker {
     private static final int MAX_WAIT = 1000;
 
     private final Random random = new Random();
-//    private final Object testInstance;
-    private final String testClassName; // TODO class name only
+    private final String testClassName;
     private final List<CTestConfiguration> testConfigurations;
     private final CTestStructure testStructure;
-//    private final ExecutionClassLoader LOADER = Utils.LOADER;
 
-    // TODO many commented code!
-
-    private LinChecker(Class testClass) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-//        LOADER.setTestClassName(testClassName.getCanonicalName());
+    private LinChecker(Class testClass) {
         this.testClassName = testClass.getCanonicalName();
-//        this.testInstance = LOADER.loadClass(testClass.getCanonicalName()).newInstance();
-//        Class<?> testClassName = testInstance.getClass();
         this.testConfigurations = CTestConfiguration.getFromTestClass(testClass);
         this.testStructure = CTestStructure.getFromTestClass(testClass);
     }
 
-    // TODO use class name as parameter
     private LinChecker(Object testInstance) {
         this.testClassName = testInstance.getClass().getCanonicalName();
-//        this.testInstance = testInstance;
         Class<?> testClass = testInstance.getClass();
-//        LOADER.setTestClassName(testClass.getCanonicalName());
         this.testConfigurations = CTestConfiguration.getFromTestClass(testClass);
         this.testStructure = CTestStructure.getFromTestClass(testClass);
     }
 
+    /**
+     * LinChecker run method. Use LinChecker.check(TestClass.class) in junit test class
+     * @param testClass class that contains CTest
+     * @throws AssertionError
+     */
     public static void check(Class testClass) throws AssertionError {
-        try {
             new LinChecker(testClass).check();
-        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
-            throw new AssertionError("Can't load class", e);
-        }
     }
 
-    // TODO remove this method
+    /**
+     * LinChecker run method. Use LinChecker.check(this) in junit test class
+     * @param testInstance object that contains CTest
+     * @throws AssertionError
+     */
     public static void check(Object testInstance) throws AssertionError {
             new LinChecker(testInstance).check();
 
@@ -232,9 +221,13 @@ public class LinChecker {
     }
 
     private void invokeReset(Object testInstance) {
+        // That what was before
+        // testStructure.getResetMethod().invoke(testInstance);
+        // Now it throws too many exceptions because it get reset method in very interesting manner.
+        // Too many reflection. I use reflection even to getResetMethod
+        // TODO set reset method in CTestStructure as a String
         try {
             testInstance.getClass().getMethod(testStructure.getResetMethod().getName()).invoke(testInstance);
-//            testStructure.getResetMethod().invoke(testInstance); // TODO commented code should be removed
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new IllegalStateException("Unable to call method annotated with @Reset", e);
         }

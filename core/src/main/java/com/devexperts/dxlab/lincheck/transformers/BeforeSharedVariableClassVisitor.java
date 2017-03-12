@@ -4,13 +4,9 @@ import com.devexperts.dxlab.lincheck.Utils;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import static org.objectweb.asm.Opcodes.ACC_NATIVE;
-
 /**
- * TODO public?
  * ClassVisitor that inserts StrategyHolder before each access to shared variable.
  */
 public class BeforeSharedVariableClassVisitor extends ClassVisitor {
@@ -31,11 +27,10 @@ public class BeforeSharedVariableClassVisitor extends ClassVisitor {
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        // TODO why constructor shouldn't be transformed? -- Question is still open
 //        if (!Modifier.isNative(access) && !name.equals("<init>")) {
         if (!Modifier.isNative(access)) {
             MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
-            return new BeforeSharedVariableMethodTransformer(api, mv, access, name, desc, className, loader);
+            return new BeforeSharedVariableMethodTransformer(api, mv, access, name, desc, className);
         }
         return super.visitMethod(access, name, desc, signature, exceptions);
     }
