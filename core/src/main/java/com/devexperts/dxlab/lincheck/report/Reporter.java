@@ -27,7 +27,7 @@ public class Reporter implements Closeable {
     private String strategyName;
     private CTestConfiguration testConfig;
     private int totalInvokations;
-    private Instant time;
+    protected Instant time;
 
     public Reporter(String testName, String strategyName){
         this.testName = testName;
