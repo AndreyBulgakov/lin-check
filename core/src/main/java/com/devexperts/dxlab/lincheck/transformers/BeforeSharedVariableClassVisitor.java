@@ -27,8 +27,7 @@ public class BeforeSharedVariableClassVisitor extends ClassVisitor {
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-//        if (!Modifier.isNative(access) && !name.equals("<init>")) {
-        if (!Modifier.isNative(access)) {
+        if (!Modifier.isNative(access) && !name.equals("<init>")) {
             MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
             return new BeforeSharedVariableMethodTransformer(api, mv, access, name, desc, className);
         }
