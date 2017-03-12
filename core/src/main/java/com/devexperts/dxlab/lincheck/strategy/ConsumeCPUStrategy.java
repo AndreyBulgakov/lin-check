@@ -5,7 +5,7 @@ import com.devexperts.dxlab.lincheck.Utils;
 import java.util.Random;
 
 /**
- * Strategy that inserts Utils.consumeCPU before each shared variable access
+ * Strategy call Utils.consumeCPU in each onSharedVariableAccess
  */
 public class ConsumeCPUStrategy implements Strategy {
     private final Random random = new Random();

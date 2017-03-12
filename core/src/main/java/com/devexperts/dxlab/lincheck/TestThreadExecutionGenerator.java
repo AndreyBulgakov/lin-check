@@ -42,7 +42,7 @@ import static org.objectweb.asm.Opcodes.*;
  */
 class TestThreadExecutionGenerator {
 
-    private static final Type[] NO_ARGS = new Type[] {};
+    private static final Type[] NO_ARGS = new Type[]{};
 
     private static final Type CLASS_TYPE = Type.getType(Class.class);
     private static final Type OBJECT_TYPE = Type.getType(Object.class);
@@ -59,13 +59,13 @@ class TestThreadExecutionGenerator {
     private static final Method TEST_THREAD_EXECUTION_CONSTRUCTOR;
 
     private static final Type UTILS_TYPE = Type.getType(Utils.class);
-    private static final Method UTILS_CONSUME_CPU = new Method("consumeCPU", Type.VOID_TYPE, new Type[] {Type.INT_TYPE});
+    private static final Method UTILS_CONSUME_CPU = new Method("consumeCPU", Type.VOID_TYPE, new Type[]{Type.INT_TYPE});
 
     private static final Type RESULT_TYPE = Type.getType(Result.class);
     private static final Type RESULT_ARRAY_TYPE = Type.getType(Result[].class);
     private static final Method RESULT_CREATE_VOID_RESULT = new Method("createVoidResult", RESULT_TYPE, NO_ARGS);
-    private static final Method RESULT_CREATE_VALUE_RESULT = new Method("createValueResult", RESULT_TYPE, new Type[] {OBJECT_TYPE});
-    private static final Method RESULT_CREATE_EXCEPTION_RESULT = new Method("createExceptionResult", RESULT_TYPE, new Type[] {CLASS_TYPE});
+    private static final Method RESULT_CREATE_VALUE_RESULT = new Method("createValueResult", RESULT_TYPE, new Type[]{OBJECT_TYPE});
+    private static final Method RESULT_CREATE_EXCEPTION_RESULT = new Method("createExceptionResult", RESULT_TYPE, new Type[]{CLASS_TYPE});
 
     private static int generatedClassNumber = 0;
 
@@ -79,17 +79,19 @@ class TestThreadExecutionGenerator {
 
     /**
      * Create a {@link TestThreadExecution} instance with specified {@link TestThreadExecution#call()} implementation.
+     *
      * @param testInstance the instance of test object which is used to execute actors.
-     * @param phaser the phaser to synchronize parallel working test thread.
-     * @param actors the actors to be executed in the test.
+     * @param phaser       the phaser to synchronize parallel working test thread.
+     * @param actors       the actors to be executed in the test.
      * @return {@link TestThreadExecution} instance with specified {@link TestThreadExecution#call()} implementation.
      */
     static TestThreadExecution create(Object testInstance, Phaser phaser, List<Actor> actors, boolean waitsEnabled, ExecutionClassLoader loader) {
         String className = TestThreadExecution.class.getCanonicalName() + generatedClassNumber++;
         String internalClassName = className.replace('.', '/');
         List<Object> objArgs = new ArrayList<>();
-        Class<? extends TestThreadExecution> clz = loader.define(className,
-            generateClass(internalClassName, Type.getType(testInstance.getClass()), actors, objArgs, waitsEnabled));
+        Class<? extends TestThreadExecution> clz = loader.defineTestThreadExecution(
+                className,
+                generateClass(internalClassName, Type.getType(testInstance.getClass()), actors, objArgs, waitsEnabled));
         try {
             TestThreadExecution execution = clz.newInstance();
             execution.phaser = phaser;
@@ -102,8 +104,7 @@ class TestThreadExecutionGenerator {
     }
 
     private static byte[] generateClass(String internalClassName, Type testClassType, List<Actor> actors,
-        List<Object> objArgs, boolean waitsEnabled)
-    {
+                                        List<Object> objArgs, boolean waitsEnabled) {
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
         CheckClassAdapter cca = new CheckClassAdapter(cw, false);
         cca.visit(52, ACC_PUBLIC + ACC_SUPER, internalClassName, null, TEST_THREAD_EXECUTION_TYPE.getInternalName(), null);
@@ -127,9 +128,9 @@ class TestThreadExecutionGenerator {
         int access = ACC_PUBLIC;
         Method m = new Method("call", RESULT_ARRAY_TYPE, NO_ARGS);
         GeneratorAdapter mv = new GeneratorAdapter(access, m,
-            // Try-catch blocks sorting is required
-            new TryCatchBlockSorter(cv.visitMethod(access, m.getName(), m.getDescriptor(), null, null),
-                access, m.getName(), m.getDescriptor(), null, null)
+                // Try-catch blocks sorting is required
+                new TryCatchBlockSorter(cv.visitMethod(access, m.getName(), m.getDescriptor(), null, null),
+                        access, m.getName(), m.getDescriptor(), null, null)
         );
         mv.visitCode();
         // Create Result[] array and store it to a local variable

@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Manager to contains all actual ids.
+ * Used as a message box between ClassLoader's transformations and Strategy
+ */
 public class LocationManager {
 
     private static final LocationManager INSTANCE = new LocationManager();
