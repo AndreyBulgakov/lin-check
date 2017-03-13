@@ -225,9 +225,8 @@ public class LinChecker {
         // testStructure.getResetMethod().invoke(testInstance);
         // Now it throws too many exceptions because it get reset method using reflection.
         // Too many reflection. I use reflection even to get ResetMethod which we had in testStructure.
-        // TODO set reset method in CTestStructure as a String
         try {
-            testInstance.getClass().getMethod(testStructure.getResetMethod().getName()).invoke(testInstance);
+            testInstance.getClass().getMethod(testStructure.getResetMethod()).invoke(testInstance);
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new IllegalStateException("Unable to call method annotated with @Reset", e);
         }
