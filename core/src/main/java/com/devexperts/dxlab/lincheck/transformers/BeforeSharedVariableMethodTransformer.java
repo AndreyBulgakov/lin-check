@@ -10,6 +10,12 @@ import org.objectweb.asm.commons.Method;
 
 import static org.objectweb.asm.Opcodes.ALOAD;
 
+/**
+ * MethodTransformer to insert StrategyHolder.currentStrategy.onSharedVariable method call
+ *
+ * @see Strategy
+ * @see StrategyHolder
+ */
 class BeforeSharedVariableMethodTransformer extends GeneratorAdapter {
 
     private static final Type STRATEGYHOLDER_TYPE = Type.getType(StrategyHolder.class);

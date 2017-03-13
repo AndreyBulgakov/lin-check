@@ -62,7 +62,7 @@ public class LinChecker {
     /**
      * LinChecker run method. Use LinChecker.check(TestClass.class) in junit test class
      * @param testClass class that contains CTest
-     * @throws AssertionError
+     * @throws AssertionError if find Non-linearizable executions
      */
     public static void check(Class testClass) throws AssertionError {
             new LinChecker(testClass).check();
@@ -71,7 +71,7 @@ public class LinChecker {
     /**
      * LinChecker run method. Use LinChecker.check(this) in junit test class
      * @param testInstance object that contains CTest
-     * @throws AssertionError
+     * @throws AssertionError if find Non-linearizable executions
      */
     public static void check(Object testInstance) throws AssertionError {
             new LinChecker(testInstance).check();
@@ -223,8 +223,8 @@ public class LinChecker {
     private void invokeReset(Object testInstance) {
         // That what was before
         // testStructure.getResetMethod().invoke(testInstance);
-        // Now it throws too many exceptions because it get reset method in very interesting manner.
-        // Too many reflection. I use reflection even to getResetMethod
+        // Now it throws too many exceptions because it get reset method using reflection.
+        // Too many reflection. I use reflection even to get ResetMethod which we had in testStructure.
         // TODO set reset method in CTestStructure as a String
         try {
             testInstance.getClass().getMethod(testStructure.getResetMethod().getName()).invoke(testInstance);

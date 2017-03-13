@@ -13,7 +13,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Loads and transform classes
+ * Loader to load and transform classes.
+ * Can delegate some classes to parent ClassLoader.
  */
 class ExecutionClassLoader extends ClassLoader {
     private final Map<String, Class<?>> cash = new ConcurrentHashMap<>();
@@ -40,7 +41,9 @@ class ExecutionClassLoader extends ClassLoader {
     @Override
     public Class<?> loadClass(String name) throws ClassNotFoundException {
         // Load transformed class from cash if it exists
-//        System.out.println("Loading: " + name);
+
+        // Print loading class
+        // System.out.println("Loading: " + name);
         Class result = cash.get(name);
         if (result != null) {
             return result;
@@ -48,13 +51,15 @@ class ExecutionClassLoader extends ClassLoader {
 
         // Secure some packages
         if (shouldIgnoreClass(name)) {
-//            System.out.println("Loaded by super:" + name);
+            // Print delegated class
+            // System.out.println("Loaded by super:" + name);
             return super.loadClass(name);
         }
 
         //Transform and save class
         try {
-//            System.out.println("Loaded by exec:" + name);
+            // Print transforming class
+            // System.out.println("Loaded by exec:" + name);
             ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
             ClassVisitor cv = new BeforeSharedVariableClassVisitor(cw, this);
             ClassVisitor cv0 = new IgnoreClassVisitor(cv, cw, testClassName);
@@ -88,7 +93,7 @@ class ExecutionClassLoader extends ClassLoader {
 
     /***
      * Check if class should be ignored for transforming and defining
-     * @param className checing class name
+     * @param className checking class name
      * @return result of checking class
      */
     private static boolean shouldIgnoreClass(String className) {
@@ -103,8 +108,8 @@ class ExecutionClassLoader extends ClassLoader {
                         className.startsWith("org.junit.");
     }
 
-    //TODO need to transform?
-    Class<? extends TestThreadExecution> define(String className, byte[] bytecode) {
+    //TODO insert onSharedVariable while TestThreadExecutionGenerator generate class
+    Class<? extends TestThreadExecution> defineTestThreadExecution(String className, byte[] bytecode) {
         return (Class<? extends TestThreadExecution>) super.defineClass(className, bytecode, 0, bytecode.length);
     }
 

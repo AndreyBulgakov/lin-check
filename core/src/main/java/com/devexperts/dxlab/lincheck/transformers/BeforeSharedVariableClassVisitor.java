@@ -7,7 +7,7 @@ import org.objectweb.asm.MethodVisitor;
 import java.lang.reflect.Modifier;
 
 /**
- * ClassVisitor that inserts StrategyHolder before each access to shared variable.
+ * ClassVisitor to transform methods by using BeforeSharedVariableMethodTransformer
  */
 public class BeforeSharedVariableClassVisitor extends ClassVisitor {
 
