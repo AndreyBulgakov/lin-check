@@ -15,6 +15,9 @@ import static java.nio.file.StandardOpenOption.APPEND;
 
 public class Reporter implements Closeable {
 
+    /**
+     * Columns for test result file
+     */
     public static final List<String> columns = Arrays.asList("TestName", "StrategyName", "MaxIterations", "MaxInvocations",
             "ThreadConfig", "Iterations", "Invocations", "Time", "Result");
     private PrintStream out;
@@ -35,6 +38,10 @@ public class Reporter implements Closeable {
         out.close();
     }
 
+    /**
+     * Write @TestReport to file
+     * @param report
+     */
     public void report(TestReport report) {
         out.println(report);
     }
