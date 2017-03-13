@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 
-//TODO I dont know how to solve LinkageError (Example in testMultipleLoaders)
+//TODO LinkageError (Example in testMultipleLoaders)
 // Run each test separated from others
 
 public class ExecutionClassLoaderTestFail {
