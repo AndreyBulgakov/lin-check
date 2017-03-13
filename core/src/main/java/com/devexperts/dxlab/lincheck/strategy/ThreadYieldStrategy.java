@@ -1,7 +1,7 @@
 package com.devexperts.dxlab.lincheck.strategy;
 
 /**
- * Strategy that call Thread.yield in each onSharedVariableAccess method call
+ * This strategy invokes {@link Thread#yield()} method on every shared variable access.
  */
 public class ThreadYieldStrategy implements Strategy {
 

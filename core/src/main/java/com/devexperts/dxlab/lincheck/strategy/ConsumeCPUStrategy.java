@@ -5,6 +5,7 @@ import com.devexperts.dxlab.lincheck.Utils;
 import java.util.Random;
 
 /**
+ * // TODO describe "onSharedVariableAccess" and "consumeCPU".
  * Strategy call Utils.consumeCPU in each onSharedVariableAccess
  */
 public class ConsumeCPUStrategy implements Strategy {

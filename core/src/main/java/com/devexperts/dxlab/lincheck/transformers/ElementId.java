@@ -5,6 +5,7 @@ package com.devexperts.dxlab.lincheck.transformers;
  */
 class ElementId {
 
+    // TODO make them final
     private String declaringClass;
     private String methodName;
     private String methodDesc;

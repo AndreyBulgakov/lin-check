@@ -4,6 +4,7 @@ import com.devexperts.dxlab.lincheck.Utils;
 import org.objectweb.asm.ClassVisitor;
 
 /**
+ * TODO remove this class
  * Visitor to ignore class with ignoreClassName and jump in classVisitorsChain
  */
 public class IgnoreClassVisitor extends ClassVisitor {

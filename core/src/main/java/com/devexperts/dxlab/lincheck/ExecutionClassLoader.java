@@ -19,9 +19,10 @@ import java.util.concurrent.ConcurrentHashMap;
 class ExecutionClassLoader extends ClassLoader {
     private final Map<String, Class<?>> cash = new ConcurrentHashMap<>();
     private final Map<String, byte[]> resources = new ConcurrentHashMap<>();
-    private final String testClassName;
+    private final String testClassName; // TODO we should transform test class (it contains algorithm logic)
 
 
+    // TODO remove one constructor
     ExecutionClassLoader() {
         testClassName = "";
     }
@@ -61,7 +62,7 @@ class ExecutionClassLoader extends ClassLoader {
             // Print transforming class
             // System.out.println("Loaded by exec:" + name);
             ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
-            ClassVisitor cv = new BeforeSharedVariableClassVisitor(cw, this);
+            ClassVisitor cv = new BeforeSharedVariableClassVisitor(cw);
             ClassVisitor cv0 = new IgnoreClassVisitor(cv, cw, testClassName);
             ClassReader cr = new ClassReader(name);
 
@@ -108,7 +109,7 @@ class ExecutionClassLoader extends ClassLoader {
                         className.startsWith("org.junit.");
     }
 
-    //TODO insert onSharedVariable while TestThreadExecutionGenerator generate class
+    //TODO remove this method, just add condition to shouldIgnoreClass
     Class<? extends TestThreadExecution> defineTestThreadExecution(String className, byte[] bytecode) {
         return (Class<? extends TestThreadExecution>) super.defineClass(className, bytecode, 0, bytecode.length);
     }

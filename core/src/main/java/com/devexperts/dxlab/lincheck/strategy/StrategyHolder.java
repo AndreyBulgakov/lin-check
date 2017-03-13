@@ -11,6 +11,7 @@ public abstract class StrategyHolder {
         StrategyHolder.currentStrategy = curentStrategy;
     }
 
+    @SuppressWarnings("unused") // invoked from transformed code
     public static Strategy getCurrentStrategy() {
         return currentStrategy;
     }

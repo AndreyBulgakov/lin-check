@@ -27,6 +27,7 @@ public class LocationManager {
         return getOrSetLocationId(location);
     }
 
+    // TODO remove unused method
     synchronized int getLocationId(ElementId elementId) {
         return getOrSetLocationId(elementId);
     }

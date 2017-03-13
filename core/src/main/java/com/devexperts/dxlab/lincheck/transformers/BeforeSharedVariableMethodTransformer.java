@@ -23,7 +23,6 @@ class BeforeSharedVariableMethodTransformer extends GeneratorAdapter {
     private static final Type STRATEGY_ITF_TYPE = Type.getType(Strategy.class);
     private static final Method STRATEGY_ITF_METHOD = new Method("onSharedVariableAccess", Type.VOID_TYPE, new Type[]{Type.INT_TYPE});
 
-
     private final String className;
     private final String methodName;
     private final String methodDesc;
@@ -47,22 +46,25 @@ class BeforeSharedVariableMethodTransformer extends GeneratorAdapter {
 
     @Override
     public void visitVarInsn(int opcode, int var) {
-        // If not ALOAD 0 (this)
+        // TODO add comments
+        // If not ALOAD 0 (this) TODO I cannot understand such comments (it is the same as the code)
         if (!(opcode == ALOAD && var == 0)) {
+            // TODO use instruction number instead of line number
             int id = lm.getLocationId(className, methodName, methodDesc, line);
-            super.invokeStatic(STRATEGYHOLDER_TYPE, STRATEGYHOLDER_GET);
-            super.push(id);
-            super.invokeInterface(STRATEGY_ITF_TYPE, STRATEGY_ITF_METHOD);
+            invokeStatic(STRATEGYHOLDER_TYPE, STRATEGYHOLDER_GET);
+            push(id);
+            invokeInterface(STRATEGY_ITF_TYPE, STRATEGY_ITF_METHOD);
         }
         mv.visitVarInsn(opcode, var);
     }
 
     @Override
     public void visitFieldInsn(int opcode, String owner, String name, String desc) {
+        // TODO add comments
         int id = lm.getLocationId(className, methodName, methodDesc, line);
-        super.invokeStatic(STRATEGYHOLDER_TYPE, STRATEGYHOLDER_GET);
-        super.push(id);
-        super.invokeInterface(STRATEGY_ITF_TYPE, STRATEGY_ITF_METHOD);
+        invokeStatic(STRATEGYHOLDER_TYPE, STRATEGYHOLDER_GET);
+        push(id);
+        invokeInterface(STRATEGY_ITF_TYPE, STRATEGY_ITF_METHOD);
         mv.visitFieldInsn(opcode, owner, name, desc);
     }
 }
