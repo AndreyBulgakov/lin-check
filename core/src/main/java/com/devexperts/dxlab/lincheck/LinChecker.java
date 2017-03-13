@@ -41,9 +41,6 @@ import java.util.stream.Collectors;
 public class LinChecker {
     private static final int MAX_WAIT = 1000;
 
-    // TODO a lot of structure changes: why? Let's remove such changes.
-    // TODO They can introduce problems with merging and history.
-
     private final Random random = new Random(0);
     private final Object testInstance;
     private final List<CTestConfiguration> testConfigurations;
@@ -78,7 +75,7 @@ public class LinChecker {
         return random.ints(actorsInThread, 0, testStructure.getActorGenerators().size()) // random indexes
             .mapToObj(i -> testStructure.getActorGenerators().get(i)) // random actor generators
             .map(ActorGenerator::generate) // generate actors
-            .collect(Collectors.toList()); // return as columns
+            .collect(Collectors.toList()); // return as list
     }
 
     private List<List<Actor>> generateActors(CTestConfiguration testConfiguration) {
@@ -113,7 +110,7 @@ public class LinChecker {
         }
     }
 
-    private Set<List<List<Result>>> generateLinearizeResults(List<List<Actor>> actorsPerThread){
+    private Set<List<List<Result>>> generateLinearizableResults(List<List<Actor>> actorsPerThread) {
         return generateAllLinearizableExecutions(actorsPerThread).stream()
                 .map(linEx -> {
                     List<Result> results = executeActors(linEx);
@@ -137,28 +134,27 @@ public class LinChecker {
         Instant startTime = Instant.now();
         // Create report builder
         TestReport.Builder reportBuilder = new TestReport.Builder()
-            .withName(testInstance.getClass().getSimpleName())
-            .withStrategy("Simple")
+            .name(testInstance.getClass().getSimpleName())
+            .strategy("Simple")
             .maxIterations(testCfg.getIterations())
             .maxInvocations(testCfg.getInvocationsPerIteration())
             .threadConfig(testCfg.getThreadConfigurations());
         try {
-            System.out.println("Number iterations: " + testCfg.getIterations());
-            System.out.println("Number invocations per iteration: " + testCfg.getInvocationsPerIteration() + "\n");
+            System.out.println("Number of iterations: " + testCfg.getIterations());
+            System.out.println("Number of invocations per iteration: " + testCfg.getInvocationsPerIteration());
             // Reusable phaser
             final Phaser phaser = new Phaser(testCfg.getThreads());
             // Run iterations
             for (int iteration = 1; iteration <= testCfg.getIterations(); iteration++) {
                 reportBuilder.incIterations();
                 List<List<Actor>> actorsPerThread = generateActors(testCfg);
-                System.out.println("Iteration № " + iteration);
-                printGeneratedAlgotithm(actorsPerThread);
+                printIterationHeader(iteration, actorsPerThread);
                 // Create TestThreadExecution's
                 List<TestThreadExecution> testThreadExecutions = actorsPerThread.stream()
                     .map(actors -> TestThreadExecutionGenerator.create(testInstance, phaser, actors, false))
                     .collect(Collectors.toList());
                 // Generate all possible results
-                Set<List<List<Result>>> possibleResultsSet = generateLinearizeResults(actorsPerThread);
+                Set<List<List<Result>>> possibleResultsSet = generateLinearizableResults(actorsPerThread);
                 printPossibleResults(possibleResultsSet);
                 // Run invocations
                 for (int invocation = 1; invocation <= testCfg.getInvocationsPerIteration(); invocation++) {
@@ -177,7 +173,7 @@ public class LinChecker {
                                 throw new IllegalStateException(e);
                             }
                         })
-                        .collect(Collectors.toList()); // and store results as columns
+                        .collect(Collectors.toList()); // and store results as list
                     // Check correctness& Throw an AssertionError if current execution
                     // is not linearizable and log invalid execution
                     if (!possibleResultsSet.contains(results)) {
@@ -186,6 +182,7 @@ public class LinChecker {
                         throw new AssertionError("Non-linearizable execution detected, see log for details");
                     }
                 }
+                // TODO these two strings are useless, let's remove it (run test with them and without. No changes for analyzing? This way, just remove them :) )
                 System.out.println("Iteration Completed");
                 System.out.println("____________________");
             }
@@ -211,8 +208,9 @@ public class LinChecker {
         });
     }
 
-    private void printGeneratedAlgotithm(List<List<Actor>> actorsPerThread) {
-        System.out.println("generated algorithm");
+    private void printIterationHeader(int iteration, List<List<Actor>> actorsPerThread) {
+        System.out.println("Iteration #" + iteration);
+        System.out.println("Actors per thread");
         actorsPerThread.forEach(System.out::println);
     }
 

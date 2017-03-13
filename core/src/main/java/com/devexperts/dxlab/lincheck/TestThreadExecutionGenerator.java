@@ -163,7 +163,7 @@ class TestThreadExecutionGenerator {
                     mv.visitTryCatchBlock(start, end, handler, Type.getType(ec).getInternalName());
                 mv.visitLabel(start);
             }
-            // Load result array and index to store the current result
+            // Load withResult array and index to store the current withResult
             mv.loadLocal(resLocal);
             mv.push(i);
             // Load test instance
@@ -177,7 +177,7 @@ class TestThreadExecutionGenerator {
             // Invoke operation
             Method actorMethod = Method.getMethod(actor.getMethod());
             mv.invokeVirtual(testType, actorMethod);
-            // Create result
+            // Create withResult
             mv.box(actorMethod.getReturnType()); // box if needed
             if (actor.getMethod().getReturnType() == void.class) {
                 mv.pop();
@@ -185,7 +185,7 @@ class TestThreadExecutionGenerator {
             } else {
                 mv.invokeStatic(RESULT_TYPE, RESULT_CREATE_VALUE_RESULT);
             }
-            // Store result to array
+            // Store withResult to array
             mv.arrayStore(RESULT_TYPE);
             // End of try-catch block
             if (actor.handlesExceptions()) {

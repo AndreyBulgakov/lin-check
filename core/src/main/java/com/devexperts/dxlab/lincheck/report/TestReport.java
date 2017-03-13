@@ -5,6 +5,7 @@ import com.devexperts.dxlab.lincheck.CTestConfiguration;
 import java.util.List;
 import java.util.Objects;
 
+// TODO javadoc (common information + describe report parameters)
 public class TestReport {
     private final String testName;
     private final String strategyName;
@@ -19,7 +20,7 @@ public class TestReport {
     private TestReport(Builder builder) {
         this.testName = Objects.requireNonNull(builder.testName);
         this.strategyName = Objects.requireNonNull(builder.strategyName);
-        this.maxIterations = Objects.requireNonNull(builder.maxIterations);
+        this.maxIterations = Objects.requireNonNull(builder.maxIterations); // TODO how it can be null? (check other params too).
         this.maxInvocations = Objects.requireNonNull(builder.maxInvocations);
         this.threadConfig = Objects.requireNonNull(builder.threadConfig);
         this.invocations = Objects.requireNonNull(builder.invocations);
@@ -49,12 +50,12 @@ public class TestReport {
         private long time;
         private Result result;
 
-        public Builder withName(String testName) {
+        public Builder name(String testName) {
             this.testName = testName;
             return this;
         }
 
-        public Builder withStrategy(String strategyName) {
+        public Builder strategy(String strategyName) {
             this.strategyName = strategyName;
             return this;
         }
@@ -69,6 +70,7 @@ public class TestReport {
             return this;
         }
 
+        // TODO do not use configuration in report
         public Builder threadConfig(List<CTestConfiguration.TestThreadConfiguration> threadConfigurations) {
             this.threadConfig = threadConfigurations.toString();
             return this;

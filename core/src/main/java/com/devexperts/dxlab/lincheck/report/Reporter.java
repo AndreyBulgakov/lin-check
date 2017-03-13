@@ -13,14 +13,17 @@ import java.util.List;
 
 import static java.nio.file.StandardOpenOption.APPEND;
 
+// TODO javadoc (purpose, output format)
 public class Reporter implements Closeable {
 
     public static final List<String> columns = Arrays.asList("TestName", "StrategyName", "MaxIterations", "MaxInvocations",
             "ThreadConfig", "Iterations", "Invocations", "Time", "Result");
-    private PrintStream out;
+    private PrintStream out; // null if reports shouldn't be written
 
     public Reporter(String filename) throws IOException {
-        Path p = Paths.get( System.getProperty("user.dir"), filename);
+        if (filename == null) // do not write reports
+            return;
+        Path p = Paths.get(filename);
         if (Files.exists(p)) {
             out = new PrintStream(Files.newOutputStream(p, APPEND));
         } else {
@@ -32,10 +35,19 @@ public class Reporter implements Closeable {
 
     @Override
     public void close() throws IOException {
-        out.close();
+        if (out != null)
+            out.close();
     }
 
+    /**
+     * Write this report to specified output.
+     *
+     * @param report report to be written
+     */
     public void report(TestReport report) {
+        if (out == null)
+            return;
+        // TODO Do not use toString method for printing report
         out.println(report);
     }
 }
