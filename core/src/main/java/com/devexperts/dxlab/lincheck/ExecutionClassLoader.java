@@ -37,7 +37,7 @@ class ExecutionClassLoader extends ClassLoader {
         // Load transformed class from cash if it exists
 
         // Print loading class
-//         System.out.println("Loading: " + name);
+        // System.out.println("Loading: " + name);
         Class result = cash.get(name);
         if (result != null) {
             return result;
@@ -46,14 +46,14 @@ class ExecutionClassLoader extends ClassLoader {
         // Secure some packages
         if (shouldIgnoreClass(name)) {
             // Print delegated class
-            System.out.println("Loaded by super:" + name);
+            //System.out.println("Loaded by super:" + name);
             return super.loadClass(name);
         }
 
         //Transform and save class
         try {
             // Print transforming class
-            System.out.println("Loaded by exec:" + name);
+            // System.out.println("Loaded by exec:" + name);
             ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
             ClassVisitor cv = new BeforeSharedVariableClassVisitor(cw);
 
