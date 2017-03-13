@@ -13,7 +13,21 @@ import java.util.List;
 
 import static java.nio.file.StandardOpenOption.APPEND;
 
-// TODO javadoc (purpose, output format)
+/**
+ * Write result of test to csv File, which contains following headers
+ * <ul>
+ *     <li>TestName</li>
+ *     <li>StrategyName</li>
+ *     <li>MaxIterations</li>
+ *     <li>MaxInvocations</li>
+ *     <li>ThreadConfig</li>
+ *     <li>Iterations</li>
+ *     <li>Invocations</li>
+ *     <li>Time</li>
+ *     <li>Result</li>
+ * </ul>
+ * See {@link TestReport} for describing parameters
+ */
 public class Reporter implements Closeable {
 
     // Columns for CSV report
@@ -48,7 +62,6 @@ public class Reporter implements Closeable {
     public void report(TestReport report) {
         if (out == null)
             return;
-        // TODO Do not use toString method for printing report
         out.println(report);
     }
 }

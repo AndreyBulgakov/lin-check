@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 
 /**
  * Test configuration which is passed via {@link CTest} annotation.
- * TODO make it package-private (and methods too), do not use configuration in report.
  */
 public class CTestConfiguration {
     private final int iterations;

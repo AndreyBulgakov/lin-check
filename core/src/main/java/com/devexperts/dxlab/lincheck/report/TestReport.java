@@ -2,10 +2,20 @@ package com.devexperts.dxlab.lincheck.report;
 
 import com.devexperts.dxlab.lincheck.CTestConfiguration;
 
-import java.util.List;
 import java.util.Objects;
 
-// TODO javadoc (common information + describe report parameters)
+/**
+ * Class with CTest report parameters
+ * Use {@link Builder} for creating
+ * <ul>
+ *     <li>testName - name of CTest</li>
+ *     <li>strategyName - name of strategy of checking interleaving points</li>
+ *     <li>maxIteration - specified in CTest running iterations</li>
+ *     <li>maxInvocation - specified in CTest running invocations</li>
+ *     <li>time - time from start to end of testing in milliSeconds</li>
+ *     <li>result - result of running test</li>
+ * </ul>
+ */
 public class TestReport {
     private final String testName;
     private final String strategyName;
@@ -20,12 +30,12 @@ public class TestReport {
     private TestReport(Builder builder) {
         this.testName = Objects.requireNonNull(builder.testName);
         this.strategyName = Objects.requireNonNull(builder.strategyName);
-        this.maxIterations = Objects.requireNonNull(builder.maxIterations); // TODO how it can be null? (check other params too).
-        this.maxInvocations = Objects.requireNonNull(builder.maxInvocations);
+        this.maxIterations = builder.maxIterations;
+        this.maxInvocations = builder.maxInvocations;
         this.threadConfig = Objects.requireNonNull(builder.threadConfig);
-        this.invocations = Objects.requireNonNull(builder.invocations);
-        this.iterations = Objects.requireNonNull(builder.iterations);
-        this.time = Objects.requireNonNull(builder.time);
+        this.invocations = builder.invocations;
+        this.iterations = builder.iterations;
+        this.time = builder.time;
         this.result = Objects.requireNonNull(builder.result);
     }
 
@@ -53,10 +63,15 @@ public class TestReport {
         private long time;
         private Result result;
 
+        public Builder(CTestConfiguration testConfiguration) {
+            this.maxIterations = testConfiguration.getIterations();
+            this.maxInvocations = testConfiguration.getInvocationsPerIteration();
+            this.threadConfig = testConfiguration.getThreadConfigurations().toString();
+        }
+
         /**
          * Set name of current test
          * @param testName simple className of test
-         * @return
          */
         public Builder name(String testName) {
             this.testName = testName;
@@ -66,7 +81,6 @@ public class TestReport {
         /**
          * Set name of current strategy
          * @param strategyName simple className of strategy
-         * @return
          */
         public Builder strategy(String strategyName) {
             this.strategyName = strategyName;
@@ -74,40 +88,8 @@ public class TestReport {
         }
 
         /**
-         * Set maximum of iterations for test configuration
-         * @param maxIterations
-         * @return
-         */
-        public Builder maxIterations(int maxIterations) {
-            this.maxIterations = maxIterations;
-            return this;
-        }
-
-        /**
-         * Set maximum of invocations for test configuration
-         * @param maxInvocations
-         * @return
-         */
-        public Builder maxInvocations(int maxInvocations) {
-            this.maxInvocations = maxInvocations;
-            return this;
-        }
-
-        // TODO do not use configuration in report
-        /**
-         * Set thread configurations for test configuration
-         * @param threadConfigurations
-         * @return
-         */
-        public Builder threadConfig(List<CTestConfiguration.TestThreadConfiguration> threadConfigurations) {
-            this.threadConfig = threadConfigurations.toString();
-            return this;
-        }
-
-        /**
          * Set time from start to end of test
          * @param time
-         * @return
          */
         public Builder time(long time) {
             this.time = time;
@@ -116,8 +98,7 @@ public class TestReport {
 
         /**
          * Set result of test
-         * @param result TODO do not write empty tags
-         * @return
+         * @param result result of running
          */
         public Builder result(Result result) {
             this.result = result;
@@ -126,7 +107,6 @@ public class TestReport {
 
         /**
          * Increment current iteration
-         * @return
          */
         public Builder incIterations() {
             this.iterations++;
@@ -135,7 +115,6 @@ public class TestReport {
 
         /**
          * Increment current invocation
-         * @return
          */
         public Builder incInvocations() {
             this.invocations++;
@@ -144,7 +123,6 @@ public class TestReport {
 
         /**
          * Generate TestReport
-         * @return TODO do not write empty tags
          */
         public TestReport build() {
             return new TestReport(this);

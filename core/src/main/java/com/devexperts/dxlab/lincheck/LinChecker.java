@@ -133,12 +133,9 @@ public class LinChecker {
         // Store start time for counting performance metrics
         Instant startTime = Instant.now();
         // Create report builder
-        TestReport.Builder reportBuilder = new TestReport.Builder()
+        TestReport.Builder reportBuilder = new TestReport.Builder(testCfg)
             .name(testInstance.getClass().getSimpleName())
-            .strategy("Simple")
-            .maxIterations(testCfg.getIterations())
-            .maxInvocations(testCfg.getInvocationsPerIteration())
-            .threadConfig(testCfg.getThreadConfigurations());
+            .strategy("Simple"); // TODO:  Get simpleName of Strategy class
         try {
             System.out.println("Number of iterations: " + testCfg.getIterations());
             System.out.println("Number of invocations per iteration: " + testCfg.getInvocationsPerIteration());
@@ -182,9 +179,6 @@ public class LinChecker {
                         throw new AssertionError("Non-linearizable execution detected, see log for details");
                     }
                 }
-                // TODO these two strings are useless, let's remove it (run test with them and without. No changes for analyzing? This way, just remove them :) )
-                System.out.println("Iteration Completed");
-                System.out.println("____________________");
             }
             reportBuilder.result(TestReport.Result.SUCCESS);
         } finally {
