@@ -35,6 +35,9 @@ public class TestReport {
                 ", " + iterations + ", " + invocations + ", " + time + ", " + result;
     }
 
+    /**
+     * Enum which specifies test result
+     */
     public enum Result {
         SUCCESS, FAILURE
     }
@@ -50,52 +53,99 @@ public class TestReport {
         private long time;
         private Result result;
 
+        /**
+         * Set name of current test
+         * @param testName simple className of test
+         * @return
+         */
         public Builder name(String testName) {
             this.testName = testName;
             return this;
         }
 
+        /**
+         * Set name of current strategy
+         * @param strategyName simple className of strategy
+         * @return
+         */
         public Builder strategy(String strategyName) {
             this.strategyName = strategyName;
             return this;
         }
 
+        /**
+         * Set maximum of iterations for test configuration
+         * @param maxIterations
+         * @return
+         */
         public Builder maxIterations(int maxIterations) {
             this.maxIterations = maxIterations;
             return this;
         }
 
+        /**
+         * Set maximum of invocations for test configuration
+         * @param maxInvocations
+         * @return
+         */
         public Builder maxInvocations(int maxInvocations) {
             this.maxInvocations = maxInvocations;
             return this;
         }
 
         // TODO do not use configuration in report
+        /**
+         * Set thread configurations for test configuration
+         * @param threadConfigurations
+         * @return
+         */
         public Builder threadConfig(List<CTestConfiguration.TestThreadConfiguration> threadConfigurations) {
             this.threadConfig = threadConfigurations.toString();
             return this;
         }
 
+        /**
+         * Set time from start to end of test
+         * @param time
+         * @return
+         */
         public Builder time(long time) {
             this.time = time;
             return this;
         }
 
+        /**
+         * Set result of test
+         * @param result TODO do not write empty tags
+         * @return
+         */
         public Builder result(Result result) {
             this.result = result;
             return this;
         }
 
+        /**
+         * Increment current iteration
+         * @return
+         */
         public Builder incIterations() {
             this.iterations++;
             return this;
         }
 
+        /**
+         * Increment current invocation
+         * @return
+         */
         public Builder incInvocations() {
             this.invocations++;
             return this;
         }
 
+        /**
+         * Generate TestReport
+         * @return TODO do not write empty tags
+         */
         public TestReport build() {
             return new TestReport(this);
         }

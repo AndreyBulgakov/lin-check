@@ -16,6 +16,7 @@ import static java.nio.file.StandardOpenOption.APPEND;
 // TODO javadoc (purpose, output format)
 public class Reporter implements Closeable {
 
+    // Columns for CSV report
     public static final List<String> columns = Arrays.asList("TestName", "StrategyName", "MaxIterations", "MaxInvocations",
             "ThreadConfig", "Iterations", "Invocations", "Time", "Result");
     private PrintStream out; // null if reports shouldn't be written
