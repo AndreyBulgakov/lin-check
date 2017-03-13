@@ -77,7 +77,7 @@ public class CTestConfiguration {
         return threadConfigurations;
     }
 
-    static class TestThreadConfiguration {
+    public static class TestThreadConfiguration {
         final int minActors;
         final int maxActors;
 

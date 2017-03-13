@@ -27,6 +27,7 @@ import com.devexperts.dxlab.lincheck.report.TestReport;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -77,7 +78,7 @@ public class LinChecker {
         return random.ints(actorsInThread, 0, testStructure.getActorGenerators().size()) // random indexes
             .mapToObj(i -> testStructure.getActorGenerators().get(i)) // random actor generators
             .map(ActorGenerator::generate) // generate actors
-            .collect(Collectors.toList()); // return as list
+            .collect(Collectors.toList()); // return as columns
     }
 
     private List<List<Actor>> generateActors(CTestConfiguration testConfiguration) {
@@ -133,11 +134,14 @@ public class LinChecker {
         // Fixed thread pool executor to run TestThreadExecution
         ExecutorService pool = Executors.newFixedThreadPool(testCfg.getThreads());
         // Store start time for counting performance metrics
-        long startTime = System.currentTimeMillis();
+        Instant startTime = Instant.now();
         // Create report builder
         TestReport.Builder reportBuilder = new TestReport.Builder()
-            .withName(testInstance.getClass().getCanonicalName()) // use fully-qualified name
-            .maxIterations(testCfg.getIterations()); // TODO other properties
+            .withName(testInstance.getClass().getSimpleName())
+            .withStrategy("Simple")
+            .maxIterations(testCfg.getIterations())
+            .maxInvocations(testCfg.getInvocationsPerIteration())
+            .threadConfig(testCfg.getThreadConfigurations());
         try {
             System.out.println("Number iterations: " + testCfg.getIterations());
             System.out.println("Number invocations per iteration: " + testCfg.getInvocationsPerIteration() + "\n");
@@ -147,7 +151,8 @@ public class LinChecker {
             for (int iteration = 1; iteration <= testCfg.getIterations(); iteration++) {
                 reportBuilder.incIterations();
                 List<List<Actor>> actorsPerThread = generateActors(testCfg);
-                actorsPerThread.forEach(System.out::println);
+                System.out.println("Iteration № " + iteration);
+                printGeneratedAlgotithm(actorsPerThread);
                 // Create TestThreadExecution's
                 List<TestThreadExecution> testThreadExecutions = actorsPerThread.stream()
                     .map(actors -> TestThreadExecutionGenerator.create(testInstance, phaser, actors, false))
@@ -157,7 +162,7 @@ public class LinChecker {
                 printPossibleResults(possibleResultsSet);
                 // Run invocations
                 for (int invocation = 1; invocation <= testCfg.getInvocationsPerIteration(); invocation++) {
-                    // TODO reportBuilder.incInvocations();
+                    reportBuilder.incInvocations();
                     // Reset the state of test
                     invokeReset();
                     // Specify waits
@@ -172,20 +177,24 @@ public class LinChecker {
                                 throw new IllegalStateException(e);
                             }
                         })
-                        .collect(Collectors.toList()); // and store results as list
+                        .collect(Collectors.toList()); // and store results as columns
                     // Check correctness& Throw an AssertionError if current execution
                     // is not linearizable and log invalid execution
                     if (!possibleResultsSet.contains(results)) {
-                        // TODO use reportBuilder
+                        System.out.println("Iteration Failed");
+                        reportBuilder.result(TestReport.Result.FAILURE);
                         throw new AssertionError("Non-linearizable execution detected, see log for details");
                     }
                 }
-                // TODO use reportBuilder
+                System.out.println("Iteration Completed");
+                System.out.println("____________________");
             }
+            reportBuilder.result(TestReport.Result.SUCCESS);
         } finally {
             pool.shutdown();
+            reportBuilder.time(Instant.now().toEpochMilli() - startTime.toEpochMilli());
             // Print report
-            try (Reporter reporter = new Reporter("report.scv")){
+            try (Reporter reporter = new Reporter("report")){
                 reporter.report(reportBuilder.build());
             } catch (IOException e) {
                 System.out.println("Unable to write report:");
@@ -200,6 +209,11 @@ public class LinChecker {
             possibleResults.forEach(System.out::println);
             System.out.println();
         });
+    }
+
+    private void printGeneratedAlgotithm(List<List<Actor>> actorsPerThread) {
+        System.out.println("generated algorithm");
+        actorsPerThread.forEach(System.out::println);
     }
 
     private Phaser SINGLE_THREAD_PHASER = new Phaser(1);

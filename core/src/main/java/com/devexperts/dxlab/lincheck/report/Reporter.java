@@ -15,17 +15,18 @@ import static java.nio.file.StandardOpenOption.APPEND;
 
 public class Reporter implements Closeable {
 
-    public static final List<String> list = Arrays.asList("TestName", "MaxIteraions", "MaxInvocations", "ThreadConfig",
-        "Iterations", "Invocations", "Time", "Result");
+    public static final List<String> columns = Arrays.asList("TestName", "StrategyName", "MaxIterations", "MaxInvocations",
+            "ThreadConfig", "Iterations", "Invocations", "Time", "Result");
     private PrintStream out;
 
     public Reporter(String filename) throws IOException {
-        Path p = Paths.get(filename);
+        Path p = Paths.get( System.getProperty("user.dir"), filename);
         if (Files.exists(p)) {
             out = new PrintStream(Files.newOutputStream(p, APPEND));
         } else {
             Utils.createMissingDirectories(p);
             out = new PrintStream(Files.newOutputStream(p));
+            out.println(columns);
         }
     }
 
@@ -35,6 +36,6 @@ public class Reporter implements Closeable {
     }
 
     public void report(TestReport report) {
-        // TODO print it to out
+        out.println(report);
     }
 }
