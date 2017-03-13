@@ -2,15 +2,20 @@ package com.devexperts.dxlab.lincheck.strategy;
 
 
 /**
- * Interface that contains methods to insert them into program points
- * // TODO in which program points? Which strategies?
+ * Interface to implement strategy to checking interleaving points
  */
 public interface Strategy {
 
     /**
-     * // TODO add onSharedVariable[Read,Write] methods and add javadoc to them
-     * Execute implemented strategy
+     * Execute implemented strategy on read operations
      * @param location location id
      */
-    void onSharedVariableAccess(int location);
+    void onSharedVariableRead(int location);
+
+    /**
+     * Execute implemented strategy on write operations
+     *
+     * @param location location id
+     */
+    void onSharedVariableWrite(int location);
 }

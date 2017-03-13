@@ -16,12 +16,11 @@ import java.io.IOException;
 
 public class TransformationTest {
 
-    // TODO rename it, you do not test ConsumeCPU here
     @Test
-    public void TestConsumeCPU() throws IOException {
+    public void TestOnSharedVariableInsertion() throws IOException {
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
         StrategyHolder.setCurrentStrategy(new ConsumeCPUStrategy(100));
-        ClassVisitor cv = new BeforeSharedVariableClassVisitor(cw, this.getClass().getClassLoader());
+        ClassVisitor cv = new BeforeSharedVariableClassVisitor(cw);
         ClassReader cr = new ClassReader(A.class.getCanonicalName());
         cr.accept(cv, ClassReader.EXPAND_FRAMES);
 

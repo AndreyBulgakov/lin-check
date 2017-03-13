@@ -1,7 +1,6 @@
 package com.devexperts.dxlab.lincheck;
 
 import com.devexperts.dxlab.lincheck.transformers.BeforeSharedVariableClassVisitor;
-import com.devexperts.dxlab.lincheck.transformers.IgnoreClassVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -20,12 +19,6 @@ class ExecutionClassLoader extends ClassLoader {
     private final Map<String, Class<?>> cash = new ConcurrentHashMap<>();
     private final Map<String, byte[]> resources = new ConcurrentHashMap<>();
     private final String testClassName; // TODO we should transform test class (it contains algorithm logic)
-
-
-    // TODO remove one constructor
-    ExecutionClassLoader() {
-        testClassName = "";
-    }
 
     ExecutionClassLoader(String testClassName) {
         this.testClassName = testClassName;
@@ -63,14 +56,19 @@ class ExecutionClassLoader extends ClassLoader {
             // System.out.println("Loaded by exec:" + name);
             ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
             ClassVisitor cv = new BeforeSharedVariableClassVisitor(cw);
-            ClassVisitor cv0 = new IgnoreClassVisitor(cv, cw, testClassName);
+
             ClassReader cr = new ClassReader(name);
+            // Ignore TestClass
+            if (name.equals(testClassName))
+                cr.accept(cw, ClassReader.SKIP_FRAMES);
+            else
+                cr.accept(cv, ClassReader.SKIP_FRAMES);
 
-            cr.accept(cv0, ClassReader.SKIP_FRAMES);
-
+            // Get transformed bytecode
             byte[] resultBytecode = cw.toByteArray();
             result = defineClass(name, resultBytecode, 0, resultBytecode.length);
 
+            // Save it to cash and resources
             resources.put(name, resultBytecode);
             cash.put(name, result);
             return result;
@@ -109,7 +107,6 @@ class ExecutionClassLoader extends ClassLoader {
                         className.startsWith("org.junit.");
     }
 
-    //TODO remove this method, just add condition to shouldIgnoreClass
     Class<? extends TestThreadExecution> defineTestThreadExecution(String className, byte[] bytecode) {
         return (Class<? extends TestThreadExecution>) super.defineClass(className, bytecode, 0, bytecode.length);
     }

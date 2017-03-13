@@ -21,15 +21,15 @@ public class ExecutionClassLoaderTestFail {
 
     @Before
     public void initialize() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-        cl = new ExecutionClassLoader();
+        cl = new ExecutionClassLoader("");
     }
     @Test
     public void testMultipleLoaders() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-        ExecutionClassLoader cl1 = new ExecutionClassLoader();
+        ExecutionClassLoader cl1 = new ExecutionClassLoader("");
         Class<? extends AParrent> aClass = (Class<? extends AParrent>) cl1.loadClass(A.class.getCanonicalName());
         AParrent aParrent1 = aClass.newInstance();
 
-        ExecutionClassLoader cl2 = new ExecutionClassLoader();
+        ExecutionClassLoader cl2 = new ExecutionClassLoader("");
         Class<? extends AParrent> aClass2 = (Class<? extends AParrent>) cl2.loadClass(A.class.getCanonicalName());
         AParrent aParrent2 = aClass2.newInstance();
 

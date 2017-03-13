@@ -6,7 +6,12 @@ package com.devexperts.dxlab.lincheck.strategy;
 public class ThreadYieldStrategy implements Strategy {
 
     @Override
-    public void onSharedVariableAccess(int location) {
+    public void onSharedVariableRead(int location) {
+        Thread.yield();
+    }
+
+    @Override
+    public void onSharedVariableWrite(int location) {
         Thread.yield();
     }
 }

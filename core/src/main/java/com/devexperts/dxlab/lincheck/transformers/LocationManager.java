@@ -14,12 +14,12 @@ public class LocationManager {
     private final ArrayList<ElementId> locations = new ArrayList<>(10_000);
     private final Map<ElementId, Integer> locationIds = new HashMap<>();
 
-    public static LocationManager getInstance() {
-        return INSTANCE;
+    private LocationManager() {
+        locations.add(null);
     }
 
-    private LocationManager(){
-        locations.add(null);
+    public static LocationManager getInstance() {
+        return INSTANCE;
     }
 
     synchronized int getLocationId(String className, String methodName, String methodDesc, int line) {
@@ -27,12 +27,15 @@ public class LocationManager {
         return getOrSetLocationId(location);
     }
 
-    // TODO remove unused method
     synchronized int getLocationId(ElementId elementId) {
         return getOrSetLocationId(elementId);
     }
 
-    private int getOrSetLocationId(ElementId locationId){
+    synchronized ElementId getElementId(int locationId) {
+        return locations.get(locationId);
+    }
+
+    private int getOrSetLocationId(ElementId locationId) {
         Integer id = locationIds.get(locationId);
         if (id != null) {
             return id;

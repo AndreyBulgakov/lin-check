@@ -5,11 +5,10 @@ package com.devexperts.dxlab.lincheck.transformers;
  */
 class ElementId {
 
-    // TODO make them final
-    private String declaringClass;
-    private String methodName;
-    private String methodDesc;
-    private int lineNumber;
+    private final String declaringClass;
+    private final String methodName;
+    private final String methodDesc;
+    private final int lineNumber;
 
     ElementId(String declaringClass, String methodName, String methodDesc, int lineNumber) {
         this.declaringClass = declaringClass;

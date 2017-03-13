@@ -5,8 +5,8 @@ import com.devexperts.dxlab.lincheck.Utils;
 import java.util.Random;
 
 /**
- * // TODO describe "onSharedVariableAccess" and "consumeCPU".
- * Strategy call Utils.consumeCPU in each onSharedVariableAccess
+ * Strategy that call Utils.consumeCPU in each onSharedVariableAccess
+ * @see Utils
  */
 public class ConsumeCPUStrategy implements Strategy {
     private final Random random = new Random();
@@ -16,8 +16,15 @@ public class ConsumeCPUStrategy implements Strategy {
         this.maxTokens = maxTokens;
     }
 
+
     @Override
-    public void onSharedVariableAccess(int location) {
+    public void onSharedVariableRead(int location) {
+        Utils.consumeCPU(random.nextInt(maxTokens));
+
+    }
+
+    @Override
+    public void onSharedVariableWrite(int location) {
         Utils.consumeCPU(random.nextInt(maxTokens));
     }
 }
