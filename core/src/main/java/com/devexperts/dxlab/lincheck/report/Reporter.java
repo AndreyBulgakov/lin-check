@@ -38,7 +38,7 @@ public class Reporter implements Closeable {
     public Reporter(String filename) throws IOException {
         if (filename == null) // do not write reports
             return;
-        Path p = Paths.get(filename);
+        Path p = Paths.get( System.getProperty("user.dir"), filename);
         if (Files.exists(p)) {
             out = new PrintStream(Files.newOutputStream(p, APPEND));
         } else {

@@ -135,6 +135,25 @@ public class LinChecker {
         }
     }
 
+    private Set<List<List<Result>>> generatePossibleResults(List<List<Actor>> actorsPerThread, Object testInstance,
+                                                             ExecutionClassLoader loader) {
+         return generateAllLinearizableExecutions(actorsPerThread).stream()
+                .map(linEx -> { // For each permutation
+                    List<Result> results = executeActors(linEx, testInstance, loader);
+                    Map<Actor, Result> resultMap = new IdentityHashMap<>();
+                    for (int i = 0; i < linEx.size(); i++) {
+                        resultMap.put(linEx.get(i), results.get(i));
+                    }
+                    // Map result from single-execution permutation
+                    // to each non-execution actorsPerThread List
+                    return actorsPerThread.stream()
+                            .map(actors -> actors.stream()
+                                    .map(resultMap::get)
+                                    .collect(Collectors.toList())
+                            ).collect(Collectors.toList());
+                }).collect(Collectors.toSet());
+    }
+
     private void checkImpl(CTestConfiguration testCfg) throws InterruptedException, ClassNotFoundException, IllegalAccessException, InstantiationException {
         // Fixed thread pool executor to run TestThreadExecution
         ExecutorService pool = Executors.newFixedThreadPool(testCfg.getThreads());
@@ -142,7 +161,7 @@ public class LinChecker {
         Instant startTime = Instant.now();
         // Create report builder
         TestReport.Builder reportBuilder = new TestReport.Builder(testCfg)
-            .name(testInstance.getClass().getSimpleName())
+            .name(testClassName)
             .strategy("Simple"); // TODO:  Get simpleName of Strategy class
         try {
             System.out.println("Number of iterations: " + testCfg.getIterations());
@@ -164,22 +183,7 @@ public class LinChecker {
                 List<TestThreadExecution> testThreadExecutions = actorsPerThread.stream()
                     .map(actors -> TestThreadExecutionGenerator.create(testInstance, phaser, actors, false, loader))
                     .collect(Collectors.toList());
-                // Generate all possible results
-                Set<List<List<Result>>> possibleResultsSet = generateAllLinearizableExecutions(actorsPerThread).stream()
-                    .map(linEx -> { // For each permutation
-                        List<Result> results = executeActors(linEx, testInstance, loader);
-                        Map<Actor, Result> resultMap = new IdentityHashMap<>();
-                        for (int i = 0; i < linEx.size(); i++) {
-                            resultMap.put(linEx.get(i), results.get(i));
-                        }
-                        // Map result from single-execution permutation
-                        // to each non-execution actorsPerThread List
-                        return actorsPerThread.stream()
-                            .map(actors -> actors.stream()
-                                    .map(resultMap::get)
-                                    .collect(Collectors.toList())
-                            ).collect(Collectors.toList());
-                    }).collect(Collectors.toSet());
+                Set<List<List<Result>>> possibleResultsSet = generatePossibleResults(actorsPerThread, testInstance, loader);
                 // Run invocations
                 for (int invocation = 1; invocation <= testCfg.getInvocationsPerIteration(); invocation++) {
                     reportBuilder.incInvocations();
