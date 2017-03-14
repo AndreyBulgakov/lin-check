@@ -26,6 +26,7 @@ import com.devexperts.dxlab.lincheck.report.Reporter;
 import com.devexperts.dxlab.lincheck.report.TestReport;
 import com.devexperts.dxlab.lincheck.strategy.ConsumeCPUStrategy;
 import com.devexperts.dxlab.lincheck.strategy.StrategyHolder;
+
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
@@ -174,6 +175,8 @@ public class LinChecker {
 
                 //Set strategy and initialize transformation in classes
                 StrategyHolder.setCurrentStrategy(new ConsumeCPUStrategy(100));
+
+                //Create loader, load and instantiate testInstance by this loader
                 final ExecutionClassLoader loader = new ExecutionClassLoader(testClassName);
                 final Object testInstance = loader.loadClass(testClassName).newInstance();
 
