@@ -26,7 +26,6 @@ import com.devexperts.dxlab.lincheck.annotations.ReadOnly;
 
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 /**
@@ -34,7 +33,7 @@ import java.util.stream.Collectors;
  * which is executed in the test. To test the linearizability
  * the actors permutations are considered.
  */
-class Actor {
+public class Actor {
     private final Method method;
     private final boolean readOnly;
     private final List<Object> arguments;

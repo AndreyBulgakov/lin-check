@@ -22,14 +22,15 @@ package com.devexperts.dxlab.lincheck;
  * #L%
  */
 
+import com.devexperts.dxlab.lincheck.report.Reporter;
+import com.devexperts.dxlab.lincheck.report.TestReport;
+import com.devexperts.dxlab.lincheck.strategy.ConsumeCPUStrategy;
+import com.devexperts.dxlab.lincheck.strategy.StrategyHolder;
+
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
+import java.time.Instant;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -44,20 +45,41 @@ import java.util.stream.Collectors;
 public class LinChecker {
     private static final int MAX_WAIT = 1000;
 
-    private final Random random = new Random();
-    private final Object testInstance;
+    private final Random random = new Random(0);
+    private final String testClassName;
     private final List<CTestConfiguration> testConfigurations;
     private final CTestStructure testStructure;
 
+    private LinChecker(Class testClass) {
+        this.testClassName = testClass.getCanonicalName();
+        this.testConfigurations = CTestConfiguration.getFromTestClass(testClass);
+        this.testStructure = CTestStructure.getFromTestClass(testClass);
+    }
+
     private LinChecker(Object testInstance) {
-        this.testInstance = testInstance;
+        this.testClassName = testInstance.getClass().getCanonicalName();
         Class<?> testClass = testInstance.getClass();
         this.testConfigurations = CTestConfiguration.getFromTestClass(testClass);
         this.testStructure = CTestStructure.getFromTestClass(testClass);
     }
 
+    /**
+     * LinChecker run method. Use LinChecker.check(TestClass.class) in junit test class
+     * @param testClass class that contains CTest
+     * @throws AssertionError if find Non-linearizable executions
+     */
+    public static void check(Class testClass) throws AssertionError {
+            new LinChecker(testClass).check();
+    }
+
+    /**
+     * LinChecker run method. Use LinChecker.check(this) in junit test class
+     * @param testInstance object that contains CTest
+     * @throws AssertionError if find Non-linearizable executions
+     */
     public static void check(Object testInstance) throws AssertionError {
-        new LinChecker(testInstance).check();
+            new LinChecker(testInstance).check();
+
     }
 
     /**
@@ -67,7 +89,8 @@ public class LinChecker {
         testConfigurations.forEach((testConfiguration) -> {
             try {
                 checkImpl(testConfiguration);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException | ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+                // TODO checkImpl should catch these exceptions
                 throw new IllegalStateException(e);
             }
         });
@@ -85,11 +108,6 @@ public class LinChecker {
         return testConfiguration.getThreadConfigurations().stream()
             .map(this::generateActorsForThread)
             .collect(Collectors.toList());
-    }
-
-    private void printActorsPerThread(List<List<Actor>> actorsPerThread) {
-        System.out.println("Actors per thread:");
-        actorsPerThread.forEach(System.out::println);
     }
 
     private List<List<Actor>> generateAllLinearizableExecutions(List<List<Actor>> actorsPerThread) {
@@ -118,46 +136,65 @@ public class LinChecker {
         }
     }
 
-    private void checkImpl(CTestConfiguration testCfg) throws InterruptedException {
+    private Set<List<List<Result>>> generatePossibleResults(List<List<Actor>> actorsPerThread, Object testInstance,
+                                                             ExecutionClassLoader loader) {
+         return generateAllLinearizableExecutions(actorsPerThread).stream()
+                .map(linEx -> { // For each permutation
+                    List<Result> results = executeActors(linEx, testInstance, loader);
+                    Map<Actor, Result> resultMap = new IdentityHashMap<>();
+                    for (int i = 0; i < linEx.size(); i++) {
+                        resultMap.put(linEx.get(i), results.get(i));
+                    }
+                    // Map result from single-execution permutation
+                    // to each non-execution actorsPerThread List
+                    return actorsPerThread.stream()
+                            .map(actors -> actors.stream()
+                                    .map(resultMap::get)
+                                    .collect(Collectors.toList())
+                            ).collect(Collectors.toList());
+                }).collect(Collectors.toSet());
+    }
+
+    private void checkImpl(CTestConfiguration testCfg) throws InterruptedException, ClassNotFoundException, IllegalAccessException, InstantiationException {
         // Fixed thread pool executor to run TestThreadExecution
         ExecutorService pool = Executors.newFixedThreadPool(testCfg.getThreads());
+        // Store start time for counting performance metrics
+        Instant startTime = Instant.now();
+        // Create report builder
+        TestReport.Builder reportBuilder = new TestReport.Builder(testCfg)
+            .name(testClassName)
+            .strategy("Simple"); // TODO:  Get simpleName of Strategy class
         try {
+            System.out.println("Number of iterations: " + testCfg.getIterations());
+            System.out.println("Number of invocations per iteration: " + testCfg.getInvocationsPerIteration());
             // Reusable phaser
             final Phaser phaser = new Phaser(testCfg.getThreads());
             // Run iterations
             for (int iteration = 1; iteration <= testCfg.getIterations(); iteration++) {
-                System.out.println("= Iteration " + iteration + " / " + testCfg.getIterations() + " =");
-                // Generate actors and print them to console
+                reportBuilder.incIterations();
+
+                //Set strategy and initialize transformation in classes
+                StrategyHolder.setCurrentStrategy(new ConsumeCPUStrategy(100));
+
+                //Create loader, load and instantiate testInstance by this loader
+                final ExecutionClassLoader loader = new ExecutionClassLoader(testClassName);
+                final Object testInstance = loader.loadClass(testClassName).newInstance();
+
                 List<List<Actor>> actorsPerThread = generateActors(testCfg);
-                printActorsPerThread(actorsPerThread);
+                printIterationHeader(iteration, actorsPerThread);
                 // Create TestThreadExecution's
                 List<TestThreadExecution> testThreadExecutions = actorsPerThread.stream()
-                    .map(actors -> TestThreadExecutionGenerator.create(testInstance, phaser, actors, false))
+                    .map(actors -> TestThreadExecutionGenerator.create(testInstance, phaser, actors, false, loader))
                     .collect(Collectors.toList());
-                // Generate all possible results
-                Set<List<List<Result>>> possibleResultsSet = generateAllLinearizableExecutions(actorsPerThread).stream()
-                    .map(linEx -> {
-                        List<Result> results = executeActors(linEx);
-                        Map<Actor, Result> resultMap = new IdentityHashMap<>();
-                        for (int i = 0; i < linEx.size(); i++) {
-                            resultMap.put(linEx.get(i), results.get(i));
-                        }
-                        return actorsPerThread.stream()
-                            .map(actors -> actors.stream()
-                                .map(resultMap::get)
-                                .collect(Collectors.toList())
-                            ).collect(Collectors.toList());
-                    }).collect(Collectors.toSet());
+                Set<List<List<Result>>> possibleResultsSet = generatePossibleResults(actorsPerThread, testInstance, loader);
                 // Run invocations
-                for (int invocation = 0; invocation < testCfg.getInvocationsPerIteration(); invocation++) {
+                for (int invocation = 1; invocation <= testCfg.getInvocationsPerIteration(); invocation++) {
+                    reportBuilder.incInvocations();
                     // Reset the state of test
-                    invokeReset();
+                    invokeReset(testInstance);
                     // Specify waits
                     int maxWait = (int) ((float) invocation * MAX_WAIT / testCfg.getInvocationsPerIteration()) + 1;
-                    for (int i = 0; i < testThreadExecutions.size(); i++) {
-                        TestThreadExecution ex = testThreadExecutions.get(i);
-                        ex.waits = random.ints(actorsPerThread.get(i).size() - 1, 0, maxWait).toArray();
-                    }
+                    setWaits(actorsPerThread, testThreadExecutions, maxWait);
                     // Run multithreaded test and get operation results for each thread
                     List<List<Result>> results = pool.invokeAll(testThreadExecutions).stream() // get futures
                         .map(f -> {
@@ -166,37 +203,67 @@ public class LinChecker {
                             } catch (InterruptedException | ExecutionException e) {
                                 throw new IllegalStateException(e);
                             }
-                        }).collect(Collectors.toList()); // and store results as list
+                        })
+                        .collect(Collectors.toList()); // and store results as list
                     // Check correctness& Throw an AssertionError if current execution
                     // is not linearizable and log invalid execution
                     if (!possibleResultsSet.contains(results)) {
-                        System.out.println("\nNon-linearizable execution:");
-                        results.forEach(System.out::println);
-                        System.out.println("\nPossible linearizable executions:");
-                        possibleResultsSet.forEach(possibleResults -> {
-                            possibleResults.forEach(System.out::println);
-                            System.out.println();
-                        });
+                        System.out.println("Iteration Failed");
+                        reportBuilder.result(TestReport.Result.FAILURE);
                         throw new AssertionError("Non-linearizable execution detected, see log for details");
                     }
                 }
             }
+            reportBuilder.result(TestReport.Result.SUCCESS);
         } finally {
             pool.shutdown();
+            reportBuilder.time(Instant.now().toEpochMilli() - startTime.toEpochMilli());
+            // Print report
+            try (Reporter reporter = new Reporter("report")){
+                reporter.report(reportBuilder.build());
+            } catch (IOException e) {
+                System.out.println("Unable to write report:");
+                e.printStackTrace();
+            }
         }
+    }
+
+    private void printPossibleResults(Set<List<List<Result>>> possibleResultsSet) {
+        System.out.println("Linearizable results:");
+        possibleResultsSet.forEach(possibleResults -> {
+            possibleResults.forEach(System.out::println);
+            System.out.println();
+        });
+    }
+
+    private void printIterationHeader(int iteration, List<List<Actor>> actorsPerThread) {
+        System.out.println("Iteration #" + iteration);
+        System.out.println("Actors per thread");
+        actorsPerThread.forEach(System.out::println);
     }
 
     private Phaser SINGLE_THREAD_PHASER = new Phaser(1);
 
-    private List<Result> executeActors(List<Actor> actors) {
-        invokeReset();
-        return Arrays.asList(TestThreadExecutionGenerator.create(testInstance, SINGLE_THREAD_PHASER, actors, false).call());
+    private void setWaits(List<List<Actor>> actorsPerThread, List<TestThreadExecution> testThreadExecutions, int maxWait){
+        for (int i = 0; i < testThreadExecutions.size(); i++) {
+            TestThreadExecution ex = testThreadExecutions.get(i);
+            ex.waits = random.ints(actorsPerThread.get(i).size() - 1, 0, maxWait).toArray();
+        }
     }
 
-    private void invokeReset() {
+    private List<Result> executeActors(List<Actor> actors, Object testInstance, ExecutionClassLoader loader) {
+        invokeReset(testInstance);
+        return Arrays.asList(TestThreadExecutionGenerator.create(testInstance, SINGLE_THREAD_PHASER, actors, false, loader).call());
+    }
+
+    private void invokeReset(Object testInstance) {
+        // That what was before
+        // testStructure.getResetMethod().invoke(testInstance);
+        // Now it throws too many exceptions because it get reset method using reflection.
+        // Too many reflection. I use reflection even to get ResetMethod which we had in testStructure.
         try {
-            testStructure.getResetMethod().invoke(testInstance);
-        } catch (IllegalAccessException | InvocationTargetException e) {
+            testInstance.getClass().getMethod(testStructure.getResetMethod()).invoke(testInstance);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new IllegalStateException("Unable to call method annotated with @Reset", e);
         }
     }

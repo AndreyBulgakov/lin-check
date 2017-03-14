@@ -43,13 +43,11 @@ package com.devexperts.dxlab.lincheck.tests.custom.queue;
 import com.devexperts.dxlab.lincheck.LinChecker;
 import com.devexperts.dxlab.lincheck.annotations.*;
 import com.devexperts.dxlab.lincheck.generators.IntGen;
-import tests.custom.queue.Queue;
-import tests.custom.queue.QueueEmptyException;
-import tests.custom.queue.QueueFullException;
-import tests.custom.queue.QueueWrong1;
 import org.junit.Test;
-
-import static org.junit.Assert.assertFalse;
+import com.devexperts.dxlab.lincheck.libtest.custom.queue.Queue;
+import com.devexperts.dxlab.lincheck.libtest.custom.queue.QueueWrong1;
+import com.devexperts.dxlab.lincheck.libtest.custom.queue.exceptions.QueueEmptyException;
+import com.devexperts.dxlab.lincheck.libtest.custom.queue.exceptions.QueueFullException;
 @CTest(iterations = 300, actorsPerThread = {"1:3", "1:3", "1:3"})
 public class WrapperQueueWrong1 {
     private Queue queue;

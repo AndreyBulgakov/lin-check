@@ -22,21 +22,12 @@ package com.devexperts.dxlab.lincheck;
  * #L%
  */
 
-import com.devexperts.dxlab.lincheck.annotations.CTest;
-import com.devexperts.dxlab.lincheck.annotations.HandleExceptionAsResult;
-import com.devexperts.dxlab.lincheck.annotations.Operation;
-import com.devexperts.dxlab.lincheck.annotations.Param;
-import com.devexperts.dxlab.lincheck.annotations.Reset;
+import com.devexperts.dxlab.lincheck.annotations.*;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Contains information about operations (see {@link Operation}) and reset method (see {@link Reset}).
@@ -45,9 +36,9 @@ import java.util.Objects;
  */
 class CTestStructure {
     private final List<ActorGenerator> actorGenerators;
-    private final Method resetMethod;
+    private final String resetMethod;
 
-    private CTestStructure(List<ActorGenerator> actorGenerators, Method resetMethod) {
+    private CTestStructure(List<ActorGenerator> actorGenerators, String resetMethod) {
         this.actorGenerators = actorGenerators;
         this.resetMethod = resetMethod;
     }
@@ -63,13 +54,13 @@ class CTestStructure {
         }
         // Create actor generators
         List<ActorGenerator> actorGenerators = new ArrayList<>();
-        Method resetMethod = null;
+        String resetMethod = null;
         for (Method m : testClass.getDeclaredMethods()) {
             // Reset
             if (m.isAnnotationPresent(Reset.class)) {
                 if (resetMethod != null)
                     throw new IllegalArgumentException("Only one @Reset method can be presented");
-                resetMethod = m;
+                resetMethod = m.getName();
             }
             // Operation
             if (m.isAnnotationPresent(Operation.class)) {
@@ -140,7 +131,7 @@ class CTestStructure {
         return actorGenerators;
     }
 
-    Method getResetMethod() {
+    String getResetMethod() {
         return resetMethod;
     }
 }

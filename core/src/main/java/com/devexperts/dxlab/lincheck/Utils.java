@@ -22,7 +22,13 @@ package com.devexperts.dxlab.lincheck;
  * #L%
  */
 
+import org.objectweb.asm.Opcodes;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 public class Utils {
+    public static final int ASM_VERSION = Opcodes.ASM5;
+
     private static volatile int consumedCPU = (int) System.currentTimeMillis();
 
     public static void consumeCPU(int tokens) {
@@ -31,5 +37,14 @@ public class Utils {
             t += (t * 0x5DEECE66DL + 0xBL + i) & (0xFFFFFFFFFFFFL);
         if (t == 42)
             consumedCPU += t;
+    }
+
+
+    public static boolean createMissingDirectories(Path file) throws IOException {
+        Path dir = file.getParent();
+        if (Files.exists(dir))
+            return false;
+        Files.createDirectories(dir);
+        return true;
     }
 }
