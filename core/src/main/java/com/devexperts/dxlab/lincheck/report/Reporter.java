@@ -27,6 +27,7 @@ import static java.nio.file.StandardOpenOption.APPEND;
  *     <li>Result</li>
  * </ul>
  * See {@link TestReport} for describing parameters
+ * For writing must set environment variable LIN_CHECK
  */
 public class Reporter implements Closeable {
 
@@ -36,15 +37,18 @@ public class Reporter implements Closeable {
     private PrintStream out; // null if reports shouldn't be written
 
     public Reporter(String filename) throws IOException {
-        if (filename == null) // do not write reports
+        if (filename == null || filename.isEmpty()) // do not write reports
             return;
-        Path p = Paths.get( System.getProperty("user.dir"), filename);
-        if (Files.exists(p)) {
-            out = new PrintStream(Files.newOutputStream(p, APPEND));
-        } else {
-            Utils.createMissingDirectories(p);
-            out = new PrintStream(Files.newOutputStream(p));
-            out.println(columns);
+        String reportFolder = System.getenv("LIN_CHECK");
+        if (Boolean.parseBoolean(reportFolder)){
+            Path p = Paths.get(System.getProperty("user.dir"), filename);
+            if (Files.exists(p)) {
+                out = new PrintStream(Files.newOutputStream(p, APPEND));
+            } else {
+                Utils.createMissingDirectories(p);
+                out = new PrintStream(Files.newOutputStream(p));
+                out.println(columns);
+            }
         }
     }
 
