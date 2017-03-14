@@ -30,7 +30,7 @@ public class IntGen implements ParameterGenerator<Integer> {
     private static final int DEFAULT_BEGIN = -10;
     private static final int DEFAULT_END = 10;
 
-    private final Random random = new Random();
+    private final Random random = new Random(0);
     private final int begin;
     private final int end;
 

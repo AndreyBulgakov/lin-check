@@ -41,14 +41,10 @@ package com.devexperts.dxlab.lincheck.tests.romix;
  */
 
 import com.devexperts.dxlab.lincheck.LinChecker;
-import com.devexperts.dxlab.lincheck.annotations.CTest;
-import com.devexperts.dxlab.lincheck.annotations.Operation;
-import com.devexperts.dxlab.lincheck.annotations.Param;
-import com.devexperts.dxlab.lincheck.annotations.ReadOnly;
-import com.devexperts.dxlab.lincheck.annotations.Reset;
+import com.devexperts.dxlab.lincheck.annotations.*;
 import com.devexperts.dxlab.lincheck.generators.IntGen;
+import com.romix.scala.collection.concurrent.TrieMap;
 import org.junit.Test;
-import romix.scala.collection.concurrent.TrieMap;
 
 import java.util.Map;
 
@@ -58,9 +54,13 @@ import java.util.Map;
 public class TrieCorrect1 {
     private Map<Integer, Integer> m;
 
+    static {
+        System.out.println(TrieCorrect1.class.getClassLoader().toString());
+    }
     @Reset
     public void reload() {
         m = new TrieMap<>();
+//        System.out.println(m.getClass().getClassLoader().toString());
     }
 
     @Operation(params = {"key", "value"})
@@ -76,7 +76,8 @@ public class TrieCorrect1 {
 
     @Test
     public void test() {
-        LinChecker.check(this);
+        LinChecker.check(TrieCorrect1.class);
+//        LinChecker.check(this);
     }
 }
 
