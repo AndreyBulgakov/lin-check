@@ -54,9 +54,13 @@ import java.util.Map;
 public class TrieCorrect1 {
     private Map<Integer, Integer> m;
 
+    static {
+        System.out.println(TrieCorrect1.class.getClassLoader().toString());
+    }
     @Reset
     public void reload() {
         m = new TrieMap<>();
+//        System.out.println(m.getClass().getClassLoader().toString());
     }
 
     @Operation(params = {"key", "value"})
@@ -72,7 +76,8 @@ public class TrieCorrect1 {
 
     @Test
     public void test() {
-        LinChecker.check(this);
+        LinChecker.check(TrieCorrect1.class);
+//        LinChecker.check(this);
     }
 }
 

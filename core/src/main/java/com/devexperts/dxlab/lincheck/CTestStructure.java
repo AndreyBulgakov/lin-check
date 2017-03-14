@@ -36,9 +36,9 @@ import java.util.*;
  */
 class CTestStructure {
     private final List<ActorGenerator> actorGenerators;
-    private final Method resetMethod;
+    private final String resetMethod;
 
-    private CTestStructure(List<ActorGenerator> actorGenerators, Method resetMethod) {
+    private CTestStructure(List<ActorGenerator> actorGenerators, String resetMethod) {
         this.actorGenerators = actorGenerators;
         this.resetMethod = resetMethod;
     }
@@ -54,13 +54,13 @@ class CTestStructure {
         }
         // Create actor generators
         List<ActorGenerator> actorGenerators = new ArrayList<>();
-        Method resetMethod = null;
+        String resetMethod = null;
         for (Method m : testClass.getDeclaredMethods()) {
             // Reset
             if (m.isAnnotationPresent(Reset.class)) {
                 if (resetMethod != null)
                     throw new IllegalArgumentException("Only one @Reset method can be presented");
-                resetMethod = m;
+                resetMethod = m.getName();
             }
             // Operation
             if (m.isAnnotationPresent(Operation.class)) {
@@ -131,7 +131,7 @@ class CTestStructure {
         return actorGenerators;
     }
 
-    Method getResetMethod() {
+    String getResetMethod() {
         return resetMethod;
     }
 }

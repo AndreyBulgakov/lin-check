@@ -24,7 +24,8 @@ package com.devexperts.dxlab.lincheck;
 
 import com.devexperts.dxlab.lincheck.report.Reporter;
 import com.devexperts.dxlab.lincheck.report.TestReport;
-
+import com.devexperts.dxlab.lincheck.strategy.ConsumeCPUStrategy;
+import com.devexperts.dxlab.lincheck.strategy.StrategyHolder;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
@@ -36,25 +37,48 @@ import java.util.concurrent.Phaser;
 import java.util.stream.Collectors;
 
 /**
+ * TODO documentation
+ * TODO logging
  * TODO avoid executions without write operations
  */
 public class LinChecker {
     private static final int MAX_WAIT = 1000;
 
     private final Random random = new Random(0);
-    private final Object testInstance;
+    private final String testClassName;
     private final List<CTestConfiguration> testConfigurations;
     private final CTestStructure testStructure;
 
+    private LinChecker(Class testClass) {
+        this.testClassName = testClass.getCanonicalName();
+        this.testConfigurations = CTestConfiguration.getFromTestClass(testClass);
+        this.testStructure = CTestStructure.getFromTestClass(testClass);
+    }
+
     private LinChecker(Object testInstance) {
-        this.testInstance = testInstance;
+        this.testClassName = testInstance.getClass().getCanonicalName();
         Class<?> testClass = testInstance.getClass();
         this.testConfigurations = CTestConfiguration.getFromTestClass(testClass);
         this.testStructure = CTestStructure.getFromTestClass(testClass);
     }
 
-    public static void check(Object testInstance) throws AssertionError{
-        new LinChecker(testInstance).check();
+    /**
+     * LinChecker run method. Use LinChecker.check(TestClass.class) in junit test class
+     * @param testClass class that contains CTest
+     * @throws AssertionError if find Non-linearizable executions
+     */
+    public static void check(Class testClass) throws AssertionError {
+            new LinChecker(testClass).check();
+    }
+
+    /**
+     * LinChecker run method. Use LinChecker.check(this) in junit test class
+     * @param testInstance object that contains CTest
+     * @throws AssertionError if find Non-linearizable executions
+     */
+    public static void check(Object testInstance) throws AssertionError {
+            new LinChecker(testInstance).check();
+
     }
 
     /**
@@ -64,7 +88,8 @@ public class LinChecker {
         testConfigurations.forEach((testConfiguration) -> {
             try {
                 checkImpl(testConfiguration);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException | ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+                // TODO checkImpl should catch these exceptions
                 throw new IllegalStateException(e);
             }
         });
@@ -110,24 +135,7 @@ public class LinChecker {
         }
     }
 
-    private Set<List<List<Result>>> generateLinearizableResults(List<List<Actor>> actorsPerThread) {
-        return generateAllLinearizableExecutions(actorsPerThread).stream()
-                .map(linEx -> {
-                    List<Result> results = executeActors(linEx);
-                    Map<Actor, Result> resultMap = new IdentityHashMap<>();
-                    for (int i = 0; i < linEx.size(); i++) {
-                        resultMap.put(linEx.get(i), results.get(i));
-                    }
-                    return actorsPerThread.stream()
-                            .map(actors -> actors.stream()
-                                    .map(resultMap::get)
-                                    .collect(Collectors.toList())
-                            ).collect(Collectors.toList());
-                })
-                .collect(Collectors.toSet());
-    }
-
-    private void checkImpl(CTestConfiguration testCfg) throws InterruptedException {
+    private void checkImpl(CTestConfiguration testCfg) throws InterruptedException, ClassNotFoundException, IllegalAccessException, InstantiationException {
         // Fixed thread pool executor to run TestThreadExecution
         ExecutorService pool = Executors.newFixedThreadPool(testCfg.getThreads());
         // Store start time for counting performance metrics
@@ -144,20 +152,39 @@ public class LinChecker {
             // Run iterations
             for (int iteration = 1; iteration <= testCfg.getIterations(); iteration++) {
                 reportBuilder.incIterations();
+
+                //Set strategy and initialize transformation in classes
+                StrategyHolder.setCurrentStrategy(new ConsumeCPUStrategy(100));
+                final ExecutionClassLoader loader = new ExecutionClassLoader(testClassName);
+                final Object testInstance = loader.loadClass(testClassName).newInstance();
+
                 List<List<Actor>> actorsPerThread = generateActors(testCfg);
                 printIterationHeader(iteration, actorsPerThread);
                 // Create TestThreadExecution's
                 List<TestThreadExecution> testThreadExecutions = actorsPerThread.stream()
-                    .map(actors -> TestThreadExecutionGenerator.create(testInstance, phaser, actors, false))
+                    .map(actors -> TestThreadExecutionGenerator.create(testInstance, phaser, actors, false, loader))
                     .collect(Collectors.toList());
                 // Generate all possible results
-                Set<List<List<Result>>> possibleResultsSet = generateLinearizableResults(actorsPerThread);
-                printPossibleResults(possibleResultsSet);
+                Set<List<List<Result>>> possibleResultsSet = generateAllLinearizableExecutions(actorsPerThread).stream()
+                    .map(linEx -> { // For each permutation
+                        List<Result> results = executeActors(linEx, testInstance, loader);
+                        Map<Actor, Result> resultMap = new IdentityHashMap<>();
+                        for (int i = 0; i < linEx.size(); i++) {
+                            resultMap.put(linEx.get(i), results.get(i));
+                        }
+                        // Map result from single-execution permutation
+                        // to each non-execution actorsPerThread List
+                        return actorsPerThread.stream()
+                            .map(actors -> actors.stream()
+                                    .map(resultMap::get)
+                                    .collect(Collectors.toList())
+                            ).collect(Collectors.toList());
+                    }).collect(Collectors.toSet());
                 // Run invocations
                 for (int invocation = 1; invocation <= testCfg.getInvocationsPerIteration(); invocation++) {
                     reportBuilder.incInvocations();
                     // Reset the state of test
-                    invokeReset();
+                    invokeReset(testInstance);
                     // Specify waits
                     int maxWait = (int) ((float) invocation * MAX_WAIT / testCfg.getInvocationsPerIteration()) + 1;
                     setWaits(actorsPerThread, testThreadExecutions, maxWait);
@@ -217,15 +244,19 @@ public class LinChecker {
         }
     }
 
-    private List<Result> executeActors(List<Actor> actors) {
-        invokeReset();
-        return Arrays.asList(TestThreadExecutionGenerator.create(testInstance, SINGLE_THREAD_PHASER, actors, false).call());
+    private List<Result> executeActors(List<Actor> actors, Object testInstance, ExecutionClassLoader loader) {
+        invokeReset(testInstance);
+        return Arrays.asList(TestThreadExecutionGenerator.create(testInstance, SINGLE_THREAD_PHASER, actors, false, loader).call());
     }
 
-    private void invokeReset() {
+    private void invokeReset(Object testInstance) {
+        // That what was before
+        // testStructure.getResetMethod().invoke(testInstance);
+        // Now it throws too many exceptions because it get reset method using reflection.
+        // Too many reflection. I use reflection even to get ResetMethod which we had in testStructure.
         try {
-            testStructure.getResetMethod().invoke(testInstance);
-        } catch (IllegalAccessException | InvocationTargetException e) {
+            testInstance.getClass().getMethod(testStructure.getResetMethod()).invoke(testInstance);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new IllegalStateException("Unable to call method annotated with @Reset", e);
         }
     }
