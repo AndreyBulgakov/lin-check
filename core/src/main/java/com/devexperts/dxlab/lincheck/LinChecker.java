@@ -43,6 +43,7 @@ import java.util.stream.Collectors;
  * TODO avoid executions without write operations
  */
 public class LinChecker {
+    private static final boolean WRITE_REPORT = Boolean.parseBoolean(System.getProperty("lincheck.writeReport", "false"));
     private static final int MAX_WAIT = 1000;
 
     private final Random random = new Random(0);
@@ -56,6 +57,7 @@ public class LinChecker {
         this.testStructure = CTestStructure.getFromTestClass(testClass);
     }
 
+    // TODO do not pass instance, remove this method
     private LinChecker(Object testInstance) {
         this.testClassName = testInstance.getClass().getCanonicalName();
         Class<?> testClass = testInstance.getClass();
@@ -73,6 +75,7 @@ public class LinChecker {
     }
 
     /**
+     * TODO do not pass instance, remove this method
      * LinChecker run method. Use LinChecker.check(this) in junit test class
      * @param testInstance object that contains CTest
      * @throws AssertionError if find Non-linearizable executions
@@ -90,7 +93,6 @@ public class LinChecker {
             try {
                 checkImpl(testConfiguration);
             } catch (InterruptedException | ClassNotFoundException | IllegalAccessException | InstantiationException e) {
-                // TODO checkImpl should catch these exceptions
                 throw new IllegalStateException(e);
             }
         });
@@ -218,8 +220,13 @@ public class LinChecker {
         } finally {
             pool.shutdown();
             reportBuilder.time(Instant.now().toEpochMilli() - startTime.toEpochMilli());
-            // Print report
-            try (Reporter reporter = new Reporter("report")){
+            writeReportIfNeeded(reportBuilder);
+        }
+    }
+
+    private void writeReportIfNeeded(TestReport.Builder reportBuilder) {
+        if (WRITE_REPORT) {
+            try (Reporter reporter = new Reporter("report")) {
                 reporter.report(reportBuilder.build());
             } catch (IOException e) {
                 System.out.println("Unable to write report:");
@@ -228,6 +235,7 @@ public class LinChecker {
         }
     }
 
+    // TODO why no one calls this method?
     private void printPossibleResults(Set<List<List<Result>>> possibleResultsSet) {
         System.out.println("Linearizable results:");
         possibleResultsSet.forEach(possibleResults -> {

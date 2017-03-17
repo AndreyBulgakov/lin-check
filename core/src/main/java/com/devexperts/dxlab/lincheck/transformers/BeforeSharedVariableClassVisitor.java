@@ -7,7 +7,7 @@ import org.objectweb.asm.MethodVisitor;
 import java.lang.reflect.Modifier;
 
 /**
- * ClassVisitor to transform methods by using BeforeSharedVariableMethodTransformer
+ * ClassVisitor to transform methods using BeforeSharedVariableMethodTransformer
  */
 public class BeforeSharedVariableClassVisitor extends ClassVisitor {
 
@@ -25,7 +25,7 @@ public class BeforeSharedVariableClassVisitor extends ClassVisitor {
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        // TODO We shouldn't ignore all constructors
+        // TODO We shouldn't ignore all constructors !!!
         if (!Modifier.isNative(access) && !name.equals("<init>")) {
             MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
             return new BeforeSharedVariableMethodTransformer(api, mv, access, name, desc, className);

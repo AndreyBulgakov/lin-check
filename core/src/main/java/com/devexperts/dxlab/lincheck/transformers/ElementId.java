@@ -1,10 +1,9 @@
 package com.devexperts.dxlab.lincheck.transformers;
 
 /**
- * Id class for mapping
+ * Id class for mapping // TODO for which mapping?
  */
 class ElementId {
-
     private final String declaringClass;
     private final String methodName;
     private final String methodDesc;

@@ -2,7 +2,7 @@ package com.devexperts.dxlab.lincheck.strategy;
 
 
 /**
- * Interface to implement strategy to checking interleaving points
+ * Each strategy should implement this interface and handle shared variable reading and writing.
  */
 public interface Strategy {
 
