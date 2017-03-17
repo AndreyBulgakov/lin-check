@@ -35,7 +35,6 @@ class BeforeSharedVariableMethodTransformer extends GeneratorAdapter {
         this.className = className;
         this.methodName = name;
         this.methodDesc = desc;
-        this.instructionNumber = 0;
     }
 
 
@@ -43,27 +42,24 @@ class BeforeSharedVariableMethodTransformer extends GeneratorAdapter {
     public void visitVarInsn(int opcode, int var) {
         this.instructionNumber++;
         switch (opcode) {
+        // TODO all these operations are NOT shared variable access. Check them with instruction listed in code.devexperts.com page
+        // TODO write test with array element access
             // "this" or ALOAD 0 is not a shared variable then ignore it
             case Opcodes.ALOAD:
                 if (var == 0) break;
             case Opcodes.LLOAD:
             case Opcodes.FLOAD:
             case Opcodes.DLOAD:
-            case Opcodes.ILOAD: {
+            case Opcodes.ILOAD:
                 insertMethod(STRATEGY_ITF_METHOD_READ);
                 break;
-            }
-
             case Opcodes.ASTORE:
                 if (var == 0) break;
             case Opcodes.ISTORE:
             case Opcodes.LSTORE:
             case Opcodes.FSTORE:
-            case Opcodes.DSTORE: {
+            case Opcodes.DSTORE:
                 insertMethod(STRATEGY_ITF_METHOD_WRITE);
-                break;
-            }
-            default:
                 break;
         }
         super.visitVarInsn(opcode, var);
@@ -71,11 +67,10 @@ class BeforeSharedVariableMethodTransformer extends GeneratorAdapter {
 
     @Override
     public void visitFieldInsn(int opcode, String owner, String name, String desc) {
-
         this.instructionNumber++;
         switch (opcode) {
             case Opcodes.GETSTATIC:
-            case Opcodes.GETFIELD: {
+            case Opcodes.GETFIELD: { // TODO do not use brackets in switch statement
                 insertMethod(STRATEGY_ITF_METHOD_READ);
                 break;
             }

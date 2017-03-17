@@ -39,6 +39,7 @@ public class TestReport {
         this.result = Objects.requireNonNull(builder.result);
     }
 
+    // TODO make it readable, not for serialization
     @Override
     public String toString() {
         return testName + ", " + strategyName + ", " + maxIterations + ", " + maxInvocations + ", " + threadConfig +
@@ -70,7 +71,7 @@ public class TestReport {
         }
 
         /**
-         * Set name of current test
+         * Set name of the current test
          * @param testName simple className of test
          */
         public Builder name(String testName) {
@@ -79,8 +80,7 @@ public class TestReport {
         }
 
         /**
-         * Set name of current strategy
-         * @param strategyName simple className of strategy
+         * Set strategy name
          */
         public Builder strategy(String strategyName) {
             this.strategyName = strategyName;
@@ -88,8 +88,7 @@ public class TestReport {
         }
 
         /**
-         * Set time from start to end of test
-         * @param time
+         * Set execution time of the test
          */
         public Builder time(long time) {
             this.time = time;
@@ -97,8 +96,7 @@ public class TestReport {
         }
 
         /**
-         * Set result of test
-         * @param result result of running
+         * Set result of the test
          */
         public Builder result(Result result) {
             this.result = result;
@@ -106,7 +104,7 @@ public class TestReport {
         }
 
         /**
-         * Increment current iteration
+         * Increment number current iteration
          */
         public Builder incIterations() {
             this.iterations++;
@@ -114,7 +112,7 @@ public class TestReport {
         }
 
         /**
-         * Increment current invocation
+         * Increment number of current invocation
          */
         public Builder incInvocations() {
             this.invocations++;

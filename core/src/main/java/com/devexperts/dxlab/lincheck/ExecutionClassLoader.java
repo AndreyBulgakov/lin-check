@@ -34,40 +34,36 @@ class ExecutionClassLoader extends ClassLoader {
      */
     @Override
     public Class<?> loadClass(String name) throws ClassNotFoundException {
-        // Load transformed class from cash if it exists
-
         // Print loading class
         // System.out.println("Loading: " + name);
-        Class result = cash.get(name);
-        if (result != null) {
-            return result;
-        }
 
-        // Secure some packages
+        // Load transformed class from cash if it exists
+        Class result = cash.get(name);
+        if (result != null)
+            return result;
+        // Do not transform some classes
         if (shouldIgnoreClass(name)) {
             // Print delegated class
             //System.out.println("Loaded by super:" + name);
             return super.loadClass(name);
         }
-
         //Transform and save class
         try {
             // Print transforming class
             // System.out.println("Loaded by exec:" + name);
             ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
             ClassVisitor cv = new BeforeSharedVariableClassVisitor(cw);
-
             ClassReader cr = new ClassReader(name);
             // Ignore TestClass
-            if (name.equals(testClassName))
+            // TODO transform test class too. Use DummyStrategy (and write it) during new instance constructing
+            if (name.equals(testClassName)) {
                 cr.accept(cw, ClassReader.SKIP_FRAMES);
-            else
+            } else {
                 cr.accept(cv, ClassReader.SKIP_FRAMES);
-
+            }
             // Get transformed bytecode
             byte[] resultBytecode = cw.toByteArray();
             result = defineClass(name, resultBytecode, 0, resultBytecode.length);
-
             // Save it to cash and resources
             resources.put(name, resultBytecode);
             cash.put(name, result);
@@ -75,9 +71,8 @@ class ExecutionClassLoader extends ClassLoader {
         } catch (SecurityException e) {
             return super.loadClass(name);
         } catch (IOException e) {
-            throw new ClassNotFoundException(name, e);
+            throw new ClassNotFoundException(name, e); // TODO write more helpful message
         }
-
     }
 
     @Override

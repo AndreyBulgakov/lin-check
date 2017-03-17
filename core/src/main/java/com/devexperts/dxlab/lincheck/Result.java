@@ -25,11 +25,11 @@ package com.devexperts.dxlab.lincheck;
 import com.devexperts.dxlab.lincheck.annotations.HandleExceptionAsResult;
 
 /**
- * The instance of this class represents a withResult of actor invocation.
- * <p> If the actor invocation does not return value the {@link Type#VOID void withResult type} is used.
- * <p> If the actor invocation returns any value then the {@link Type#VALUE value withResult type} is used.
- * <p> However, if the actor invocation fails the {@link Type#EXCEPTION exception withResult type} is used.
- * Note that the exception can be a normal withResult according to {@link HandleExceptionAsResult}.
+ * The instance of this class represents a result of actor invocation.
+ * <p> If the actor invocation does not return value the {@link Type#VOID void result type} is used.
+ * <p> If the actor invocation returns any value then the {@link Type#VALUE value result type} is used.
+ * <p> However, if the actor invocation fails the {@link Type#EXCEPTION exception result type} is used.
+ * Note that the exception can be a normal result according to {@link HandleExceptionAsResult}.
  *
  * <p> This class should be public for having access from generated classes.
  */
