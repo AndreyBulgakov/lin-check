@@ -167,8 +167,6 @@ public class LinChecker {
             .name(testClassName)
             .strategy("Simple"); // TODO:  Get simpleName of Strategy class
         try {
-            System.out.println("Number of iterations: " + testCfg.getIterations());
-            System.out.println("Number of invocations per iteration: " + testCfg.getInvocationsPerIteration());
             // Reusable phaser
             final Phaser phaser = new Phaser(testCfg.getThreads());
             // Run iterations
@@ -210,7 +208,8 @@ public class LinChecker {
                     // Check correctness& Throw an AssertionError if current execution
                     // is not linearizable and log invalid execution
                     if (!possibleResultsSet.contains(results)) {
-                        System.out.println("Iteration Failed");
+                        printExecutionResult(results);
+                        printPossibleResults(possibleResultsSet);
                         reportBuilder.result(TestReport.Result.FAILURE);
                         throw new AssertionError("Non-linearizable execution detected, see log for details");
                     }
@@ -232,21 +231,30 @@ public class LinChecker {
                 System.out.println("Unable to write report:");
                 e.printStackTrace();
             }
+            catch (IllegalArgumentException e){
+                System.out.println("Illegal argument");
+                e.printStackTrace();
+            }
         }
     }
 
-    // TODO why no one calls this method?
     private void printPossibleResults(Set<List<List<Result>>> possibleResultsSet) {
-        System.out.println("Linearizable results:");
+        System.out.println("Possible linearizable executions:");
         possibleResultsSet.forEach(possibleResults -> {
             possibleResults.forEach(System.out::println);
             System.out.println();
         });
     }
 
+    private void printExecutionResult(List<List<Result>> result){
+        System.out.println("Non-linearizable execution:");
+        result.forEach(System.out::println);
+        System.out.println();
+    }
+
     private void printIterationHeader(int iteration, List<List<Actor>> actorsPerThread) {
         System.out.println("Iteration #" + iteration);
-        System.out.println("Actors per thread");
+        System.out.println("Actors per thread:");
         actorsPerThread.forEach(System.out::println);
     }
 

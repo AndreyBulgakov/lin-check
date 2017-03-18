@@ -39,11 +39,55 @@ public class TestReport {
         this.result = Objects.requireNonNull(builder.result);
     }
 
-    // TODO make it readable, not for serialization
+    //region Getters
+    public String getTestName() {
+        return testName;
+    }
+
+    public String getStrategyName() {
+        return strategyName;
+    }
+
+    public int getMaxIterations() {
+        return maxIterations;
+    }
+
+    public int getMaxInvocations() {
+        return maxInvocations;
+    }
+
+    public String getThreadConfig() {
+        return threadConfig;
+    }
+
+    public int getIterations() {
+        return iterations;
+    }
+
+    public int getInvocations() {
+        return invocations;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public Result getResult() {
+        return result;
+    }
+    //endregion
+
     @Override
     public String toString() {
-        return testName + ", " + strategyName + ", " + maxIterations + ", " + maxInvocations + ", " + threadConfig +
-                ", " + iterations + ", " + invocations + ", " + time + ", " + result;
+        return "Testname = " + testName +
+                ", StrategyName = " + strategyName +
+                ", MaxIterations = " + maxIterations +
+                ", MaxInvocations = " + maxInvocations +
+                ", ThreadConfiguration = " + threadConfig +
+                ", Iterations = " + iterations +
+                ", Invocations = " + invocations +
+                ", PassedTime = " + time +
+                ", CurrentResult = " + result;
     }
 
     /**
