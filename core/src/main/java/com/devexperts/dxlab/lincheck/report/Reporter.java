@@ -14,7 +14,6 @@ import java.util.List;
 import static java.nio.file.StandardOpenOption.APPEND;
 
 /**
- * // TODO add columns description
  * Write result of test to csv File, which contains following columns
  * <ul>
  *     <li>TestName</li>
@@ -31,22 +30,22 @@ import static java.nio.file.StandardOpenOption.APPEND;
  */
 public class Reporter implements Closeable {
 
-    // TODO why public?
     // Columns for CSV report
-    public static final List<String> columns = Arrays.asList("TestName", "StrategyName", "MaxIterations", "MaxInvocations",
+    private static final List<String> columns = Arrays.asList("TestName", "StrategyName", "MaxIterations", "MaxInvocations",
             "ThreadConfig", "Iterations", "Invocations", "Time", "Result");
     private PrintStream out; // null if reports shouldn't be written
 
     public Reporter(String filename) throws IOException {
-        if (filename == null) // do not write reports
-            return;
+        if (filename == null || filename.isEmpty()) // do not write reports
+            throw new IllegalArgumentException();
         Path p = Paths.get( System.getProperty("user.dir"), filename);
         if (Files.exists(p)) {
             out = new PrintStream(Files.newOutputStream(p, APPEND));
         } else {
             Utils.createMissingDirectories(p);
             out = new PrintStream(Files.newOutputStream(p));
-            out.println(columns);
+            String header = columns.toString().replace("[", "").replace("]", "").replace(", ", ",");
+            out.println(header);
         }
     }
 
@@ -64,6 +63,10 @@ public class Reporter implements Closeable {
     public void report(TestReport report) {
         if (out == null)
             return;
-        out.println(report); // TODO do not use toString for writing to CSV table!!!
+        String serializedReport = report.getTestName() + "," + report.getStrategyName() + "," +
+                report.getMaxIterations() + "," + report.getMaxInvocations() + ",\"" +
+                report.getThreadConfig() + "\"," + report.getIterations() + "," + report.getInvocations() + "," +
+                report.getTime() + "," + report.getResult();
+        out.println(serializedReport);
     }
 }
