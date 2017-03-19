@@ -25,6 +25,7 @@ package com.devexperts.dxlab.lincheck;
 import com.devexperts.dxlab.lincheck.report.Reporter;
 import com.devexperts.dxlab.lincheck.report.TestReport;
 import com.devexperts.dxlab.lincheck.strategy.ConsumeCPUStrategy;
+import com.devexperts.dxlab.lincheck.strategy.Strategy;
 import com.devexperts.dxlab.lincheck.strategy.StrategyHolder;
 
 import java.io.IOException;
@@ -164,17 +165,17 @@ public class LinChecker {
         Instant startTime = Instant.now();
         // Create report builder
         TestReport.Builder reportBuilder = new TestReport.Builder(testCfg)
-            .name(testClassName)
-            .strategy("Simple"); // TODO:  Get simpleName of Strategy class
+            .name(testClassName);
         try {
             // Reusable phaser
             final Phaser phaser = new Phaser(testCfg.getThreads());
+            //Set strategy and initialize transformation in classes
+            Strategy currentStrategy = new ConsumeCPUStrategy(100);
+            StrategyHolder.setCurrentStrategy(currentStrategy);
+            reportBuilder.strategy(currentStrategy.getClass().getSimpleName().replace("Strategy", ""));
             // Run iterations
             for (int iteration = 1; iteration <= testCfg.getIterations(); iteration++) {
                 reportBuilder.incIterations();
-
-                //Set strategy and initialize transformation in classes
-                StrategyHolder.setCurrentStrategy(new ConsumeCPUStrategy(100));
 
                 //Create loader, load and instantiate testInstance by this loader
                 final ExecutionClassLoader loader = new ExecutionClassLoader(testClassName);
