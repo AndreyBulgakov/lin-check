@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
@@ -193,19 +192,32 @@ public class LinChecker {
                     reportBuilder.incInvocations();
                     // Reset the state of test
                     invokeReset(testInstance);
-                    // Specify waits
-                    int maxWait = (int) ((float) invocation * MAX_WAIT / testCfg.getInvocationsPerIteration()) + 1;
-                    setWaits(actorsPerThread, testThreadExecutions, maxWait);
+
                     // Run multithreaded test and get operation results for each thread
-                    List<List<Result>> results = pool.invokeAll(testThreadExecutions).stream() // get futures
-                        .map(f -> {
-                            try {
-                                return Arrays.asList(f.get()); // wait and get results
-                            } catch (InterruptedException | ExecutionException e) {
-                                throw new IllegalStateException(e);
-                            }
-                        })
-                        .collect(Collectors.toList()); // and store results as list
+                    LinCheckThread[] threads = new LinCheckThread[testThreadExecutions.size()];
+                    for (int i = 0; i < testThreadExecutions.size(); i++) {
+                        threads[i] = new LinCheckThread(i+1, testThreadExecutions.get(i));
+                        threads[i].run();
+                    }
+                    List<List<Result>> results = Arrays.stream(threads)
+                            .map(f -> {
+                                try {
+                                    f.join();
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                                return Arrays.asList(f.getResults());
+                            })
+                    .collect(Collectors.toList());
+//                    List<List<Result>> results = pool.invokeAll(testThreadExecutions).stream() // get futures
+//                        .map(f -> {
+//                            try {
+//                                return Arrays.asList(f.get()); // wait and get results
+//                            } catch (InterruptedException | ExecutionException e) {
+//                                throw new IllegalStateException(e);
+//                            }
+//                        })
+//                        .collect(Collectors.toList()); // and store results as list
                     // Check correctness& Throw an AssertionError if current execution
                     // is not linearizable and log invalid execution
                     if (!possibleResultsSet.contains(results)) {
