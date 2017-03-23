@@ -22,6 +22,8 @@ package com.devexperts.dxlab.lincheck;
  * #L%
  */
 
+import com.devexperts.dxlab.lincheck.strategy.Strategy;
+import com.devexperts.dxlab.lincheck.strategy.StrategyHolder;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
@@ -198,6 +200,8 @@ class TestThreadExecutionGenerator {
             // Increment number of current operation
             mv.iinc(iLocal, 1);
         }
+        mv. invokeStatic(Type.getType(StrategyHolder.class), new Method("getCurrentStrategy", Type.getType(Strategy.class), new Type[]{}));
+        mv.invokeInterface(Type.getType(Strategy.class), new Method("endOfThread", Type.VOID_TYPE, NO_ARGS));
         // Return results as list
         mv.loadThis();
         mv.loadLocal(resLocal);
