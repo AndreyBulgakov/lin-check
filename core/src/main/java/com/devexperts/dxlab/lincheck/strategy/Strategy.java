@@ -18,4 +18,10 @@ public interface Strategy {
      * @param location location id
      */
     void onSharedVariableWrite(int location);
+
+
+    /**
+     * Execute implemented strategy at end of thread
+     */
+    default void endOfThread() {    }
 }
