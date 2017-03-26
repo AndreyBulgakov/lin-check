@@ -39,7 +39,14 @@ public class LocationManager {
         return id;
     }
 
-    synchronized ElementId getElementId(int locationId) {
+    public synchronized ElementId getElementId(int locationId) {
         return locations.get(locationId);
+    }
+
+    @Override
+    public String toString() {
+        return "LocationManager{" +
+                "locations=" + locations +
+                '}';
     }
 }

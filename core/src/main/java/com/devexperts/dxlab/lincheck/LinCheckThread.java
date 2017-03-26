@@ -1,27 +1,20 @@
 package com.devexperts.dxlab.lincheck;
 
+import java.util.concurrent.FutureTask;
+
 /**
  * Created by alexander on 21.03.17.
  */
 public class LinCheckThread extends Thread {
     private final int id;
-    private final TestThreadExecution execution;
-    private Result[] results;
 
-    public LinCheckThread(int id, TestThreadExecution execution) {
+
+    public  LinCheckThread(int id, FutureTask<Result[]> execution) {
+        super(execution);
         this.id = id;
-        this.execution = execution;
-        this.start();
     }
 
     public int getThreadId() {
         return id;
-    }
-
-    public Result[] getResults() { return results; }
-
-    @Override
-    public void run() {
-        results = execution.call();
     }
 }

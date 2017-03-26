@@ -3,7 +3,7 @@ package com.devexperts.dxlab.lincheck.transformers;
 /**
  * Id class for mapping // TODO for which mapping?
  */
-class ElementId {
+public class ElementId {
     private final String declaringClass;
     private final String methodName;
     private final String methodDesc;
@@ -14,6 +14,10 @@ class ElementId {
         this.methodName = methodName;
         this.methodDesc = methodDesc;
         this.lineNumber = lineNumber;
+    }
+
+    public String getMethodName(){
+        return methodName;
     }
 
     @Override
@@ -36,5 +40,15 @@ class ElementId {
         result = 31 * result + methodDesc.hashCode();
         result = 31 * result + lineNumber;
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "ElementId{" +
+                "declaringClass='" + declaringClass + '\'' +
+                ", methodName='" + methodName + '\'' +
+                ", methodDesc='" + methodDesc + '\'' +
+                ", lineNumber=" + lineNumber +
+                '}';
     }
 }
