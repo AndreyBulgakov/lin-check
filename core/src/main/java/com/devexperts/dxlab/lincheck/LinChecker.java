@@ -24,16 +24,15 @@ package com.devexperts.dxlab.lincheck;
 
 import com.devexperts.dxlab.lincheck.report.Reporter;
 import com.devexperts.dxlab.lincheck.report.TestReport;
-import com.devexperts.dxlab.lincheck.strategy.ConsumeCPUStrategy;
-import com.devexperts.dxlab.lincheck.strategy.Strategy;
+import com.devexperts.dxlab.lincheck.strategy.EnumerationStrategy;
 import com.devexperts.dxlab.lincheck.strategy.StrategyHolder;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.Phaser;
 import java.util.stream.Collectors;
 
@@ -97,7 +96,7 @@ public class LinChecker {
             }
         });
     }
-
+    //region Generators
     private List<Actor> generateActorsForThread(CTestConfiguration.TestThreadConfiguration threadCfg) {
         int actorsInThread = threadCfg.minActors + random.nextInt(threadCfg.maxActors - threadCfg.minActors + 1);
         return random.ints(actorsInThread, 0, testStructure.getActorGenerators().size()) // random indexes
@@ -156,10 +155,11 @@ public class LinChecker {
                             ).collect(Collectors.toList());
                 }).collect(Collectors.toSet());
     }
+    //endregion
 
     private void checkImpl(CTestConfiguration testCfg) throws InterruptedException, ClassNotFoundException, IllegalAccessException, InstantiationException {
         // Fixed thread pool executor to run TestThreadExecution
-        ExecutorService pool = Executors.newFixedThreadPool(testCfg.getThreads());
+        //ExecutorService pool = Executors.newFixedThreadPool(testCfg.getThreads());
         // Store start time for counting performance metrics
         Instant startTime = Instant.now();
         // Create report builder
@@ -169,11 +169,15 @@ public class LinChecker {
             // Reusable phaser
             final Phaser phaser = new Phaser(testCfg.getThreads());
             //Set strategy and initialize transformation in classes
-            Strategy currentStrategy = new ConsumeCPUStrategy(100);
+            //Strategy currentStrategy = new ConsumeCPUStrategy(100);
+            EnumerationStrategy currentStrategy = new EnumerationStrategy();
             StrategyHolder.setCurrentStrategy(currentStrategy);
             reportBuilder.strategy(currentStrategy.getClass().getSimpleName().replace("Strategy", ""));
             // Run iterations
             for (int iteration = 1; iteration <= testCfg.getIterations(); iteration++) {
+                int startThread = 1;
+                boolean needNextIteration = true;
+                currentStrategy.startNewIteration();
                 reportBuilder.incIterations();
 
                 //Create loader, load and instantiate testInstance by this loader
@@ -188,36 +192,36 @@ public class LinChecker {
                     .collect(Collectors.toList());
                 Set<List<List<Result>>> possibleResultsSet = generatePossibleResults(actorsPerThread, testInstance, loader);
                 // Run invocations
-                for (int invocation = 1; invocation <= testCfg.getInvocationsPerIteration(); invocation++) {
+                for (int invocation = 1; invocation <= testCfg.getInvocationsPerIteration() && needNextIteration; invocation++) {
+                    currentStrategy.printHeader(iteration, invocation);
                     reportBuilder.incInvocations();
                     // Reset the state of test
                     invokeReset(testInstance);
 
                     // Run multithreaded test and get operation results for each thread
                     LinCheckThread[] threads = new LinCheckThread[testThreadExecutions.size()];
+                    FutureTask<Result[]>[] resultsTask = new FutureTask[testThreadExecutions.size()];
                     for (int i = 0; i < testThreadExecutions.size(); i++) {
-                        threads[i] = new LinCheckThread(i+1, testThreadExecutions.get(i));
-                        threads[i].run();
+                        resultsTask[i] = new FutureTask<Result[]>(testThreadExecutions.get(i));
+                        threads[i] = new LinCheckThread(i+1, resultsTask[i]);
+                        threads[i].start();
                     }
-                    List<List<Result>> results = Arrays.stream(threads)
+                    List<List<Result>> results = Arrays.stream(resultsTask)
                             .map(f -> {
                                 try {
-                                    f.join();
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
+                                    return Arrays.asList(f.get());
+                                } catch (InterruptedException  | ExecutionException e) {
+                                    throw new IllegalStateException(e);
                                 }
-                                return Arrays.asList(f.getResults());
                             })
                     .collect(Collectors.toList());
-//                    List<List<Result>> results = pool.invokeAll(testThreadExecutions).stream() // get futures
-//                        .map(f -> {
-//                            try {
-//                                return Arrays.asList(f.get()); // wait and get results
-//                            } catch (InterruptedException | ExecutionException e) {
-//                                throw new IllegalStateException(e);
-//                            }
-//                        })
-//                        .collect(Collectors.toList()); // and store results as list
+                    //currentStrategy.printTraces();
+                    if (currentStrategy.isNeedChangeFirstThread()) {
+                        if (startThread == 2)
+                            needNextIteration = false;
+                        startThread = 2 - startThread + 1;
+                    }
+                    currentStrategy.returnDatas(startThread, false);
                     // Check correctness& Throw an AssertionError if current execution
                     // is not linearizable and log invalid execution
                     if (!possibleResultsSet.contains(results)) {
@@ -227,10 +231,10 @@ public class LinChecker {
                         throw new AssertionError("Non-linearizable execution detected, see log for details");
                     }
                 }
+                currentStrategy.printTraces();
             }
             reportBuilder.result(TestReport.Result.SUCCESS);
         } finally {
-            pool.shutdown();
             reportBuilder.time(Instant.now().toEpochMilli() - startTime.toEpochMilli());
             writeReportIfNeeded(reportBuilder);
         }
@@ -251,6 +255,7 @@ public class LinChecker {
         }
     }
 
+    //region Printers
     private void printPossibleResults(Set<List<List<Result>>> possibleResultsSet) {
         System.out.println("Possible linearizable executions:");
         possibleResultsSet.forEach(possibleResults -> {
@@ -270,6 +275,7 @@ public class LinChecker {
         System.out.println("Actors per thread:");
         actorsPerThread.forEach(System.out::println);
     }
+    //endregion
 
     private Phaser SINGLE_THREAD_PHASER = new Phaser(1);
 
