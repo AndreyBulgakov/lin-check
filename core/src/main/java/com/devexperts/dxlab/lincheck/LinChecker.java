@@ -26,6 +26,7 @@ import com.devexperts.dxlab.lincheck.report.Reporter;
 import com.devexperts.dxlab.lincheck.report.TestReport;
 import com.devexperts.dxlab.lincheck.strategy.EnumerationStrategy;
 import com.devexperts.dxlab.lincheck.strategy.StrategyHolder;
+import javafx.util.Pair;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -35,6 +36,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.Phaser;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * TODO documentation
@@ -96,6 +98,7 @@ public class LinChecker {
             }
         });
     }
+
     //region Generators
     private List<Actor> generateActorsForThread(CTestConfiguration.TestThreadConfiguration threadCfg) {
         int actorsInThread = threadCfg.minActors + random.nextInt(threadCfg.maxActors - threadCfg.minActors + 1);
@@ -173,11 +176,25 @@ public class LinChecker {
             EnumerationStrategy currentStrategy = new EnumerationStrategy();
             StrategyHolder.setCurrentStrategy(currentStrategy);
             reportBuilder.strategy(currentStrategy.getClass().getSimpleName().replace("Strategy", ""));
+
+            List<Integer> list = IntStream.range(1, testCfg.getThreads() + 1).boxed().collect(Collectors.toList());
+            //список возможных запусков
+            List<List<Integer>> enumer = EnumerationStrategy.threadPermutations(list);
             // Run iterations
-            for (int iteration = 1; iteration <= testCfg.getIterations(); iteration++) {
-                int startThread = 1;
-                boolean needNextIteration = true;
-                currentStrategy.startNewIteration();
+            for (int iteration = 1; iteration <= 1; iteration++) {
+
+                //индекс потока, в котором делаем прерывание
+                int firstInteleavingThreadIndex = 0;
+                int startScheduleIndex = 0;
+                //первый возможный запуск
+                List<Integer> threadQueue = enumer.get(startScheduleIndex);
+
+                currentStrategy.setExecutionParameters(threadQueue, new Pair<>(threadQueue.get(firstInteleavingThreadIndex),
+                        threadQueue.get(++firstInteleavingThreadIndex)));
+
+
+                boolean needNextIteration = false;
+                currentStrategy.prepareIteration();
                 reportBuilder.incIterations();
 
                 //Create loader, load and instantiate testInstance by this loader
@@ -192,7 +209,7 @@ public class LinChecker {
                     .collect(Collectors.toList());
                 Set<List<List<Result>>> possibleResultsSet = generatePossibleResults(actorsPerThread, testInstance, loader);
                 // Run invocations
-                for (int invocation = 1; invocation <= testCfg.getInvocationsPerIteration() && needNextIteration; invocation++) {
+                for (int invocation = 1; invocation <= testCfg.getInvocationsPerIteration() && !needNextIteration; invocation++) {
                     currentStrategy.printHeader(iteration, invocation);
                     reportBuilder.incInvocations();
                     // Reset the state of test
@@ -215,13 +232,23 @@ public class LinChecker {
                                 }
                             })
                     .collect(Collectors.toList());
-                    //currentStrategy.printTraces();
                     if (currentStrategy.isNeedChangeFirstThread()) {
-                        if (startThread == 2)
-                            needNextIteration = false;
-                        startThread = 2 - startThread + 1;
+                        if (firstInteleavingThreadIndex == threadQueue.size() - 1){
+                            if (startScheduleIndex == enumer.size() - 1) {
+                                needNextIteration = true;
+                            }
+                            else {
+                                threadQueue = enumer.get(++startScheduleIndex);
+                                firstInteleavingThreadIndex = 0;
+                            }
+                        }
+                        else {
+                            currentStrategy.setExecutionParameters(threadQueue, new Pair<>(threadQueue.get(firstInteleavingThreadIndex),
+                                    threadQueue.get(++firstInteleavingThreadIndex)));
+                        }
+
                     }
-                    currentStrategy.returnDatas(startThread, false);
+                    currentStrategy.prepareInvocation(0, false);
                     // Check correctness& Throw an AssertionError if current execution
                     // is not linearizable and log invalid execution
                     if (!possibleResultsSet.contains(results)) {
