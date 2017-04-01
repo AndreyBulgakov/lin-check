@@ -44,13 +44,13 @@ class ExecutionClassLoader extends ClassLoader {
         // Do not transform some classes
         if (shouldIgnoreClass(name)) {
             // Print delegated class
-            //System.out.println("Loaded by super:" + name);
+//            System.out.println("Loaded by super:" + name);
             return super.loadClass(name);
         }
         //Transform and save class
         try {
             // Print transforming class
-            // System.out.println("Loaded by exec:" + name);
+//             System.out.println("Loaded by exec:" + name);
             ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
             ClassVisitor cv = new BeforeSharedVariableClassVisitor(cw);
             ClassReader cr = new ClassReader(name);
@@ -94,7 +94,9 @@ class ExecutionClassLoader extends ClassLoader {
         return
                 className == null ||
                         className.startsWith("com.devexperts.dxlab.lincheck.") &&
-                                !className.startsWith("com.devexperts.dxlab.lincheck.tests.") ||
+                                !className.startsWith("com.devexperts.dxlab.lincheck.tests.") &&
+                                !className.startsWith("com.devexperts.dxlab.lincheck.libtest.")
+                        ||
                         className.startsWith("sun.") ||
                         className.startsWith("java.");
                         // TODO let's transform java.util.concurrent
