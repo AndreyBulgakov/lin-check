@@ -42,23 +42,18 @@ class BeforeSharedVariableMethodTransformer extends GeneratorAdapter {
     public void visitVarInsn(int opcode, int var) {
         this.instructionNumber++;
         switch (opcode) {
-        // TODO all these operations are NOT shared variable access. Check them with instruction listed in code.devexperts.com page
-        // TODO write test with array element access
-            // "this" or ALOAD 0 is not a shared variable then ignore it
-            case Opcodes.ALOAD:
-                if (var == 0) break;
-            case Opcodes.LLOAD:
-            case Opcodes.FLOAD:
-            case Opcodes.DLOAD:
-            case Opcodes.ILOAD:
+            case Opcodes.AALOAD:
+            case Opcodes.LALOAD:
+            case Opcodes.FALOAD:
+            case Opcodes.DALOAD:
+            case Opcodes.IALOAD:
                 insertMethod(STRATEGY_ITF_METHOD_READ);
                 break;
-            case Opcodes.ASTORE:
-                if (var == 0) break;
-            case Opcodes.ISTORE:
-            case Opcodes.LSTORE:
-            case Opcodes.FSTORE:
-            case Opcodes.DSTORE:
+            case Opcodes.AASTORE:
+            case Opcodes.IASTORE:
+            case Opcodes.LASTORE:
+            case Opcodes.FASTORE:
+            case Opcodes.DASTORE:
                 insertMethod(STRATEGY_ITF_METHOD_WRITE);
                 break;
         }
