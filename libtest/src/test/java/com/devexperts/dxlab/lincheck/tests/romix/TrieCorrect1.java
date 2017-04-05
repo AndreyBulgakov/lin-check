@@ -76,8 +76,8 @@ public class TrieCorrect1 {
 
     @Test
     public void test() {
-        LinChecker.check(TrieCorrect1.class);
-//        LinChecker.check(this);
+//        LinChecker.check(TrieCorrect1.class);
+        LinChecker.check(this);
     }
 }
 
