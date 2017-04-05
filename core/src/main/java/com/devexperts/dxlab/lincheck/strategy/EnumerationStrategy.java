@@ -25,6 +25,7 @@ public class EnumerationStrategy implements Strategy {
     private volatile List<Integer> executionQueue;
     private volatile boolean needInterleave = true;
     private volatile boolean needChangeFirstThread = false;
+    private volatile List<CheckPoint> history = new ArrayList<>();
 
     @Override
     public void onSharedVariableRead(int location) {
@@ -75,26 +76,30 @@ public class EnumerationStrategy implements Strategy {
                 int index = executionQueue.indexOf(currentThread) + 1;
 
                 if (index < executionQueue.size()) {
-                    currentThread = executionQueue.get(executionQueue.indexOf(currentThread) + 1);
+                    changeCurrentThreadTo(executionQueue.get(executionQueue.indexOf(currentThread) + 1));
+                    //currentThread = executionQueue.get(executionQueue.indexOf(currentThread) + 1);
                 }
             }
             else if (wasInterleavings == 1) {
                 firstCheckPoint = null;
                 needInterleave = false;
                 if (currentThread == interleavingThreads.getValue()) {
-                    currentThread = interleavingThreads.getKey();
+                    changeCurrentThreadTo(interleavingThreads.getKey());
+                    //currentThread = interleavingThreads.getKey();
                 }
                 else if (currentThread == interleavingThreads.getKey()) {
                     int index = executionQueue.indexOf(currentThread) + 1;
                     if (index < executionQueue.size() - 1)
-                        currentThread = executionQueue.get(executionQueue.indexOf(currentThread) + 2);
+                        changeCurrentThreadTo(executionQueue.get(executionQueue.indexOf(currentThread) + 2));
+                        //currentThread = executionQueue.get(executionQueue.indexOf(currentThread) + 2);
                 }
                 else {
 
                     int index = executionQueue.indexOf(currentThread) + 1;
 
                     if (index < executionQueue.size())
-                        currentThread = executionQueue.get(executionQueue.indexOf(currentThread) + 1);
+                        changeCurrentThreadTo(executionQueue.get(executionQueue.indexOf(currentThread) + 1));
+                        //currentThread = executionQueue.get(executionQueue.indexOf(currentThread) + 1);
                 }
             }
             else if (wasInterleavings == 2) {
@@ -102,7 +107,8 @@ public class EnumerationStrategy implements Strategy {
                 int index = executionQueue.indexOf(currentThread) + 1;
 
                 if (index < executionQueue.size())
-                    currentThread = executionQueue.get(executionQueue.indexOf(currentThread) + 1);
+                    changeCurrentThreadTo(executionQueue.get(executionQueue.indexOf(currentThread) + 1));
+                    //currentThread = executionQueue.get(executionQueue.indexOf(currentThread) + 1);
                 }
             else {
                 logger.println("something else");
@@ -122,7 +128,10 @@ public class EnumerationStrategy implements Strategy {
                     passedPaths.put(currentPoint, new HashSet<>());
                     firstCheckPoint = currentPoint;
                     wasInterleavings++;
-                    changeCurrentThread();
+                    if (currentThread == interleavingThreads.getKey())
+                        changeCurrentThreadTo(interleavingThreads.getValue());
+                    else
+                        changeCurrentThreadTo(interleavingThreads.getKey());
                 }
                 //если нужно найти новую точку и не находим - пропускаем
                 else if (wasInterleavings == 0 && firstCheckPoint == null && passedPaths.containsKey(currentPoint)) {
@@ -130,14 +139,20 @@ public class EnumerationStrategy implements Strategy {
                 //если не нужно искать новую точку и мы на ней - переключаемся
                 else if (wasInterleavings == 0 && firstCheckPoint != null && currentPoint.equals(firstCheckPoint)) {
                     wasInterleavings++;
-                    changeCurrentThread();
+                    if (currentThread == interleavingThreads.getKey())
+                        changeCurrentThreadTo(interleavingThreads.getValue());
+                    else
+                        changeCurrentThreadTo(interleavingThreads.getKey());
                 }
                 //если не нужно искать новую точку, но мы не на ней - не переключаемся
                 else if (wasInterleavings == 0 && firstCheckPoint != null && !currentPoint.equals(firstCheckPoint)) {
                 } else if (wasInterleavings == 1 && !passedPaths.get(firstCheckPoint).contains(currentPoint)) {
                     passedPaths.get(firstCheckPoint).add(currentPoint);
                     wasInterleavings++;
-                    changeCurrentThread();
+                    if (currentThread == interleavingThreads.getKey())
+                        changeCurrentThreadTo(interleavingThreads.getValue());
+                    else
+                        changeCurrentThreadTo(interleavingThreads.getKey());
                 }
             }
         }
@@ -211,8 +226,13 @@ public class EnumerationStrategy implements Strategy {
         passedPaths.forEach((a,b) -> logger.println(a + " with set: " + b));
     }
 
-    private void changeCurrentThread() {
-        currentThread = currentThread == interleavingThreads.getKey() ? interleavingThreads.getValue() : interleavingThreads.getKey();
+
+    /**
+     * Содержит логику для смены потока
+     * @param n - номер нового потока
+     */
+    private void changeCurrentThreadTo(int n) {
+        currentThread = n;
     }
 
     public static ArrayList<Pair<Integer, Integer>> generateInterleavedPairs(int threadNumber) {
