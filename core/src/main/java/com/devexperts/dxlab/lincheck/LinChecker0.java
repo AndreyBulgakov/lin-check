@@ -23,12 +23,14 @@ package com.devexperts.dxlab.lincheck;
  */
 
 import co.paralleluniverse.fibers.Fiber;
+import co.paralleluniverse.fibers.Suspendable;
+import co.paralleluniverse.fibers.instrument.Retransform;
 import co.paralleluniverse.fibers.instrument.SuspendableHelper;
 import com.devexperts.dxlab.lincheck.report.Reporter;
 import com.devexperts.dxlab.lincheck.report.TestReport;
-import com.devexperts.dxlab.lincheck.strategy.ConsumeCPUStrategy;
 import com.devexperts.dxlab.lincheck.strategy.EnumerationStrategy;
 import com.devexperts.dxlab.lincheck.strategy.StrategyHolder;
+import com.devexperts.dxlab.lincheck.strategy.ThreadYieldStrategy;
 import javafx.util.Pair;
 
 import java.io.IOException;
@@ -57,17 +59,19 @@ public class LinChecker0 {
         this.testClassName = testClass.getCanonicalName();
         this.testConfigurations = CTestConfiguration.getFromTestClass(testClass);
         this.testStructure = CTestStructure.getFromTestClass(testClass);
+        Retransform.addWaiver("com.devexperts.dxlab.lincheck.tests.counter.SimpleWrongCounter1", "incrementAndGet");
+        Retransform.addWaiver(testClassName, "incAndGet");
+//        Retransform.
     }
 
     // TODO do not pass instance, remove this method
     LinChecker0(Object testInstance) {
-        System.err.println(SuspendableHelper.isInstrumented(this.getClass()));
         this.testClassName = testInstance.getClass().getCanonicalName();
         Class<?> testClass = testInstance.getClass();
         this.testConfigurations = CTestConfiguration.getFromTestClass(testClass);
         this.testStructure = CTestStructure.getFromTestClass(testClass);
     }
-
+//
 //    /**
 //     * LinChecker run method. Use LinChecker.check(TestClass.class) in junit test class
 //     * @param testClass class that contains CTest
@@ -77,6 +81,15 @@ public class LinChecker0 {
 //            new LinChecker0(testClass).check();
 //    }
 
+    /**
+     * LinChecker run method. Use LinChecker.check(TestClass.class) in junit test class
+     *
+     * @param testInstance class that contains CTest
+     * @throws AssertionError if find Non-linearizable executions
+     */
+    public static void check(Object testInstance) throws AssertionError {
+        new LinChecker0(testInstance).check();
+    }
 
     /**
      * @throws AssertionError if atomicity violation is detected
@@ -84,7 +97,8 @@ public class LinChecker0 {
     void check() throws AssertionError {
         testConfigurations.forEach((testConfiguration) -> {
             try {
-                checkImpl(testConfiguration);
+//                checkImpl(testConfiguration);
+                checkImplFiber(testConfiguration);
             } catch (InterruptedException | ClassNotFoundException | IllegalAccessException | InstantiationException e) {
                 throw new IllegalStateException(e);
             }
@@ -198,7 +212,9 @@ public class LinChecker0 {
                 List<TestThreadExecution> testThreadExecutions = actorsPerThread.stream()
                         .map(actors -> TestThreadExecutionGenerator.create(testInstance, phaser, actors, false, loader))
                         .collect(Collectors.toList());
+
                 Set<List<List<Result>>> possibleResultsSet = generatePossibleResults(actorsPerThread, testInstance, loader);
+
                 // Run invocations
                 for (int invocation = 1; invocation <= testCfg.getInvocationsPerIteration() && !needNextIteration; invocation++) {
                     currentStrategy.printHeader(iteration, invocation);
@@ -256,8 +272,9 @@ public class LinChecker0 {
         }
     }
 
+    @Suspendable
     private void checkImplFiber(CTestConfiguration testCfg) throws InterruptedException, ClassNotFoundException, IllegalAccessException, InstantiationException {
-
+        System.err.println("Fibers Enabled:" + SuspendableHelper.isInstrumented(this.getClass()));
         // Fixed thread pool executor to run TestThreadExecution
         ExecutorService pool = Executors.newFixedThreadPool(testCfg.getThreads());
         // Reusable phaser
@@ -277,10 +294,12 @@ public class LinChecker0 {
                 reportBuilder.incIterations();
 
                 //Set strategy and initialize transformation in classes
-                StrategyHolder.setCurrentStrategy(new ConsumeCPUStrategy(100));
+                new ThreadYieldStrategy();
+                StrategyHolder.setCurrentStrategy(new ThreadYieldStrategy());
 
                 //Create loader, load and instantiate testInstance by this loader
-                final ExecutionClassLoader loader = new ExecutionClassLoader(testClassName);
+                final ExecutionClassLoader loader = new ExecutionClassLoader(this.getClass().getClassLoader(), testClassName);
+//                final ExecutionClassLoader loader = new ExecutionClassLoader(testClassName);
                 final Object testInstance = loader.loadClass(testClassName).newInstance();
 
                 List<List<Actor>> actorsPerThread = generateActors(testCfg);
@@ -290,6 +309,15 @@ public class LinChecker0 {
                         .map(actors -> TestThreadExecutionGenerator.create(testInstance, new Phaser(1), actors, false, loader))
 //                    .map(actors -> TestThreadExecutionGenerator.create(testInstance, phaser, actors, false, loader))
                         .collect(Collectors.toList());
+//                Fiber<Set<List<List<Result>>>> all = new Fiber<Set<List<List<Result>>> >(() -> generatePossibleResults(actorsPerThread, testInstance, loader));
+//                all.start();
+//
+//                Set<List<List<Result>>> possibleResultsSet = null;
+//                try {
+//                    possibleResultsSet = all.get();
+//                } catch (ExecutionException e) {
+//                    throw new AssertionError(e);
+//                }
                 Set<List<List<Result>>> possibleResultsSet = generatePossibleResults(actorsPerThread, testInstance, loader);
                 // Run invocations
                 for (int invocation = 1; invocation <= testCfg.getInvocationsPerIteration(); invocation++) {

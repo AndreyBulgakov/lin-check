@@ -25,6 +25,7 @@ package com.devexperts.dxlab.lincheck.libtest.counter;
 public class SimpleWrongCounter1 implements Counter {
     private int c;
 
+
     public SimpleWrongCounter1() {
         c = 0;
     }

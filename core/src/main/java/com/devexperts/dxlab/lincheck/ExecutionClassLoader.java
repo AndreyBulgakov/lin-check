@@ -1,5 +1,8 @@
 package com.devexperts.dxlab.lincheck;
 
+import co.paralleluniverse.fibers.instrument.QuasarInstrumentor;
+import co.paralleluniverse.fibers.instrument.Retransform;
+import co.paralleluniverse.fibers.instrument.SuspendableHelper;
 import com.devexperts.dxlab.lincheck.transformers.BeforeSharedVariableClassVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -8,6 +11,9 @@ import org.objectweb.asm.ClassWriter;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.instrument.ClassDefinition;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -16,12 +22,22 @@ import java.util.concurrent.ConcurrentHashMap;
  * Can delegate some classes to parent ClassLoader.
  */
 class ExecutionClassLoader extends ClassLoader {
-    private final Map<String, Class<?>> cash = new ConcurrentHashMap<>();
+    private final Map<String, Class<?>> cache = new ConcurrentHashMap<>();
     private final Map<String, byte[]> resources = new ConcurrentHashMap<>();
     private final String testClassName; // TODO we should transform test class (it contains algorithm logic)
+    private final QuasarInstrumentor instrumentor = new QuasarInstrumentor(); //TODO is instrumentor must be single?
 
     ExecutionClassLoader(String testClassName) {
         this.testClassName = testClassName;
+
+    }
+
+    ExecutionClassLoader(ClassLoader parent, String testClassName) {
+        super(parent);
+        this.testClassName = testClassName;
+        this.instrumentor.setVerbose(true);
+        this.instrumentor.setDebug(true);
+
     }
 
     /**
@@ -37,20 +53,20 @@ class ExecutionClassLoader extends ClassLoader {
         // Print loading class
         // System.out.println("Loading: " + name);
 
-        // Load transformed class from cash if it exists
-        Class result = cash.get(name);
+        // Load transformed class from cache if it exists
+        Class result = cache.get(name);
         if (result != null)
             return result;
         // Do not transform some classes
         if (shouldIgnoreClass(name)) {
             // Print delegated class
-//            System.out.println("Loaded by super:" + name);
+            System.out.println("Loaded by super:" + name);
             return super.loadClass(name);
         }
         //Transform and save class
         try {
             // Print transforming class
-//             System.out.println("Loaded by exec:" + name);
+            System.out.println("Loaded by exec:" + name);
             ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
             ClassVisitor cv = new BeforeSharedVariableClassVisitor(cw);
             ClassReader cr = new ClassReader(name);
@@ -63,10 +79,18 @@ class ExecutionClassLoader extends ClassLoader {
             }
             // Get transformed bytecode
             byte[] resultBytecode = cw.toByteArray();
-            result = defineClass(name, resultBytecode, 0, resultBytecode.length);
-            // Save it to cash and resources
+//            resultBytecode = instrumentor.instrumentClass(this, name, resultBytecode);
+//            System.out.println("==========="+Retransform.isWaiver("com.devexperts.dxlab.lincheck.tests.counter.SimpleWrongCounter1", "incrementAndGet"));
+            resultBytecode = Retransform.getInstrumentor().instrumentClass(this, name, resultBytecode);
+            ClassDefinition definition = new ClassDefinition(Class.forName(name), resultBytecode);
+            Retransform.redefine(Collections.singleton(definition));
+            result = Class.forName(name);
+//            result = defineClass(name, resultBytecode, 0, resultBytecode.length);
+            System.err.println("----" + result.getName() + "-----" + SuspendableHelper.isInstrumented(result));
+            System.err.println(Arrays.toString(result.getAnnotations()));
+            // Save it to cache and resources
             resources.put(name, resultBytecode);
-            cash.put(name, result);
+            cache.put(name, result);
             return result;
         } catch (SecurityException e) {
             return super.loadClass(name);
@@ -98,11 +122,18 @@ class ExecutionClassLoader extends ClassLoader {
                                 !className.startsWith("com.devexperts.dxlab.lincheck.libtest.")
                         ||
                         className.startsWith("sun.") ||
+                        className.startsWith("co.paralleluniverse.") ||
                         className.startsWith("java.");
                         // TODO let's transform java.util.concurrent
     }
 
     Class<? extends TestThreadExecution> defineTestThreadExecution(String className, byte[] bytecode) {
+        Retransform.addWaiver(className, "call");
+//        byte[] resultByteCode = Retransform.getInstrumentor().instrumentClass(this, className, bytecode);
+//        Class<? extends TestThreadExecution> result = (Class<? extends TestThreadExecution>) super.defineClass(className, resultByteCode, 0, resultByteCode.length);
+
+//        System.out.println(SuspendableHelper.isInstrumented(result));
+//        return result;
         return (Class<? extends TestThreadExecution>) super.defineClass(className, bytecode, 0, bytecode.length);
     }
 
