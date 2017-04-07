@@ -45,6 +45,7 @@ public class LinChecker {
      * @param testInstance object that contains CTest
      * @throws AssertionError if find Non-linearizable executions
      */
+    //=v -Dco.paralleluniverse.fibers.verifyInstrumentation=true
 //    public static void check(Object testInstance) throws AssertionError {
 ////        System.out.println(testInstance.getClass().getAnnotations()[0].getClass());
 //        try {

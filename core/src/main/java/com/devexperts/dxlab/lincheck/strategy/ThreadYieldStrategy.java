@@ -8,15 +8,16 @@ import co.paralleluniverse.fibers.Suspendable;
  * This strategy invokes {@link Thread#yield()} method on every shared variable access.
  */
 public class ThreadYieldStrategy implements Strategy {
+    static int out;
     @Suspendable
     @Override
     public void onSharedVariableRead(int location) {
-
         try {
 
             if (Fiber.isCurrentFiber()) {
-                Fiber.yield();
-                System.out.println("after park...");
+                Fiber.parkNanos(100);
+                out++;
+//                System.out.println("after park...");
             }
 
         } catch (SuspendExecution suspendExecution) {
@@ -30,8 +31,10 @@ public class ThreadYieldStrategy implements Strategy {
     public void onSharedVariableWrite(int location) {
         try {
             if (Fiber.isCurrentFiber()) {
-                Fiber.yield();
-                System.out.println("after park...");
+                Fiber.parkNanos(100);
+//                Fiber.yield();
+                out++;
+//                System.out.println("after park...");
             }
         } catch (SuspendExecution suspendExecution) {
             throw new AssertionError(suspendExecution);
