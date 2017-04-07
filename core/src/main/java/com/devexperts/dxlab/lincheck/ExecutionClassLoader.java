@@ -2,7 +2,6 @@ package com.devexperts.dxlab.lincheck;
 
 import co.paralleluniverse.fibers.instrument.QuasarInstrumentor;
 import co.paralleluniverse.fibers.instrument.Retransform;
-import co.paralleluniverse.fibers.instrument.SuspendableHelper;
 import com.devexperts.dxlab.lincheck.transformers.BeforeSharedVariableClassVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -11,9 +10,6 @@ import org.objectweb.asm.ClassWriter;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.instrument.ClassDefinition;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -79,15 +75,7 @@ class ExecutionClassLoader extends ClassLoader {
             }
             // Get transformed bytecode
             byte[] resultBytecode = cw.toByteArray();
-//            resultBytecode = instrumentor.instrumentClass(this, name, resultBytecode);
-//            System.out.println("==========="+Retransform.isWaiver("com.devexperts.dxlab.lincheck.tests.counter.SimpleWrongCounter1", "incrementAndGet"));
-            resultBytecode = Retransform.getInstrumentor().instrumentClass(this, name, resultBytecode);
-            ClassDefinition definition = new ClassDefinition(Class.forName(name), resultBytecode);
-            Retransform.redefine(Collections.singleton(definition));
-            result = Class.forName(name);
-//            result = defineClass(name, resultBytecode, 0, resultBytecode.length);
-            System.err.println("----" + result.getName() + "-----" + SuspendableHelper.isInstrumented(result));
-            System.err.println(Arrays.toString(result.getAnnotations()));
+            result = defineClass(name, resultBytecode, 0, resultBytecode.length);
             // Save it to cache and resources
             resources.put(name, resultBytecode);
             cache.put(name, result);

@@ -59,9 +59,10 @@ public class LinChecker0 {
         this.testClassName = testClass.getCanonicalName();
         this.testConfigurations = CTestConfiguration.getFromTestClass(testClass);
         this.testStructure = CTestStructure.getFromTestClass(testClass);
-        Retransform.addWaiver("com.devexperts.dxlab.lincheck.tests.counter.SimpleWrongCounter1", "incrementAndGet");
+        Retransform.addWaiver("com.devexperts.dxlab.lincheck.libtest.counter.SimpleWrongCounter1", "incrementAndGet");
         Retransform.addWaiver(testClassName, "incAndGet");
-//        Retransform.
+//        Retransform.getMethodDB(this.getClass().getClassLoader()).getClassEntry()
+
     }
 
     // TODO do not pass instance, remove this method
