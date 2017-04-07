@@ -15,6 +15,7 @@ import org.junit.Test;
 public class SimpleWrongCounterTest1 {
     private Counter counter;
 
+
     @Reset
     public void reload() throws Exception {
         counter = new SimpleWrongCounter1();
