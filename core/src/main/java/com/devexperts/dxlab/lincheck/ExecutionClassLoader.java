@@ -68,11 +68,7 @@ class ExecutionClassLoader extends ClassLoader {
             ClassReader cr = new ClassReader(name);
             // Ignore TestClass
             // TODO transform test class too. Use DummyStrategy (and write it) during new instance constructing
-            if (name.equals(testClassName)) {
-                cr.accept(cw, ClassReader.SKIP_FRAMES);
-            } else {
-                cr.accept(cv, ClassReader.SKIP_FRAMES);
-            }
+            cr.accept(cv, ClassReader.SKIP_FRAMES);
             // Get transformed bytecode
             byte[] resultBytecode = cw.toByteArray();
             result = defineClass(name, resultBytecode, 0, resultBytecode.length);
