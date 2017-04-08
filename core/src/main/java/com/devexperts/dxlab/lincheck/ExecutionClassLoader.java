@@ -56,13 +56,13 @@ class ExecutionClassLoader extends ClassLoader {
         // Do not transform some classes
         if (shouldIgnoreClass(name)) {
             // Print delegated class
-            System.out.println("Loaded by super:" + name);
+//            System.out.println("Loaded by super:" + name);
             return super.loadClass(name);
         }
         //Transform and save class
         try {
             // Print transforming class
-            System.out.println("Loaded by exec:" + name);
+//            System.out.println("Loaded by exec:" + name);
             ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
             ClassVisitor cv = new BeforeSharedVariableClassVisitor(cw);
             ClassReader cr = new ClassReader(name);
@@ -71,6 +71,7 @@ class ExecutionClassLoader extends ClassLoader {
             cr.accept(cv, ClassReader.SKIP_FRAMES);
             // Get transformed bytecode
             byte[] resultBytecode = cw.toByteArray();
+//            resultBytecode = instrumentor.instrumentClass(this, name, resultBytecode);
             result = defineClass(name, resultBytecode, 0, resultBytecode.length);
             // Save it to cache and resources
             resources.put(name, resultBytecode);
@@ -113,11 +114,7 @@ class ExecutionClassLoader extends ClassLoader {
 
     Class<? extends TestThreadExecution> defineTestThreadExecution(String className, byte[] bytecode) {
         Retransform.addWaiver(className, "call");
-//        byte[] resultByteCode = Retransform.getInstrumentor().instrumentClass(this, className, bytecode);
-//        Class<? extends TestThreadExecution> result = (Class<? extends TestThreadExecution>) super.defineClass(className, resultByteCode, 0, resultByteCode.length);
-
-//        System.out.println(SuspendableHelper.isInstrumented(result));
-//        return result;
+//        bytecode = instrumentor.instrumentClass(this, className, bytecode);
         return (Class<? extends TestThreadExecution>) super.defineClass(className, bytecode, 0, bytecode.length);
     }
 

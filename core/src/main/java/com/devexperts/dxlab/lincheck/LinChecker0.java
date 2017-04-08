@@ -60,18 +60,7 @@ public class LinChecker0 {
         Class<?> testClass = testInstance.getClass();
         this.testConfigurations = CTestConfiguration.getFromTestClass(testClass);
         this.testStructure = CTestStructure.getFromTestClass(testClass);
-//        Retransform.addWaiver("com.devexperts.dxlab.lincheck.libtest.counter.SimpleWrongCounter1", "incrementAndGet");
-//        Retransform.addWaiver(testClassName, "incAndGet");
     }
-//
-//    /**
-//     * LinChecker run method. Use LinChecker.check(TestClass.class) in junit test class
-//     * @param testClass class that contains CTest
-//     * @throws AssertionError if find Non-linearizable executions
-//     */
-//    public static void check(Class testClass) throws AssertionError {
-//            new LinChecker0(testClass).check();
-//    }
 
     /**
      * LinChecker run method. Use LinChecker.check(TestClass.class) in junit test class
