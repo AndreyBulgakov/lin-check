@@ -22,6 +22,9 @@ package com.devexperts.dxlab.lincheck;
  * #L%
  */
 
+import co.paralleluniverse.fibers.instrument.JavaAgent;
+import com.ea.agentloader.AgentLoader;
+
 /**
  * Class to start Linearization checking
  */
@@ -35,8 +38,8 @@ public class LinChecker {
     public static void check(Object testInstance) throws AssertionError {
 //            if (testInstance.getClass().isAnnotationPresent(GreenTest.class))
 //                AgentLoader.loadAgentClass(JavaAgent.class.getName(), "d");
-//        AgentLoader.loadAgentClass(JavaAgent.class.getName(), "");
-        new LinChecker0(testInstance.getClass()).check();
+        AgentLoader.loadAgentClass(JavaAgent.class.getName(), "");
+        new LinChecker0(testInstance).check();
     }
 
     /**

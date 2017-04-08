@@ -24,7 +24,6 @@ package com.devexperts.dxlab.lincheck;
 
 import co.paralleluniverse.fibers.Fiber;
 import co.paralleluniverse.fibers.Suspendable;
-import co.paralleluniverse.fibers.instrument.Retransform;
 import co.paralleluniverse.fibers.instrument.SuspendableHelper;
 import com.devexperts.dxlab.lincheck.report.Reporter;
 import com.devexperts.dxlab.lincheck.report.TestReport;
@@ -55,22 +54,14 @@ public class LinChecker0 {
     private final List<CTestConfiguration> testConfigurations;
     private final CTestStructure testStructure;
 
-    LinChecker0(Class testClass) {
-        this.testClassName = testClass.getCanonicalName();
-        this.testConfigurations = CTestConfiguration.getFromTestClass(testClass);
-        this.testStructure = CTestStructure.getFromTestClass(testClass);
-        Retransform.addWaiver("com.devexperts.dxlab.lincheck.libtest.counter.SimpleWrongCounter1", "incrementAndGet");
-        Retransform.addWaiver(testClassName, "incAndGet");
-//        Retransform.getMethodDB(this.getClass().getClassLoader()).getClassEntry()
-
-    }
-
     // TODO do not pass instance, remove this method
     LinChecker0(Object testInstance) {
         this.testClassName = testInstance.getClass().getCanonicalName();
         Class<?> testClass = testInstance.getClass();
         this.testConfigurations = CTestConfiguration.getFromTestClass(testClass);
         this.testStructure = CTestStructure.getFromTestClass(testClass);
+//        Retransform.addWaiver("com.devexperts.dxlab.lincheck.libtest.counter.SimpleWrongCounter1", "incrementAndGet");
+//        Retransform.addWaiver(testClassName, "incAndGet");
     }
 //
 //    /**

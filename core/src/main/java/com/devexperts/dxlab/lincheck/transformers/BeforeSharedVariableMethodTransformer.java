@@ -1,5 +1,6 @@
 package com.devexperts.dxlab.lincheck.transformers;
 
+import co.paralleluniverse.fibers.instrument.Retransform;
 import com.devexperts.dxlab.lincheck.strategy.Strategy;
 import com.devexperts.dxlab.lincheck.strategy.StrategyHolder;
 import org.objectweb.asm.MethodVisitor;
@@ -35,6 +36,7 @@ class BeforeSharedVariableMethodTransformer extends GeneratorAdapter {
         this.className = className;
         this.methodName = name;
         this.methodDesc = desc;
+        Retransform.addWaiver(className.replace("/", "."), name);
     }
 
 
