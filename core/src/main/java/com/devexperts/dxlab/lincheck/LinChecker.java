@@ -22,8 +22,12 @@ package com.devexperts.dxlab.lincheck;
  * #L%
  */
 
-import co.paralleluniverse.fibers.instrument.JavaAgent;
-import com.ea.agentloader.AgentLoader;
+import sun.misc.URLClassPath;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
 
 /**
  * Class to start Linearization checking
@@ -35,12 +39,12 @@ public class LinChecker {
      * @param testInstance object that contains CTest
      * @throws AssertionError if find Non-linearizable executions
      */
-    public static void check(Object testInstance) throws AssertionError {
-//            if (testInstance.getClass().isAnnotationPresent(GreenTest.class))
-//                AgentLoader.loadAgentClass(JavaAgent.class.getName(), "d");
-        AgentLoader.loadAgentClass(JavaAgent.class.getName(), "");
-        new LinChecker0(testInstance).check();
-    }
+//    public static void check(Object testInstance) throws AssertionError {
+////            if (testInstance.getClass().isAnnotationPresent(GreenTest.class))
+////                AgentLoader.loadAgentClass(JavaAgent.class.getName(), "d");
+//        AgentLoader.loadAgentClass(JavaAgent.class.getName(), "");
+//        new LinChecker0(testInstance).check();
+//    }
 
     /**
      * TODO do not pass instance, remove this method
@@ -49,28 +53,28 @@ public class LinChecker {
      * @throws AssertionError if find Non-linearizable executions
      */
     //=v -Dco.paralleluniverse.fibers.verifyInstrumentation=true
-//    public static void check(Object testInstance) throws AssertionError {
-////        System.out.println(testInstance.getClass().getAnnotations()[0].getClass());
-//        try {
-//            // Get current URLs from parrent classLoader
-//            Field ucp = URLClassLoader.class.getDeclaredField("ucp");
-//            ucp.setAccessible(true);
-//            URL[] classLoaderUrls = ((URLClassPath) ucp.get(LinChecker.class.getClassLoader())).getURLs();
-//            // Loading instruments
-//            QuasarLoader urlClassLoader = new QuasarLoader(classLoaderUrls);
-//            Thread.currentThread().setContextClassLoader(urlClassLoader);
-//            // Log
-////          helper.setLog(true, true);
-//            Class<?> instrumentedLincheckClass = urlClassLoader.loadClass("com.devexperts.dxlab.lincheck.LinChecker0");
-//            Class<?> instrumentedTestInstance = urlClassLoader.loadClass(testInstance.getClass().getName());
-//            Object newInstance = instrumentedTestInstance.newInstance();
-//            Method m = instrumentedLincheckClass.getMethod("check", Object.class);
-//            m.invoke(null, newInstance);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//    }
+    public static void check(Object testInstance) throws AssertionError {
+//        System.out.println(testInstance.getClass().getAnnotations()[0].getClass());
+        try {
+            // Get current URLs from parrent classLoader
+            Field ucp = URLClassLoader.class.getDeclaredField("ucp");
+            ucp.setAccessible(true);
+            URL[] classLoaderUrls = ((URLClassPath) ucp.get(LinChecker.class.getClassLoader())).getURLs();
+            // Loading instruments
+            QuasarLoader urlClassLoader = new QuasarLoader(classLoaderUrls);
+            Thread.currentThread().setContextClassLoader(urlClassLoader);
+            // Log
+//          helper.setLog(true, true);
+            Class<?> instrumentedLincheckClass = urlClassLoader.loadClass("com.devexperts.dxlab.lincheck.LinChecker0");
+            Class<?> instrumentedTestInstance = urlClassLoader.loadClass(testInstance.getClass().getName());
+            Object newInstance = instrumentedTestInstance.newInstance();
+            Method m = instrumentedLincheckClass.getMethod("check", Object.class);
+            m.invoke(null, newInstance);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
 
 
 
