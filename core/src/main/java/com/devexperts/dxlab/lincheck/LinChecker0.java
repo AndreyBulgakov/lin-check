@@ -28,8 +28,8 @@ import co.paralleluniverse.fibers.instrument.SuspendableHelper;
 import com.devexperts.dxlab.lincheck.report.Reporter;
 import com.devexperts.dxlab.lincheck.report.TestReport;
 import com.devexperts.dxlab.lincheck.strategy.EnumerationStrategy;
+import com.devexperts.dxlab.lincheck.strategy.RandomUnparkStrategy;
 import com.devexperts.dxlab.lincheck.strategy.StrategyHolder;
-import com.devexperts.dxlab.lincheck.strategy.ThreadYieldStrategy;
 import javafx.util.Pair;
 
 import java.io.IOException;
@@ -54,8 +54,7 @@ public class LinChecker0 {
     private final List<CTestConfiguration> testConfigurations;
     private final CTestStructure testStructure;
 
-    // TODO do not pass instance, remove this method
-    LinChecker0(Object testInstance) {
+    private LinChecker0(Object testInstance) {
         this.testClassName = testInstance.getClass().getCanonicalName();
         Class<?> testClass = testInstance.getClass();
         this.testConfigurations = CTestConfiguration.getFromTestClass(testClass);
@@ -275,8 +274,8 @@ public class LinChecker0 {
                 reportBuilder.incIterations();
 
                 //Set strategy and initialize transformation in classes
-                new ThreadYieldStrategy();
-                StrategyHolder.setCurrentStrategy(new ThreadYieldStrategy());
+                new RandomUnparkStrategy();
+                StrategyHolder.setCurrentStrategy(new RandomUnparkStrategy());
 
                 //Create loader, load and instantiate testInstance by this loader
                 final ExecutionClassLoader loader = new ExecutionClassLoader(this.getClass().getClassLoader(), testClassName);
@@ -309,18 +308,36 @@ public class LinChecker0 {
                     int maxWait = (int) ((float) invocation * MAX_WAIT / testCfg.getInvocationsPerIteration()) + 1;
                     setWaits(actorsPerThread, testThreadExecutions, maxWait);
                     // Run multithreaded test and get operation results for each thread
-
-                    List<List<Result>> results = testThreadExecutions.stream()
-                            .map(c -> new Fiber<>(c::call))
-                            .map(Fiber::start)
-                            .map(f -> {
-                                try {
-                                    return Arrays.asList(f.get());
-                                } catch (ExecutionException | InterruptedException e) {
-                                    throw new IllegalStateException(e);
-                                }
-                            })
-                            .collect(Collectors.toList());
+                    testThreadExecutions.forEach(c -> StrategyHolder.fibers.add(new Fiber<Result>(c::call)));
+                    for (Fiber<Result> fiber : StrategyHolder.fibers) {
+                        fiber.start();
+                    }
+                    List<List<Result>> results = new ArrayList<>();
+                    for (Fiber<Result> fiber : StrategyHolder.fibers) {
+                        results.add(Arrays.asList(fiber.get()));
+                    }
+                    //А это работает
+//                    List<List<Result>> results = StrategyHolder.fibers.stream()
+//                            .map(f -> {
+//                                try {
+//                                    return Arrays.asList(f.get());
+//                                } catch (ExecutionException | InterruptedException e) {
+//                                    throw new IllegalStateException(e);
+//                                }
+//                            })
+//                            .collect(Collectors.toList());
+//                    List<List<Result>> results = testThreadExecutions.stream()
+//                            .map(c -> new Fiber<>(c::call))
+//                            .map(Fiber::start)
+//                            .map(f -> {
+//                                try {
+//                                    return Arrays.asList(f.get());
+//                                } catch (ExecutionException | InterruptedException e) {
+//                                    throw new IllegalStateException(e);
+//                                }
+//                            })
+//                            .collect(Collectors.toList());
+                    StrategyHolder.fibers.clear();
 //                    List<List<Result>> results = pool.invokeAll(testThreadExecutions).stream() // get futures
 //                        .map(f -> {
 //                            try {

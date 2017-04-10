@@ -21,8 +21,8 @@ public class LocationManager {
         return INSTANCE;
     }
 
-    synchronized int getLocationId(String className, String methodName, String methodDesc, int line) {
-        ElementId elementId = new ElementId(className, methodName, methodDesc, line);
+    synchronized int getLocationId(String className, String methodName, String methodDesc, int instructionNumber) {
+        ElementId elementId = new ElementId(className, methodName, methodDesc, instructionNumber);
         return getLocationId(elementId);
     }
 

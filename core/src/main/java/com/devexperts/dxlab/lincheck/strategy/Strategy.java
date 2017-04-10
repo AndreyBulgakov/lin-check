@@ -23,5 +23,6 @@ public interface Strategy {
     /**
      * Execute implemented strategy at end of thread
      */
-    default void endOfThread() {    }
+    default void endOfThread() {
+    }
 }

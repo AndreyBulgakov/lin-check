@@ -7,13 +7,13 @@ public class ElementId {
     private final String declaringClass;
     private final String methodName;
     private final String methodDesc;
-    private final int lineNumber;
+    private final int instructionNumber;
 
     ElementId(String declaringClass, String methodName, String methodDesc, int lineNumber) {
         this.declaringClass = declaringClass;
         this.methodName = methodName;
         this.methodDesc = methodDesc;
-        this.lineNumber = lineNumber;
+        this.instructionNumber = lineNumber;
     }
 
     public String getMethodName(){
@@ -27,7 +27,7 @@ public class ElementId {
 
         ElementId elementId = (ElementId) o;
 
-        if (lineNumber != elementId.lineNumber) return false;
+        if (instructionNumber != elementId.instructionNumber) return false;
         if (!declaringClass.equals(elementId.declaringClass)) return false;
         if (!methodName.equals(elementId.methodName)) return false;
         return methodDesc.equals(elementId.methodDesc);
@@ -38,7 +38,7 @@ public class ElementId {
         int result = declaringClass.hashCode();
         result = 31 * result + methodName.hashCode();
         result = 31 * result + methodDesc.hashCode();
-        result = 31 * result + lineNumber;
+        result = 31 * result + instructionNumber;
         return result;
     }
 
@@ -48,7 +48,7 @@ public class ElementId {
                 "declaringClass='" + declaringClass + '\'' +
                 ", methodName='" + methodName + '\'' +
                 ", methodDesc='" + methodDesc + '\'' +
-                ", lineNumber=" + lineNumber +
+                ", instructionNumber=" + instructionNumber +
                 '}';
     }
 }
