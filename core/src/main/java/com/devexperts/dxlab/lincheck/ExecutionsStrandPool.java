@@ -20,8 +20,9 @@ public class ExecutionsStrandPool {
     private final StrandType strandType;
     private final CallableStrandFactory FACTORY;
     private boolean isRuning = false;
+    private int strandNum = 0;
 
-    public static enum StrandType {
+    public enum StrandType {
         THREAD,
         FIBER
     }
@@ -33,25 +34,30 @@ public class ExecutionsStrandPool {
     /**
      * Create new instance of ExecutionsStrandPool that scheduling Threads or Fibers
      *
-     * @param type type of Strand tha
+     * @param type type of Strand can be Fiber or Thread
      */
     ExecutionsStrandPool(final StrandType type) {
         System.out.println("===" + SuspendableHelper.isInstrumented(this.getClass()));
         this.strandType = type;
         if (type == StrandType.FIBER)
             this.FACTORY = callable -> {
-                Fiber<Result[]> fiber = new Fiber<>(callable::call);
-//                Fiber<T> fiber = new Fiber<>();
-                futureTasks.add(fiber);
-                pool.add(fiber);
-                return fiber;
+                Fiber<Result[]> strand = new Fiber<>(callable::call);
+                String name = "LinCheckStrand-" + strandNum;
+                strand.setName(name);
+                futureTasks.add(strand);
+                pool.add(strand);
+                strandNum++;
+                return strand;
             };
         else
             this.FACTORY = callable -> {
                 FutureTask<Result[]> futureTask = new FutureTask<>(callable);
                 Strand strand = Strand.of(new Thread(futureTask));
+                String name = "LinCheckStrand-" + strandNum;
+                strand.setName(name);
                 futureTasks.add(futureTask);
                 pool.add(strand);
+                strandNum++;
                 return strand;
             };
     }
@@ -84,6 +90,7 @@ public class ExecutionsStrandPool {
         Strand strand = pool.get(id);
         if (!strand.isAlive() && !strand.isTerminated()) {
             strand.start();
+            isRuning = true;
         }
     }
 
