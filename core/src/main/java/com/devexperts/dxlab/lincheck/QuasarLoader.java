@@ -28,7 +28,7 @@ public class QuasarLoader extends QuasarURLClassLoader {
         // Secure some packages
         if (shouldIgnoreClass(name)) {
             // Print delegated class
-//            System.out.println("Loaded by super:" + name);
+//            System.out.println("Loaded by App:" + name);
             return super.loadClass(name);
         }
         //        System.out.println("Loaded by quasar: " + name);
@@ -48,8 +48,9 @@ public class QuasarLoader extends QuasarURLClassLoader {
 //                        className.startsWith("com.devexperts.dxlab.lincheck.") &&
 //                                !className.startsWith("com.devexperts.dxlab.lincheck.tests.") ||
                         className.startsWith("sun.") ||
-                        className.startsWith("java.") ||
-                        className.startsWith("co.paralleluniverse.");
+                        className.startsWith("javax.") ||
+                        className.startsWith("java."); //||
+//                        className.startsWith("co.paralleluniverse.");
         // TODO let's transform java.util.concurrent
     }
 
