@@ -208,6 +208,7 @@ public class LinChecker0 {
                     for (int i = 0; i < testThreadExecutions.size(); i++) {
                         resultsTask[i] = new FutureTask<Result[]>(testThreadExecutions.get(i));
                         threads[i] = new LinCheckThread(i + 1, resultsTask[i]);
+                        StrategyHolder.threads.add(threads[i]);
                         threads[i].start();
                     }
                     List<List<Result>> results = Arrays.stream(resultsTask)
@@ -236,6 +237,7 @@ public class LinChecker0 {
                     currentStrategy.prepareInvocation(0, false);
                     // Check correctness& Throw an AssertionError if current execution
                     // is not linearizable and log invalid execution
+                    StrategyHolder.threads.clear();
                     if (!possibleResultsSet.contains(results)) {
                         printExecutionResult(results);
                         printPossibleResults(possibleResultsSet);

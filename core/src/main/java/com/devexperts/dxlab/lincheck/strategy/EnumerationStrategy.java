@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.locks.LockSupport;
 
 import static java.nio.file.StandardOpenOption.APPEND;
 
@@ -27,40 +28,61 @@ public class EnumerationStrategy implements Strategy {
     private volatile boolean needChangeFirstThread = false;
     private volatile List<CheckPoint> history = new ArrayList<>();
 
+    //region ToDriver
+    /**
+     * Содержит логику для смены потока
+     * @param n - номер нового потока
+     */
+    private void changeCurrentThreadTo(int n) {
+        currentThread = n;
+        LockSupport.unpark(StrategyHolder.threads.get(currentThread - 1));
+        LockSupport.park();
+    }
+
+    private void switchEndOFThread(int n){
+        currentThread = n;
+        LockSupport.unpark(StrategyHolder.threads.get(currentThread - 1));
+    }
+
+    private void stopNeededThread(LinCheckThread th) {
+        while (th.getThreadId() != currentThread){
+            LockSupport.park();
+        }
+    }
+    //endregion
+
     @Override
     public void onSharedVariableRead(int location) {
+        //TODO check via getName() == "LinChecker"
         if (Thread.currentThread() instanceof LinCheckThread){
             LinCheckThread th = (LinCheckThread) Thread.currentThread();
             //ждем, пока можно будет продолжить выполнение
-            while (th.getThreadId() != currentThread){}
+            stopNeededThread(th);
             logger.println("\t\tEnter on SharedRead");
             logger.println("\t\tThread id: " + th.getThreadId() + " currentID: " + currentThread);
             logger.println("\t\tCurrentLocation id" + location);
             CheckPoint currentPoint = new CheckPoint(location, th.getThreadId());
-
             onSharedVariableAccess(currentPoint);
-            //переключились и снова ждем, когда можно будет продолжить выполнение
-            while (th.getThreadId() != currentThread){}
         }
     }
 
     @Override
     public void onSharedVariableWrite(int location) {
+        //TODO check via getName() == "LinChecker"
         if (Thread.currentThread() instanceof LinCheckThread){
             LinCheckThread th = (LinCheckThread) Thread.currentThread();
-            while (th.getThreadId() != currentThread){}
+            stopNeededThread(th);
             logger.println("\t\tEnter on SharedWrite");
             logger.println("\t\tThread id: " + th.getThreadId() + " currentID: " + currentThread);
             logger.println("\t\tCurrentLocation id" + location);
             CheckPoint currentPoint = new CheckPoint(location, th.getThreadId());
             onSharedVariableAccess(currentPoint);
-            //переключились и снова ждем, когда можно будет продолжить выполнение
-            while (th.getThreadId() != currentThread){}
         }
     }
 
     @Override
     public void endOfThread() {
+        //TODO check via getName() == "LinChecker"
         if (Thread.currentThread() instanceof LinCheckThread) {
             LinCheckThread th = (LinCheckThread) Thread.currentThread();
             logger.println("\tEndOfThread " + th.getThreadId() + "with interleavings:" + wasInterleavings);
@@ -76,30 +98,27 @@ public class EnumerationStrategy implements Strategy {
                 int index = executionQueue.indexOf(currentThread) + 1;
 
                 if (index < executionQueue.size()) {
-                    changeCurrentThreadTo(executionQueue.get(executionQueue.indexOf(currentThread) + 1));
-                    //currentThread = executionQueue.get(executionQueue.indexOf(currentThread) + 1);
+                    switchEndOFThread(executionQueue.get(executionQueue.indexOf(currentThread) + 1));
                 }
             }
             else if (wasInterleavings == 1) {
                 firstCheckPoint = null;
                 needInterleave = false;
                 if (currentThread == interleavingThreads.getValue()) {
-                    changeCurrentThreadTo(interleavingThreads.getKey());
+                    switchEndOFThread(interleavingThreads.getKey());
                     //currentThread = interleavingThreads.getKey();
                 }
                 else if (currentThread == interleavingThreads.getKey()) {
                     int index = executionQueue.indexOf(currentThread) + 1;
                     if (index < executionQueue.size() - 1)
-                        changeCurrentThreadTo(executionQueue.get(executionQueue.indexOf(currentThread) + 2));
-                        //currentThread = executionQueue.get(executionQueue.indexOf(currentThread) + 2);
+                        switchEndOFThread(executionQueue.get(executionQueue.indexOf(currentThread) + 2));
                 }
                 else {
 
                     int index = executionQueue.indexOf(currentThread) + 1;
 
                     if (index < executionQueue.size())
-                        changeCurrentThreadTo(executionQueue.get(executionQueue.indexOf(currentThread) + 1));
-                        //currentThread = executionQueue.get(executionQueue.indexOf(currentThread) + 1);
+                        switchEndOFThread(executionQueue.get(executionQueue.indexOf(currentThread) + 1));
                 }
             }
             else if (wasInterleavings == 2) {
@@ -107,8 +126,7 @@ public class EnumerationStrategy implements Strategy {
                 int index = executionQueue.indexOf(currentThread) + 1;
 
                 if (index < executionQueue.size())
-                    changeCurrentThreadTo(executionQueue.get(executionQueue.indexOf(currentThread) + 1));
-                    //currentThread = executionQueue.get(executionQueue.indexOf(currentThread) + 1);
+                    switchEndOFThread(executionQueue.get(executionQueue.indexOf(currentThread) + 1));
                 }
             else {
                 logger.println("something else");
@@ -205,7 +223,6 @@ public class EnumerationStrategy implements Strategy {
 
     public static PrintStream getLogger() {
         try {
-
             Path p = Paths.get(System.getProperty("user.dir"), "log");
             if (Files.exists(p)) {
                 return new PrintStream(Files.newOutputStream(p, APPEND));
@@ -224,15 +241,6 @@ public class EnumerationStrategy implements Strategy {
      */
     public void printTraces() {
         passedPaths.forEach((a,b) -> logger.println(a + " with set: " + b));
-    }
-
-
-    /**
-     * Содержит логику для смены потока
-     * @param n - номер нового потока
-     */
-    private void changeCurrentThreadTo(int n) {
-        currentThread = n;
     }
 
     public static ArrayList<Pair<Integer, Integer>> generateInterleavedPairs(int threadNumber) {
