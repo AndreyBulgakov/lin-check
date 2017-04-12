@@ -13,9 +13,10 @@ public class RandomUnparkStrategy implements Strategy {
     public void onSharedVariableRead(int location) {
         try {
             if (Fiber.isCurrentFiber()) {
-                Fiber randomFiber = getRandomParkedFiber();
-                Fiber.parkAndUnpark(randomFiber);
-                out++;
+                Fiber.parkNanos(100);
+//                Fiber randomFiber = getRandomParkedFiber();
+//                Fiber.parkAndUnpark(randomFiber);
+                out = 0;
             }
         } catch (SuspendExecution suspendExecution) {
             throw new AssertionError(suspendExecution);
@@ -28,9 +29,11 @@ public class RandomUnparkStrategy implements Strategy {
     public void onSharedVariableWrite(int location) {
         try {
             if (Fiber.isCurrentFiber()) {
-                Fiber randomFiber = getRandomParkedFiber();
-                Fiber.parkAndUnpark(randomFiber);
-                out++;
+                Fiber.parkNanos(100);
+//                Fiber randomFiber = getRandomParkedFiber();
+//                Fiber.parkAndUnpark(randomFiber);
+                out = 0;
+//                out++;
             }
 
         } catch (SuspendExecution suspendExecution) {

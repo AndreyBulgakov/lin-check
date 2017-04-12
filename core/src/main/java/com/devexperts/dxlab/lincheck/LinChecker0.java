@@ -308,16 +308,32 @@ public class LinChecker0 {
                     int maxWait = (int) ((float) invocation * MAX_WAIT / testCfg.getInvocationsPerIteration()) + 1;
                     setWaits(actorsPerThread, testThreadExecutions, maxWait);
                     // Run multithreaded test and get operation results for each thread
-                    testThreadExecutions.forEach(c -> StrategyHolder.fibers.add(new Fiber<Result>(c::call)));
-                    for (Fiber<Result> fiber : StrategyHolder.fibers) {
+//                    testThreadExecutions.stream()
+//                            .map(SuspendableUtils::asSuspendable)
+//                            .forEach(c -> StrategyHolder.fibers.add(new Fiber<Result>(c)));
+
+//                    // Run multithreaded test and get operation results for each thread
+//                    LinCheckThread[] threads = new LinCheckThread[testThreadExecutions.size()];
+//                    FutureTask<Result[]>[] resultsTask = new FutureTask[testThreadExecutions.size()];
+//                    for (int i = 0; i < testThreadExecutions.size(); i++) {
+//                        resultsTask[i] = new FutureTask<Result[]>(testThreadExecutions.get(i));
+//                        threads[i] = new LinCheckThread(i + 1, resultsTask[i]);
+//                        threads[i].start();
+//                    }
+
+                    testThreadExecutions.forEach(c -> StrategyHolder.fibers.add(new Fiber<Result[]>(c::call)));
+
+                    for (Fiber fiber : StrategyHolder.fibers) {
                         fiber.start();
                     }
                     List<List<Result>> results = new ArrayList<>();
-                    for (Fiber<Result> fiber : StrategyHolder.fibers) {
+                    for (Fiber<Result[]> fiber : StrategyHolder.fibers) {
                         results.add(Arrays.asList(fiber.get()));
                     }
+
                     //А это работает
 //                    List<List<Result>> results = StrategyHolder.fibers.stream()
+//                            .map(Fiber::start)
 //                            .map(f -> {
 //                                try {
 //                                    return Arrays.asList(f.get());
@@ -326,6 +342,7 @@ public class LinChecker0 {
 //                                }
 //                            })
 //                            .collect(Collectors.toList());
+
 //                    List<List<Result>> results = testThreadExecutions.stream()
 //                            .map(c -> new Fiber<>(c::call))
 //                            .map(Fiber::start)
@@ -348,6 +365,7 @@ public class LinChecker0 {
 //                        }).collect(Collectors.toList()); // and store results as list
                     // Check correctness& Throw an AssertionError if current execution
                     // is not linearizable and log invalid execution
+                    System.out.println(results);
                     if (!possibleResultsSet.contains(results)) {
                         System.out.println("Iteration Failed");
                         reportBuilder.result(TestReport.Result.FAILURE);
