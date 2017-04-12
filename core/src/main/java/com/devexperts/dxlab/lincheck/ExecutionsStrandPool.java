@@ -1,20 +1,20 @@
 package com.devexperts.dxlab.lincheck;
 
 import co.paralleluniverse.fibers.Fiber;
+import co.paralleluniverse.fibers.instrument.SuspendableHelper;
 import co.paralleluniverse.strands.Strand;
-import co.paralleluniverse.strands.SuspendableUtils;
+import co.paralleluniverse.strands.SuspendableCallable;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
 /**
  * Executor that can initialize {@link Thread} or {@link co.paralleluniverse.fibers.Fiber} pool
  */
-public class StrandPoolBuilder<T> {
+public class ExecutionsStrandPool<T> {
     //implements ExecutorService
     private final ArrayList<Strand> pool = new ArrayList<>();
     private final List<Future<T>> futureTasks = new ArrayList<>();
@@ -31,64 +31,42 @@ public class StrandPoolBuilder<T> {
         return strandType;
     }
 
-
     /**
-     * Create new instance of StrandPoolBuilder that scheduling Threads or Fibers
+     * Create new instance of ExecutionsStrandPool that scheduling Threads or Fibers
      *
      * @param type type of Strand tha
      */
-    private StrandPoolBuilder(final StrandType type) {
+    ExecutionsStrandPool(final StrandType type) {
+        System.out.println("===" + SuspendableHelper.isInstrumented(this.getClass()));
         this.strandType = type;
         if (type == StrandType.FIBER)
             this.FACTORY = callable -> {
-                Fiber<T> fiber = new Fiber<>(SuspendableUtils.asSuspendable(callable));
+                Fiber<T> fiber = new Fiber<T>(callable);
+//                Fiber<T> fiber = new Fiber<>();
                 futureTasks.add(fiber);
                 pool.add(fiber);
                 return fiber;
             };
         else
             this.FACTORY = callable -> {
-                FutureTask<T> futureTask = new FutureTask<>(callable);
+                FutureTask<T> futureTask = new FutureTask<>(callable::run);
                 Strand strand = Strand.of(new Thread(futureTask));
                 futureTasks.add(futureTask);
                 pool.add(strand);
                 return strand;
             };
-
     }
 
-    public StrandPoolBuilder add(Collection<? extends Callable<T>> tasks) {
-//        switch (strandType){
-//            case FIBER: tasks.forEach(this::newFiberStrand);
-//            case THREAD: tasks.forEach(this::newThreadStrand);
-//        }
+    public ExecutionsStrandPool<T> add(Collection<? extends SuspendableCallable<T>> tasks) {
         if (isRuning) throw new IllegalStateException("Pool has already been running");
         tasks.forEach(FACTORY::newStrand);
         return this;
     }
 
-    public StrandPoolBuilder add(Callable<T> task) {
+    public ExecutionsStrandPool<T> add(SuspendableCallable<T> task) {
         if (isRuning) throw new IllegalStateException("Pool has already been running");
         FACTORY.newStrand(task);
         return this;
-    }
-
-    public boolean isTerminated() {
-        return pool.stream().allMatch(Strand::isTerminated);
-    }
-
-
-    public boolean isInterrupted() {
-        return pool.stream().allMatch(Strand::isInterrupted);
-    }
-
-
-    public boolean isAlive() {
-        return pool.stream().allMatch(Strand::isAlive);
-    }
-
-    public boolean isDone() {
-        return pool.stream().allMatch(Strand::isDone);
     }
 
     public int getStrandId(Strand strand) {
@@ -122,22 +100,32 @@ public class StrandPoolBuilder<T> {
         return futureTasks;
     }
 
+    public void clear() {
+        pool.clear();
+        futureTasks.clear();
+        isRuning = false;
+    }
 
-//    private Strand newFiberStrand(Callable<T> target){
-//        Fiber<T> fiber = new Fiber<>(SuspendableUtils.asSuspendable(target));
-//        futureTasks.add(fiber);
-//        pool.add(fiber);
-//        return fiber;
-//    }
-//    private Strand newThreadStrand(Callable<T> target){
-//        FutureTask<T> futureTask = new FutureTask<>(target);
-//        Strand strand = Strand.of(new Thread(futureTask));
-//        futureTasks.add(futureTask);
-//        pool.add(strand);
-//        return strand;
-//    }
+    public boolean isTerminated() {
+        return pool.stream().allMatch(Strand::isTerminated);
+    }
+
+
+    public boolean isInterrupted() {
+        return pool.stream().allMatch(Strand::isInterrupted);
+    }
+
+
+    public boolean isAlive() {
+        return pool.stream().allMatch(Strand::isAlive);
+    }
+
+    public boolean isDone() {
+        return pool.stream().allMatch(Strand::isDone);
+    }
 
     private interface CallableStrandFactory<C> {
-        Strand newStrand(Callable<C> callable);
+        Strand newStrand(SuspendableCallable<C> callable);
     }
+
 }
