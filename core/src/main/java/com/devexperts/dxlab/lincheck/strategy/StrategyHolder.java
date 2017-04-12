@@ -16,7 +16,7 @@ public abstract class StrategyHolder {
         StrategyHolder.currentStrategy = curentStrategy;
     }
 
-    public final static ArrayList<Fiber<Result>> fibers = new ArrayList<>();
+    public final static ArrayList<Fiber<Result[]>> fibers = new ArrayList<>();
 
     @SuppressWarnings("unused") // invoked from transformed code
     public static Strategy getCurrentStrategy() {
