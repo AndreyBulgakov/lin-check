@@ -14,13 +14,11 @@ import java.util.concurrent.FutureTask;
  * Executor that can initialize {@link Thread} or {@link co.paralleluniverse.fibers.Fiber} pool
  */
 public class ExecutionsStrandPool {
-    //implements ExecutorService
     private final ArrayList<Strand> pool = new ArrayList<>();
     private final List<Future<Result[]>> futureTasks = new ArrayList<>();
     private final StrandType strandType;
     private final CallableStrandFactory FACTORY;
     private boolean isRuning = false;
-    private int strandNum = 0;
 
     public enum StrandType {
         THREAD,
@@ -46,7 +44,6 @@ public class ExecutionsStrandPool {
                 strand.setName(name);
                 futureTasks.add(strand);
                 pool.add(strand);
-                strandNum++;
                 return strand;
             };
         else
@@ -57,7 +54,6 @@ public class ExecutionsStrandPool {
                 strand.setName(name);
                 futureTasks.add(futureTask);
                 pool.add(strand);
-                strandNum++;
                 return strand;
             };
     }
