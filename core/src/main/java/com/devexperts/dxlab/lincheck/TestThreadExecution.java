@@ -22,8 +22,6 @@ package com.devexperts.dxlab.lincheck;
  * #L%
  */
 
-import co.paralleluniverse.fibers.Suspendable;
-
 import java.util.concurrent.Callable;
 import java.util.concurrent.Phaser;
 
@@ -45,6 +43,5 @@ public abstract class TestThreadExecution implements Callable<Result[]> {
     // method to support generics and the byte-code generation
     // is more bug-prone as well. If you need to use
     // List<Result>, see Arrays.asList(..) method.
-    @Suspendable
     public abstract Result[] call();
 }

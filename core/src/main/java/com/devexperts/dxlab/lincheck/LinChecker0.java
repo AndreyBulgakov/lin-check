@@ -24,7 +24,6 @@ package com.devexperts.dxlab.lincheck;
 
 import co.paralleluniverse.fibers.Suspendable;
 import co.paralleluniverse.fibers.instrument.SuspendableHelper;
-import co.paralleluniverse.strands.SuspendableCallable;
 import com.devexperts.dxlab.lincheck.report.Reporter;
 import com.devexperts.dxlab.lincheck.report.TestReport;
 import com.devexperts.dxlab.lincheck.strategy.EnumerationStrategy;
@@ -276,7 +275,7 @@ public class LinChecker0 {
                 reportBuilder.incIterations();
 
                 //Set strategy and initialize transformation in classes
-                ExecutionsStrandPool<Result[]> strandPool = new ExecutionsStrandPool<Result[]>(ExecutionsStrandPool.StrandType.FIBER);
+                ExecutionsStrandPool strandPool = new ExecutionsStrandPool(ExecutionsStrandPool.StrandType.FIBER);
                 StrategyHolder.setCurrentStrategy(new RandomUnparkStrategy());
 
                 //Create loader, load and instantiate testInstance by this loader
@@ -301,14 +300,9 @@ public class LinChecker0 {
                     int maxWait = (int) ((float) invocation * MAX_WAIT / testCfg.getInvocationsPerIteration()) + 1;
                     setWaits(actorsPerThread, testThreadExecutions, maxWait);
                     // Run multithreaded test and get operation results for each thread
-                    List<SuspendableCallable<Result[]>> suspendableExecutions = testThreadExecutions.stream()
-//                            .map(SuspendableUtils::asSuspendable)
-                            .map(c -> (SuspendableCallable<Result[]>) c::call)
-                            .collect(Collectors.toList());
                     List<List<Result>> results = strandPool
-                            .add(suspendableExecutions)
-//                            .add(testThreadExecutions)
-                            .invokePool().stream()
+                            .add(testThreadExecutions)
+                            .invokeAll().stream()
                             .map(f -> {
                                 try {
                                     return Arrays.asList(f.get());

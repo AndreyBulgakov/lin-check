@@ -3,7 +3,6 @@ package com.devexperts.dxlab.lincheck;
 import co.paralleluniverse.fibers.Fiber;
 import co.paralleluniverse.fibers.instrument.SuspendableHelper;
 import co.paralleluniverse.strands.Strand;
-import co.paralleluniverse.strands.SuspendableCallable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,12 +13,12 @@ import java.util.concurrent.FutureTask;
 /**
  * Executor that can initialize {@link Thread} or {@link co.paralleluniverse.fibers.Fiber} pool
  */
-public class ExecutionsStrandPool<T> {
+public class ExecutionsStrandPool {
     //implements ExecutorService
     private final ArrayList<Strand> pool = new ArrayList<>();
-    private final List<Future<T>> futureTasks = new ArrayList<>();
+    private final List<Future<Result[]>> futureTasks = new ArrayList<>();
     private final StrandType strandType;
-    private final CallableStrandFactory<T> FACTORY;
+    private final CallableStrandFactory FACTORY;
     private boolean isRuning = false;
 
     public static enum StrandType {
@@ -41,7 +40,7 @@ public class ExecutionsStrandPool<T> {
         this.strandType = type;
         if (type == StrandType.FIBER)
             this.FACTORY = callable -> {
-                Fiber<T> fiber = new Fiber<T>(callable);
+                Fiber<Result[]> fiber = new Fiber<>(callable::call);
 //                Fiber<T> fiber = new Fiber<>();
                 futureTasks.add(fiber);
                 pool.add(fiber);
@@ -49,7 +48,7 @@ public class ExecutionsStrandPool<T> {
             };
         else
             this.FACTORY = callable -> {
-                FutureTask<T> futureTask = new FutureTask<>(callable::run);
+                FutureTask<Result[]> futureTask = new FutureTask<>(callable);
                 Strand strand = Strand.of(new Thread(futureTask));
                 futureTasks.add(futureTask);
                 pool.add(strand);
@@ -57,13 +56,13 @@ public class ExecutionsStrandPool<T> {
             };
     }
 
-    public ExecutionsStrandPool<T> add(Collection<? extends SuspendableCallable<T>> tasks) {
+    public ExecutionsStrandPool add(Collection<? extends TestThreadExecution> tasks) {
         if (isRuning) throw new IllegalStateException("Pool has already been running");
         tasks.forEach(FACTORY::newStrand);
         return this;
     }
 
-    public ExecutionsStrandPool<T> add(SuspendableCallable<T> task) {
+    public ExecutionsStrandPool add(TestThreadExecution task) {
         if (isRuning) throw new IllegalStateException("Pool has already been running");
         FACTORY.newStrand(task);
         return this;
@@ -77,20 +76,18 @@ public class ExecutionsStrandPool<T> {
         return pool.get(id);
     }
 
-    public List<Future<T>> getFutures() {
+    public List<Future<Result[]>> getFutures() {
         return futureTasks;
     }
 
     public void invokeOne(int id) {
         Strand strand = pool.get(id);
-//        Future<T> future = futureTasks.get(id);
         if (!strand.isAlive() && !strand.isTerminated()) {
             strand.start();
-//            return future;
         }
     }
 
-    public List<Future<T>> invokePool() {
+    public List<Future<Result[]>> invokeAll() {
         if (isRuning) throw new IllegalStateException("Pool has already been running");
         isRuning = true;
         for (Strand strand : pool) {
@@ -124,8 +121,8 @@ public class ExecutionsStrandPool<T> {
         return pool.stream().allMatch(Strand::isDone);
     }
 
-    private interface CallableStrandFactory<C> {
-        Strand newStrand(SuspendableCallable<C> callable);
+    private interface CallableStrandFactory {
+        Strand newStrand(TestThreadExecution callable);
     }
 
 }
