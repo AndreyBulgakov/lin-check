@@ -2,6 +2,7 @@ package com.devexperts.dxlab.lincheck.strategy;
 
 
 import co.paralleluniverse.fibers.Fiber;
+import com.devexperts.dxlab.lincheck.LinCheckThread;
 import com.devexperts.dxlab.lincheck.Result;
 
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.ArrayList;
  */
 public abstract class StrategyHolder {
     private static Strategy currentStrategy;
+    public static ArrayList<LinCheckThread> threads = new ArrayList<>();
 
     public static void setCurrentStrategy(Strategy curentStrategy) {
         StrategyHolder.currentStrategy = curentStrategy;
