@@ -71,7 +71,7 @@ class ExecutionClassLoader extends ClassLoader {
             cr.accept(cv, ClassReader.SKIP_FRAMES);
             // Get transformed bytecode
             byte[] resultBytecode = cw.toByteArray();
-//            resultBytecode = instrumentor.instrumentClass(this, name, resultBytecode);
+            resultBytecode = instrumentor.instrumentClass(this, name, resultBytecode);
             result = defineClass(name, resultBytecode, 0, resultBytecode.length);
             // Save it to cache and resources
             resources.put(name, resultBytecode);
@@ -107,14 +107,14 @@ class ExecutionClassLoader extends ClassLoader {
                                 !className.startsWith("com.devexperts.dxlab.lincheck.libtest.")
                         ||
                         className.startsWith("sun.") ||
-                        className.startsWith("co.paralleluniverse.") ||
+                        className.startsWith("co.paralleluniverse.fibers.instrument.") ||
                         className.startsWith("java.");
                         // TODO let's transform java.util.concurrent
     }
 
     Class<? extends TestThreadExecution> defineTestThreadExecution(String className, byte[] bytecode) {
         Retransform.addWaiver(className, "call");
-//        bytecode = instrumentor.instrumentClass(this, className, bytecode);
+        bytecode = instrumentor.instrumentClass(this, className, bytecode);
         return (Class<? extends TestThreadExecution>) super.defineClass(className, bytecode, 0, bytecode.length);
     }
 
