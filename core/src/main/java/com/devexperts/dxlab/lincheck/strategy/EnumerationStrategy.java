@@ -46,7 +46,8 @@ public class EnumerationStrategy implements Strategy {
         currentThread = n;
         Strand.unpark(pool.getStrand(currentThread - 1));
         try {
-            Strand.park();
+            Strand srt = pool.getStrand(currentThread - 1);
+            Strand.parkAndUnpark(srt);
         } catch (SuspendExecution suspendExecution) {
             suspendExecution.printStackTrace();
         }
@@ -69,6 +70,7 @@ public class EnumerationStrategy implements Strategy {
     }
     //endregion
 
+    @Suspendable
     @Override
     public void onSharedVariableRead(int location) {
         if (Strand.currentStrand().getName().equals(strandName)){
@@ -83,9 +85,9 @@ public class EnumerationStrategy implements Strategy {
         }
     }
 
+    @Suspendable
     @Override
     public void onSharedVariableWrite(int location) {
-        //TODO check via getName() == "LinChecker"
         if (Strand.currentStrand().getName().equals(strandName)){
             Strand th = Strand.currentStrand();
             stopNeededThread(th);
@@ -97,6 +99,7 @@ public class EnumerationStrategy implements Strategy {
         }
     }
 
+    @Suspendable
     @Override
     public void endOfThread() {
         if (Strand.currentStrand().getName().equals(strandName)) {
@@ -153,6 +156,7 @@ public class EnumerationStrategy implements Strategy {
      * Method contains logic for interleaving thread
      * @param currentPoint pair locationId, threadID
      */
+    @Suspendable
     private void onSharedVariableAccess(CheckPoint currentPoint) {
         if (currentThread == interleavingThreads.getKey() || currentThread == interleavingThreads.getValue()) {
             if (needInterleave) {
