@@ -1,7 +1,6 @@
 package com.devexperts.dxlab.lincheck;
 
 import co.paralleluniverse.fibers.Fiber;
-import co.paralleluniverse.fibers.instrument.SuspendableHelper;
 import co.paralleluniverse.strands.Strand;
 
 import java.util.ArrayList;
@@ -35,7 +34,6 @@ public class ExecutionsStrandPool {
      * @param type type of Strand can be Fiber or Thread
      */
     ExecutionsStrandPool(final StrandType type) {
-        System.out.println("===" + SuspendableHelper.isInstrumented(this.getClass()));
         this.strandType = type;
         if (type == StrandType.FIBER)
             this.FACTORY = callable -> {
