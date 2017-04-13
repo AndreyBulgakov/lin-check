@@ -1,6 +1,9 @@
 package com.devexperts.dxlab.lincheck.strategy;
 
-import com.devexperts.dxlab.lincheck.LinCheckThread;
+import co.paralleluniverse.fibers.SuspendExecution;
+import co.paralleluniverse.fibers.Suspendable;
+import co.paralleluniverse.strands.Strand;
+import com.devexperts.dxlab.lincheck.ExecutionsStrandPool;
 import javafx.util.Pair;
 
 import java.io.IOException;
@@ -9,7 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.locks.LockSupport;
 
 import static java.nio.file.StandardOpenOption.APPEND;
 
@@ -27,41 +29,56 @@ public class EnumerationStrategy implements Strategy {
     private volatile boolean needInterleave = true;
     private volatile boolean needChangeFirstThread = false;
     private volatile List<CheckPoint> history = new ArrayList<>();
+    private final String strandName = "LinCheckStrand";
+    private ExecutionsStrandPool pool;
+
+    public EnumerationStrategy(ExecutionsStrandPool pool) {
+        this.pool = pool;
+    }
 
     //region ToDriver
     /**
      * Содержит логику для смены потока
      * @param n - номер нового потока
      */
+    @Suspendable
     private void changeCurrentThreadTo(int n) {
         currentThread = n;
-        LockSupport.unpark(StrategyHolder.threads.get(currentThread - 1));
-        LockSupport.park();
+        Strand.unpark(pool.getStrand(currentThread - 1));
+        try {
+            Strand.park();
+        } catch (SuspendExecution suspendExecution) {
+            suspendExecution.printStackTrace();
+        }
     }
 
     private void switchEndOFThread(int n){
         currentThread = n;
-        LockSupport.unpark(StrategyHolder.threads.get(currentThread - 1));
+        Strand.unpark(pool.getStrand(currentThread - 1));
     }
 
-    private void stopNeededThread(LinCheckThread th) {
-        while (th.getThreadId() != currentThread){
-            LockSupport.park();
+    @Suspendable
+    private void stopNeededThread(Strand th) {
+        while (pool.getStrandId(th) + 1 != currentThread){
+            try {
+                Strand.park();
+            } catch (SuspendExecution suspendExecution) {
+                suspendExecution.printStackTrace();
+            }
         }
     }
     //endregion
 
     @Override
     public void onSharedVariableRead(int location) {
-        //TODO check via getName() == "LinChecker"
-        if (Thread.currentThread() instanceof LinCheckThread){
-            LinCheckThread th = (LinCheckThread) Thread.currentThread();
+        if (Strand.currentStrand().getName().equals(strandName)){
+            Strand th = Strand.currentStrand();
             //ждем, пока можно будет продолжить выполнение
             stopNeededThread(th);
             logger.println("\t\tEnter on SharedRead");
-            logger.println("\t\tThread id: " + th.getThreadId() + " currentID: " + currentThread);
+            logger.println("\t\tThread id: " + (pool.getStrandId(th) + 1) + " currentID: " + currentThread);
             logger.println("\t\tCurrentLocation id" + location);
-            CheckPoint currentPoint = new CheckPoint(location, th.getThreadId());
+            CheckPoint currentPoint = new CheckPoint(location, (pool.getStrandId(th) + 1));
             onSharedVariableAccess(currentPoint);
         }
     }
@@ -69,24 +86,22 @@ public class EnumerationStrategy implements Strategy {
     @Override
     public void onSharedVariableWrite(int location) {
         //TODO check via getName() == "LinChecker"
-        if (Thread.currentThread() instanceof LinCheckThread){
-            LinCheckThread th = (LinCheckThread) Thread.currentThread();
+        if (Strand.currentStrand().getName().equals(strandName)){
+            Strand th = Strand.currentStrand();
             stopNeededThread(th);
             logger.println("\t\tEnter on SharedWrite");
-            logger.println("\t\tThread id: " + th.getThreadId() + " currentID: " + currentThread);
+            logger.println("\t\tThread id: " + (pool.getStrandId(th) + 1) + " currentID: " + currentThread);
             logger.println("\t\tCurrentLocation id" + location);
-            CheckPoint currentPoint = new CheckPoint(location, th.getThreadId());
+            CheckPoint currentPoint = new CheckPoint(location, (pool.getStrandId(th) + 1));
             onSharedVariableAccess(currentPoint);
         }
     }
 
     @Override
     public void endOfThread() {
-        //TODO check via getName() == "LinChecker"
-        if (Thread.currentThread() instanceof LinCheckThread) {
-            LinCheckThread th = (LinCheckThread) Thread.currentThread();
-            logger.println("\tEndOfThread " + th.getThreadId() + "with interleavings:" + wasInterleavings);
-
+        if (Strand.currentStrand().getName().equals(strandName)) {
+            Strand th = Strand.currentStrand();
+            logger.println("\tEndOfThread " + (pool.getStrandId(th) + 1) + "with interleavings:" + wasInterleavings);
             //В конце потока смотрим, если это поток, который не надо было прерывать - выполняем слеующий в расписании
             //иначе - выполняем некоторую логику.
             if (wasInterleavings == 0) {
@@ -200,7 +215,6 @@ public class EnumerationStrategy implements Strategy {
     public boolean isNeedChangeFirstThread() {
         return needChangeFirstThread;
     }
-
 
     /**
      * Method print checked point to log file and clear all information about previous iteration
