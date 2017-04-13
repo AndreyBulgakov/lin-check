@@ -1,6 +1,7 @@
 package com.devexperts.dxlab.lincheck;
 
 import co.paralleluniverse.fibers.Fiber;
+import co.paralleluniverse.fibers.FiberExecutorScheduler;
 import co.paralleluniverse.strands.Strand;
 
 import java.util.ArrayList;
@@ -35,9 +36,10 @@ public class ExecutionsStrandPool {
      */
     ExecutionsStrandPool(final StrandType type) {
         this.strandType = type;
+        FiberExecutorScheduler exe = new FiberExecutorScheduler("demo", Runnable::run);
         if (type == StrandType.FIBER)
             this.FACTORY = callable -> {
-                Fiber<Result[]> strand = new Fiber<>(callable::call);
+                Fiber<Result[]> strand = new Fiber<>(exe, callable::call);
                 String name = "LinCheckStrand";
                 strand.setName(name);
                 futureTasks.add(strand);
@@ -76,6 +78,15 @@ public class ExecutionsStrandPool {
         return pool.get(id);
     }
 
+    public Strand getNotCurrentStrandAndAlive() {
+        Strand current = Strand.currentStrand();
+        for (Strand strand : pool) {
+            if (current != strand)
+                return strand;
+        }
+        return null;
+    }
+
     public List<Future<Result[]>> getFutures() {
         return futureTasks;
     }
@@ -92,8 +103,8 @@ public class ExecutionsStrandPool {
         if (isRuning) throw new IllegalStateException("Pool has already been running");
         isRuning = true;
         for (Strand strand : pool) {
-            if (!strand.isAlive() && !strand.isTerminated())
                 strand.start();
+//            if (!strand.isAlive())
         }
         return futureTasks;
     }

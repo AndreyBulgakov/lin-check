@@ -106,8 +106,8 @@ public class LinChecker0 {
     void check() throws AssertionError {
         testConfigurations.forEach((testConfiguration) -> {
             try {
-                checkImpl(testConfiguration);
-//                checkImplFiber(testConfiguration);
+//                checkImpl(testConfiguration);
+                checkImplFiber(testConfiguration);
             } catch (InterruptedException | ClassNotFoundException | IllegalAccessException | InstantiationException e) {
                 throw new IllegalStateException(e);
             }
@@ -186,7 +186,7 @@ public class LinChecker0 {
             // Reusable phaser
             final Phaser phaser = new Phaser(testCfg.getThreads());
             //Set strategy and initialize transformation in classes
-            ExecutionsStrandPool strandPool = new ExecutionsStrandPool(ExecutionsStrandPool.StrandType.THREAD);
+            ExecutionsStrandPool strandPool = new ExecutionsStrandPool(ExecutionsStrandPool.StrandType.FIBER);
             EnumerationStrategy currentStrategy = new EnumerationStrategy(strandPool);
             StrategyHolder.setCurrentStrategy(currentStrategy);
             reportBuilder.strategy(currentStrategy.getClass().getSimpleName().replace("Strategy", ""));
@@ -308,7 +308,7 @@ public class LinChecker0 {
 
                 //Set strategy and initialize transformation in classes
                 ExecutionsStrandPool strandPool = new ExecutionsStrandPool(ExecutionsStrandPool.StrandType.FIBER);
-                StrategyHolder.setCurrentStrategy(new RandomUnparkStrategy());
+                StrategyHolder.setCurrentStrategy(new RandomUnparkStrategy(strandPool));
 
                 //Create loader, load and instantiate testInstance by this loader
                 final ExecutionClassLoader loader = new ExecutionClassLoader(this.getClass().getClassLoader(), testClassName);
