@@ -76,8 +76,8 @@ public class LinChecker0 {
     void check() throws AssertionError {
         testConfigurations.forEach((testConfiguration) -> {
             try {
-//                checkImpl(testConfiguration);
-                checkImplFiber(testConfiguration);
+                checkImpl(testConfiguration);
+//                checkImplFiber(testConfiguration);
             } catch (InterruptedException | ClassNotFoundException | IllegalAccessException | InstantiationException e) {
                 throw new IllegalStateException(e);
             }
@@ -156,8 +156,8 @@ public class LinChecker0 {
             // Reusable phaser
             final Phaser phaser = new Phaser(testCfg.getThreads());
             //Set strategy and initialize transformation in classes
-            //Strategy currentStrategy = new ConsumeCPUStrategy(100);
-            EnumerationStrategy currentStrategy = new EnumerationStrategy();
+            ExecutionsStrandPool strandPool = new ExecutionsStrandPool(ExecutionsStrandPool.StrandType.THREAD);
+            EnumerationStrategy currentStrategy = new EnumerationStrategy(strandPool);
             StrategyHolder.setCurrentStrategy(currentStrategy);
             reportBuilder.strategy(currentStrategy.getClass().getSimpleName().replace("Strategy", ""));
 
@@ -202,23 +202,26 @@ public class LinChecker0 {
                     invokeReset(testInstance);
 
                     // Run multithreaded test and get operation results for each thread
-                    LinCheckThread[] threads = new LinCheckThread[testThreadExecutions.size()];
-                    FutureTask<Result[]>[] resultsTask = new FutureTask[testThreadExecutions.size()];
-                    for (int i = 0; i < testThreadExecutions.size(); i++) {
-                        resultsTask[i] = new FutureTask<Result[]>(testThreadExecutions.get(i));
-                        threads[i] = new LinCheckThread(i + 1, resultsTask[i]);
-                        StrategyHolder.threads.add(threads[i]);
-                        threads[i].start();
-                    }
-                    List<List<Result>> results = Arrays.stream(resultsTask)
+//                    LinCheckThread[] threads = new LinCheckThread[testThreadExecutions.size()];
+//                    FutureTask<Result[]>[] resultsTask = new FutureTask[testThreadExecutions.size()];
+//                    for (int i = 0; i < testThreadExecutions.size(); i++) {
+//                        resultsTask[i] = new FutureTask<Result[]>(testThreadExecutions.get(i));
+//                        threads[i] = new LinCheckThread(i + 1, resultsTask[i]);
+//                        StrategyHolder.threads.add(threads[i]);
+//                        threads[i].start();
+//                    }
+                    List<List<Result>> results = strandPool
+                            .add(testThreadExecutions)
+                            .invokeAll().stream()
                             .map(f -> {
                                 try {
                                     return Arrays.asList(f.get());
-                                } catch (InterruptedException | ExecutionException e) {
+                                } catch (ExecutionException | InterruptedException e) {
                                     throw new IllegalStateException(e);
                                 }
                             })
                             .collect(Collectors.toList());
+                    strandPool.clear();
                     if (currentStrategy.isNeedChangeFirstThread()) {
                         if (firstInteleavingThreadIndex == threadQueue.size() - 1) {
                             if (startScheduleIndex == enumer.size() - 1) {
