@@ -55,7 +55,7 @@ public class LinChecker {
     //=v -Dco.paralleluniverse.fibers.verifyInstrumentation=true
     public static void check(Object testInstance) throws AssertionError {
 //        System.out.println(testInstance.getClass().getAnnotations()[0].getClass());
-//        LinChecker.check(testInstance);
+//        LinChecker0.check(testInstance);
         try {
             // Get current URLs from parrent classLoader
             Field ucp = URLClassLoader.class.getDeclaredField("ucp");
