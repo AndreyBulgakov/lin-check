@@ -14,13 +14,13 @@ public interface Driver {
     void waitFor(int targetThreadId);
 
     @Suspendable
-    void park();
+    void block();
 
     @Suspendable
-    void unpark(int targetThreadId);
+    void unblock(int targetThreadId);
 
     @Suspendable
-    void parkAndUnpark(int targetThreadId);
+    void blockAndUnblock(int targetThreadId);
 
     @Suspendable
     void yield();
