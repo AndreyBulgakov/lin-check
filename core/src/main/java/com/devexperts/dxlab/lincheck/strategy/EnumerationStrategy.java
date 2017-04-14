@@ -29,9 +29,9 @@ public class EnumerationStrategy implements Strategy {
     private final String strandName = "LinCheckStrand";
 
     //    private ExecutionsStrandPool pool;
-    private StrandDriver driver;
+    private Driver driver;
 
-    public EnumerationStrategy(StrandDriver driver) {
+    public EnumerationStrategy(Driver driver) {
         this.driver = driver;
     }
 
