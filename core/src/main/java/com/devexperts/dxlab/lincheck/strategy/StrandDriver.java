@@ -17,7 +17,6 @@ public class StrandDriver implements Driver {
     @Suspendable
     @Override
     public void switchThread(int targetThreadId) {
-        Strand.unpark(pool.getStrand(targetThreadId - 1));
         try {
             Strand srt = pool.getStrand(targetThreadId - 1);
             Strand.parkAndUnpark(srt);

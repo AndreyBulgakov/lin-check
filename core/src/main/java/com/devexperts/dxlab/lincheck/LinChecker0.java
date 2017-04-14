@@ -27,10 +27,7 @@ import co.paralleluniverse.fibers.Suspendable;
 import co.paralleluniverse.fibers.instrument.SuspendableHelper;
 import com.devexperts.dxlab.lincheck.report.Reporter;
 import com.devexperts.dxlab.lincheck.report.TestReport;
-import com.devexperts.dxlab.lincheck.strategy.EnumerationStrategy;
-import com.devexperts.dxlab.lincheck.strategy.RandomUnparkStrategy;
-import com.devexperts.dxlab.lincheck.strategy.StrandDriver;
-import com.devexperts.dxlab.lincheck.strategy.StrategyHolder;
+import com.devexperts.dxlab.lincheck.strategy.*;
 import javafx.util.Pair;
 
 import java.io.IOException;
@@ -188,7 +185,7 @@ public class LinChecker0 {
             final Phaser phaser = new Phaser(testCfg.getThreads());
             //Set strategy and initialize transformation in classes
             ExecutionsStrandPool strandPool = new ExecutionsStrandPool(ExecutionsStrandPool.StrandType.FIBER);
-            StrandDriver driver = new StrandDriver(strandPool);
+            Driver driver = new StrandDriver(strandPool);
             EnumerationStrategy currentStrategy = new EnumerationStrategy(driver);
             StrategyHolder.setCurrentStrategy(currentStrategy);
             reportBuilder.strategy(currentStrategy.getClass().getSimpleName().replace("Strategy", ""));
