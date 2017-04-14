@@ -9,6 +9,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static java.nio.file.StandardOpenOption.APPEND;
 
@@ -75,6 +77,7 @@ public class EnumerationStrategy implements Strategy {
 //    }
     //endregion
 
+    //region Logic
     @Suspendable
     @Override
     public void onSharedVariableRead(int location) {
@@ -229,7 +232,9 @@ public class EnumerationStrategy implements Strategy {
             }
         }
     }
+    //endregion
 
+    //region Logging
     /**
      * Method for printing information about current invocation
      * @param iteration - current iteration
@@ -239,6 +244,30 @@ public class EnumerationStrategy implements Strategy {
         logger.println("Iteration №" + iteration + " Invocation №" + invocation + " FirstCheckPoint" + firstCheckPoint);
     }
 
+    public static PrintStream getLogger() {
+        try {
+            Path p = Paths.get(System.getProperty("user.dir"), "log");
+            if (Files.exists(p)) {
+                return new PrintStream(Files.newOutputStream(p, APPEND));
+            } else {
+                return new PrintStream(Files.newOutputStream(p));
+            }
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * Print all checked points to log file
+     */
+    public void printTraces() {
+        passedPaths.forEach((a,b) -> logger.println(a + " with set: " + b));
+    }
+    //endregion
+
+    //region Helpers
     /**
      * Clear information about previous running
      * @param firstThread
@@ -274,27 +303,6 @@ public class EnumerationStrategy implements Strategy {
         logger.println("Current interleaving threads id's" + interleavedThreads);
     }
 
-    public static PrintStream getLogger() {
-        try {
-            Path p = Paths.get(System.getProperty("user.dir"), "log");
-            if (Files.exists(p)) {
-                return new PrintStream(Files.newOutputStream(p, APPEND));
-            } else {
-                return new PrintStream(Files.newOutputStream(p));
-            }
-        }
-        catch (IOException e){
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    /**
-     * Print all checked points to log file
-     */
-    public void printTraces() {
-        passedPaths.forEach((a,b) -> logger.println(a + " with set: " + b));
-    }
 
     public static ArrayList<Pair<Integer, Integer>> generateInterleavedPairs(int threadNumber) {
         ArrayList<Pair<Integer, Integer>> pairList = new ArrayList<>();
@@ -325,6 +333,53 @@ public class EnumerationStrategy implements Strategy {
             }
         }
         return returnMe;
+    }
+    //endregion
+
+    private EnumerationStrategyHelper helper;
+
+    public void beforeStartIteration() {
+        helper = new EnumerationStrategyHelper(2);
+    }
+
+    public void onStartIteration() {
+        helper.firstInteleavingThreadIndex = 0;
+        helper.startScheduleIndex = 0;
+        helper.threadQueue = helper.queueThreadExecutions.get(helper.startScheduleIndex);
+        setExecutionParameters(helper.threadQueue, new Pair<>(helper.threadQueue.get(helper.firstInteleavingThreadIndex),
+                helper.threadQueue.get(++helper.firstInteleavingThreadIndex)));
+        helper.needNextIteration = false;
+        prepareIteration();
+    }
+
+    public void onStartInvocation(int iteration, int invocation) {
+        printHeader(iteration, invocation);
+    }
+
+    public void onEndInvocation() {
+        if (isNeedChangeFirstThread()) {
+            if (helper.firstInteleavingThreadIndex == helper.threadQueue.size() - 1) {
+                if (helper.startScheduleIndex == helper.queueThreadExecutions.size() - 1) {
+                    helper.needNextIteration = true;
+                } else {
+                    helper.threadQueue = helper.queueThreadExecutions.get(++helper.startScheduleIndex);
+                    helper.firstInteleavingThreadIndex = 0;
+                }
+            } else {
+                setExecutionParameters(helper.threadQueue, new Pair<>(helper.threadQueue.get(helper.firstInteleavingThreadIndex),
+                        helper.threadQueue.get(++helper.firstInteleavingThreadIndex)));
+            }
+
+        }
+        prepareInvocation(0, false);
+    }
+
+    public void onEndIteration() {
+        printTraces();
+    }
+
+    public boolean isNeedStopIteration() {
+        return helper.needNextIteration;
     }
 
     /**
@@ -365,4 +420,24 @@ public class EnumerationStrategy implements Strategy {
             return result;
         }
     }
+
+    private static class EnumerationStrategyHelper {
+        //список возможных запусков
+        public List<List<Integer>> queueThreadExecutions;
+
+        //индекс потока, в котором делаем прерывание
+        public int firstInteleavingThreadIndex;
+        public int startScheduleIndex;
+        public boolean needNextIteration;
+
+        //первый возможный запуск
+        List<Integer> threadQueue;
+
+        public EnumerationStrategyHelper(int threadNumber) {
+            List<Integer> list = IntStream.range(1, threadNumber + 1).boxed().collect(Collectors.toList());
+            queueThreadExecutions = EnumerationStrategy.threadPermutations(list);
+        }
+
+    }
+
 }
