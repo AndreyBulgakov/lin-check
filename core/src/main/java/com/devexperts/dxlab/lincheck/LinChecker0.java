@@ -28,7 +28,6 @@ import co.paralleluniverse.fibers.instrument.SuspendableHelper;
 import com.devexperts.dxlab.lincheck.report.Reporter;
 import com.devexperts.dxlab.lincheck.report.TestReport;
 import com.devexperts.dxlab.lincheck.strategy.*;
-import javafx.util.Pair;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -39,7 +38,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * TODO documentation
@@ -190,24 +188,11 @@ public class LinChecker0 {
             StrategyHolder.setCurrentStrategy(currentStrategy);
             reportBuilder.strategy(currentStrategy.getClass().getSimpleName().replace("Strategy", ""));
 
-            List<Integer> list = IntStream.range(1, testCfg.getThreads() + 1).boxed().collect(Collectors.toList());
-            //список возможных запусков
-            List<List<Integer>> enumer = EnumerationStrategy.threadPermutations(list);
-            // Run iterations
+            currentStrategy.beforeStartIteration();
             for (int iteration = 1; iteration <= 1; iteration++) {
 
+                currentStrategy.onStartIteration();
                 //индекс потока, в котором делаем прерывание
-                int firstInteleavingThreadIndex = 0;
-                int startScheduleIndex = 0;
-                //первый возможный запуск
-                List<Integer> threadQueue = enumer.get(startScheduleIndex);
-
-                currentStrategy.setExecutionParameters(threadQueue, new Pair<>(threadQueue.get(firstInteleavingThreadIndex),
-                        threadQueue.get(++firstInteleavingThreadIndex)));
-
-
-                boolean needNextIteration = false;
-                currentStrategy.prepareIteration();
                 reportBuilder.incIterations();
 
                 //Create loader, load and instantiate testInstance by this loader
@@ -223,8 +208,8 @@ public class LinChecker0 {
                 Set<List<List<Result>>> possibleResultsSet = generatePossibleResults(actorsPerThread, testInstance, loader);
 
                 // Run invocations
-                for (int invocation = 1; invocation <= testCfg.getInvocationsPerIteration() && !needNextIteration; invocation++) {
-                    currentStrategy.printHeader(iteration, invocation);
+                for (int invocation = 1; invocation <= testCfg.getInvocationsPerIteration() && !currentStrategy.isNeedStopIteration(); invocation++) {
+                    currentStrategy.onStartInvocation(iteration, invocation);
                     reportBuilder.incInvocations();
                     // Reset the state of test
                     invokeReset(testInstance);
@@ -241,21 +226,7 @@ public class LinChecker0 {
                             })
                             .collect(Collectors.toList());
                     strandPool.clear();
-                    if (currentStrategy.isNeedChangeFirstThread()) {
-                        if (firstInteleavingThreadIndex == threadQueue.size() - 1) {
-                            if (startScheduleIndex == enumer.size() - 1) {
-                                needNextIteration = true;
-                            } else {
-                                threadQueue = enumer.get(++startScheduleIndex);
-                                firstInteleavingThreadIndex = 0;
-                            }
-                        } else {
-                            currentStrategy.setExecutionParameters(threadQueue, new Pair<>(threadQueue.get(firstInteleavingThreadIndex),
-                                    threadQueue.get(++firstInteleavingThreadIndex)));
-                        }
-
-                    }
-                    currentStrategy.prepareInvocation(0, false);
+                    currentStrategy.onEndInvocation();
                     // Check correctness& Throw an AssertionError if current execution
                     // is not linearizable and log invalid execution
                     StrategyHolder.threads.clear();
@@ -266,7 +237,7 @@ public class LinChecker0 {
                         throw new AssertionError("Non-linearizable execution detected, see log for details");
                     }
                 }
-                currentStrategy.printTraces();
+                currentStrategy.onEndIteration();
             }
             reportBuilder.result(TestReport.Result.SUCCESS);
         } catch (Throwable e) {
