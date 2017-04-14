@@ -45,26 +45,26 @@ public class StrandDriver implements Driver {
 
     @Suspendable
     @Override
-    public void park() {
+    public void block() {
         try {
             Strand.park();
         } catch (SuspendExecution suspendExecution) {
-            throw new IllegalStateException("Driver cant park thread", suspendExecution);
+            throw new IllegalStateException("Driver cant block thread", suspendExecution);
         }
     }
 
     @Override
-    public void unpark(int targetThreadId) {
+    public void unblock(int targetThreadId) {
         Strand.unpark(pool.getStrand(targetThreadId));
     }
 
     @Suspendable
     @Override
-    public void parkAndUnpark(int targetThreadId) {
+    public void blockAndUnblock(int targetThreadId) {
         try {
             Strand.parkAndUnpark(pool.getStrand(targetThreadId));
         } catch (SuspendExecution suspendExecution) {
-            throw new IllegalStateException("Driver can't park or unpark thread", suspendExecution);
+            throw new IllegalStateException("Driver can't block or unblock thread", suspendExecution);
         }
 
     }
