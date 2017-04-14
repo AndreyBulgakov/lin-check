@@ -29,9 +29,9 @@ public class EnumerationStrategy implements Strategy {
     private final String strandName = "LinCheckStrand";
 
     //    private ExecutionsStrandPool pool;
-    private StrandDriver driver;
+    private Driver driver;
 
-    public EnumerationStrategy(StrandDriver driver) {
+    public EnumerationStrategy(Driver driver) {
         this.driver = driver;
     }
 
@@ -150,9 +150,7 @@ public class EnumerationStrategy implements Strategy {
                     }
                 }
                 else {
-
                     int index = executionQueue.indexOf(currentThread) + 1;
-
                     if (index < executionQueue.size()) {
                         currentThread = executionQueue.get(executionQueue.indexOf(currentThread) + 1);
                         driver.switchOnEndOfThread(currentThread);
@@ -161,9 +159,7 @@ public class EnumerationStrategy implements Strategy {
                 }
             }
             else if (wasInterleavings == 2) {
-
                 int index = executionQueue.indexOf(currentThread) + 1;
-
                 if (index < executionQueue.size()) {
                     currentThread = executionQueue.get(executionQueue.indexOf(currentThread) + 1);
                     driver.switchOnEndOfThread(currentThread);
@@ -175,7 +171,7 @@ public class EnumerationStrategy implements Strategy {
             }
         }
     }
-    
+
     /**
      * Method contains logic for interleaving thread
      * @param currentPoint pair locationId, threadID
