@@ -29,6 +29,7 @@ import com.devexperts.dxlab.lincheck.report.Reporter;
 import com.devexperts.dxlab.lincheck.report.TestReport;
 import com.devexperts.dxlab.lincheck.strategy.EnumerationStrategy;
 import com.devexperts.dxlab.lincheck.strategy.RandomUnparkStrategy;
+import com.devexperts.dxlab.lincheck.strategy.StrandDriver;
 import com.devexperts.dxlab.lincheck.strategy.StrategyHolder;
 import javafx.util.Pair;
 
@@ -83,7 +84,7 @@ public class LinChecker0 {
 //            URL[] classLoaderUrls = ((URLClassPath) ucp.get(LinChecker.class.getClassLoader())).getURLs();
 //            // Loading instruments
 //            QuasarLoader urlClassLoader = new QuasarLoader(classLoaderUrls);
-//            Thread.currentThread().setContextClassLoader(urlClassLoader);
+//            Thread.getCurrentThreadId().setContextClassLoader(urlClassLoader);
 //            // Log
 //            Class<?> instrumentedLincheckClass = urlClassLoader.loadClass("com.devexperts.dxlab.lincheck.LinChecker0");
 //            Class<?> instrumentedTestInstance = urlClassLoader.loadClass(testInstance.getClass().getName());
@@ -106,8 +107,8 @@ public class LinChecker0 {
     void check() throws AssertionError {
         testConfigurations.forEach((testConfiguration) -> {
             try {
-//                checkImpl(testConfiguration);
-                checkImplFiber(testConfiguration);
+                checkImpl(testConfiguration);
+//                checkImplFiber(testConfiguration);
             } catch (InterruptedException | ClassNotFoundException | IllegalAccessException | InstantiationException e) {
                 throw new IllegalStateException(e);
             }
@@ -187,7 +188,8 @@ public class LinChecker0 {
             final Phaser phaser = new Phaser(testCfg.getThreads());
             //Set strategy and initialize transformation in classes
             ExecutionsStrandPool strandPool = new ExecutionsStrandPool(ExecutionsStrandPool.StrandType.FIBER);
-            EnumerationStrategy currentStrategy = new EnumerationStrategy(strandPool);
+            StrandDriver driver = new StrandDriver(strandPool);
+            EnumerationStrategy currentStrategy = new EnumerationStrategy(driver);
             StrategyHolder.setCurrentStrategy(currentStrategy);
             reportBuilder.strategy(currentStrategy.getClass().getSimpleName().replace("Strategy", ""));
 
@@ -219,7 +221,7 @@ public class LinChecker0 {
                 printIterationHeader(iteration, actorsPerThread);
                 // Create TestThreadExecution's
                 List<TestThreadExecution> testThreadExecutions = actorsPerThread.stream()
-                        .map(actors -> TestThreadExecutionGenerator.create(testInstance, phaser, actors, false, loader))
+                        .map(actors -> TestThreadExecutionGenerator.create(testInstance, new Phaser(1), actors, false, loader))
                         .collect(Collectors.toList());
                 Set<List<List<Result>>> possibleResultsSet = generatePossibleResults(actorsPerThread, testInstance, loader);
 
