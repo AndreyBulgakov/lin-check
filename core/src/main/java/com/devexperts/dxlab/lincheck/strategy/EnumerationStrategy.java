@@ -24,59 +24,17 @@ public class EnumerationStrategy implements Strategy {
     private volatile int currentThread;
     private volatile int wasInterleavings = 0;
     private volatile Pair<Integer, Integer> interleavingThreads;
-    private volatile List<Integer> executionQueue;
     private volatile boolean needInterleave = true;
     private volatile boolean needChangeFirstThread = false;
     private volatile List<CheckPoint> history = new ArrayList<>();
     private final String strandName = "LinCheckStrand";
-
-    //    private ExecutionsStrandPool pool;
+    private EnumerationStrategyHelper helper;
     private Driver driver;
 
     public EnumerationStrategy(Driver driver) {
         this.driver = driver;
     }
-
-
-//    public EnumerationStrategy(ExecutionsStrandPool pool) {
-//        this.pool = pool;
-//        this.driver = new StrandDriver(pool);
-//    }
-
-    //region ToDriver
-//    /**
-//     * Содержит логику для смены потока
-//     * @param n - номер нового потока
-//     */
-//    @Suspendable
-//    private void changeCurrentThreadTo(int n) {
-//        currentThread = n;
-//        Strand.unpark(pool.getStrand(currentThread - 1));
-//        try {
-//            Strand srt = pool.getStrand(currentThread - 1);
-//            Strand.parkAndUnpark(srt);
-//        } catch (SuspendExecution suspendExecution) {
-//            suspendExecution.printStackTrace();
-//        }
-//    }
-//
-//    private void switchEndOFThread(int n){
-//        currentThread = n;
-//        Strand.unpark(pool.getStrand(currentThread - 1));
-//    }
-//
-//    @Suspendable
-//    private void stopNeededThread(Strand th) {
-//        while (pool.getStrandId(th) + 1 != currentThread){
-//            try {
-//                Strand.park();
-//            } catch (SuspendExecution suspendExecution) {
-//                suspendExecution.printStackTrace();
-//            }
-//        }
-//    }
-    //endregion
-
+    
     //region Logic
     @Suspendable
     @Override
@@ -127,10 +85,10 @@ public class EnumerationStrategy implements Strategy {
                     needInterleave = false;
                     needChangeFirstThread = true;
                 }
-                int index = executionQueue.indexOf(currentThread) + 1;
+                int index = helper.threadQueue.indexOf(currentThread) + 1;
 
-                if (index < executionQueue.size()) {
-                    currentThread = executionQueue.get(executionQueue.indexOf(currentThread) + 1);
+                if (index < helper.threadQueue.size()) {
+                    currentThread = helper.threadQueue.get(helper.threadQueue.indexOf(currentThread) + 1);
                     driver.switchOnEndOfThread(currentThread);
 //                    switchEndOFThread(executionQueue.get(executionQueue.indexOf(currentThread) + 1));
                 }
@@ -145,26 +103,26 @@ public class EnumerationStrategy implements Strategy {
                     //currentThread = interleavingThreads.getKey();
                 }
                 else if (currentThread == interleavingThreads.getKey()) {
-                    int index = executionQueue.indexOf(currentThread) + 1;
-                    if (index < executionQueue.size() - 1) {
-                        currentThread = executionQueue.get(executionQueue.indexOf(currentThread) + 2);
+                    int index = helper.threadQueue.indexOf(currentThread) + 1;
+                    if (index < helper.threadQueue.size() - 1) {
+                        currentThread = helper.threadQueue.get(helper.threadQueue.indexOf(currentThread) + 2);
                         driver.switchOnEndOfThread(currentThread);
 //                        switchEndOFThread(executionQueue.get(executionQueue.indexOf(currentThread) + 2));
                     }
                 }
                 else {
-                    int index = executionQueue.indexOf(currentThread) + 1;
-                    if (index < executionQueue.size()) {
-                        currentThread = executionQueue.get(executionQueue.indexOf(currentThread) + 1);
+                    int index = helper.threadQueue.indexOf(currentThread) + 1;
+                    if (index < helper.threadQueue.size()) {
+                        currentThread = helper.threadQueue.get(helper.threadQueue.indexOf(currentThread) + 1);
                         driver.switchOnEndOfThread(currentThread);
 //                        switchEndOFThread(executionQueue.get(executionQueue.indexOf(currentThread) + 1));
                     }
                 }
             }
             else if (wasInterleavings == 2) {
-                int index = executionQueue.indexOf(currentThread) + 1;
-                if (index < executionQueue.size()) {
-                    currentThread = executionQueue.get(executionQueue.indexOf(currentThread) + 1);
+                int index = helper.threadQueue.indexOf(currentThread) + 1;
+                if (index < helper.threadQueue.size()) {
+                    currentThread = helper.threadQueue.get(helper.threadQueue.indexOf(currentThread) + 1);
                     driver.switchOnEndOfThread(currentThread);
 //                    switchEndOFThread(executionQueue.get(executionQueue.indexOf(currentThread) + 1));
                 }
@@ -275,7 +233,7 @@ public class EnumerationStrategy implements Strategy {
      */
     public void prepareInvocation(int firstThread, boolean needChangeFirstThread){
         needInterleave = true;
-        currentThread = executionQueue.get(0);
+        currentThread = helper.threadQueue.get(0);
         this.needChangeFirstThread = needChangeFirstThread;
         wasInterleavings = 0;
     }
@@ -295,14 +253,12 @@ public class EnumerationStrategy implements Strategy {
     }
 
     public void setExecutionParameters(List<Integer> queue, Pair<Integer, Integer> interleavedThreads) {
-        executionQueue = queue;
-        currentThread = executionQueue.get(0);
+        currentThread = helper.threadQueue.get(0);
         this.interleavingThreads = interleavedThreads;
         passedPaths = new HashMap<>();
         logger.println("Current queue of threads execution" + queue);
         logger.println("Current interleaving threads id's" + interleavedThreads);
     }
-
 
     public static ArrayList<Pair<Integer, Integer>> generateInterleavedPairs(int threadNumber) {
         ArrayList<Pair<Integer, Integer>> pairList = new ArrayList<>();
@@ -313,30 +269,7 @@ public class EnumerationStrategy implements Strategy {
         }
         return pairList;
     }
-
-    public static List<List<Integer>> threadPermutations(List<Integer> list) {
-
-        if (list.size() == 0) {
-            List<List<Integer>> result = new ArrayList<List<Integer>>();
-            result.add(new ArrayList<Integer>());
-            return result;
-        }
-
-        List<List<Integer>> returnMe = new ArrayList<List<Integer>>();
-        Integer firstElement = list.remove(0);
-        List<List<Integer>> recursiveReturn = threadPermutations(list);
-        for (List<Integer> li : recursiveReturn) {
-            for (int index = 0; index <= li.size(); index++) {
-                List<Integer> temp = new ArrayList<Integer>(li);
-                temp.add(index, firstElement);
-                returnMe.add(temp);
-            }
-        }
-        return returnMe;
-    }
     //endregion
-
-    private EnumerationStrategyHelper helper;
 
     public void beforeStartIteration() {
         helper = new EnumerationStrategyHelper(2);
@@ -361,9 +294,12 @@ public class EnumerationStrategy implements Strategy {
             if (helper.firstInteleavingThreadIndex == helper.threadQueue.size() - 1) {
                 if (helper.startScheduleIndex == helper.queueThreadExecutions.size() - 1) {
                     helper.needNextIteration = true;
-                } else {
+                }
+                else {
                     helper.threadQueue = helper.queueThreadExecutions.get(++helper.startScheduleIndex);
                     helper.firstInteleavingThreadIndex = 0;
+                    setExecutionParameters(helper.threadQueue, new Pair<>(helper.threadQueue.get(helper.firstInteleavingThreadIndex),
+                            helper.threadQueue.get(++helper.firstInteleavingThreadIndex)));
                 }
             } else {
                 setExecutionParameters(helper.threadQueue, new Pair<>(helper.threadQueue.get(helper.firstInteleavingThreadIndex),
@@ -435,7 +371,28 @@ public class EnumerationStrategy implements Strategy {
 
         public EnumerationStrategyHelper(int threadNumber) {
             List<Integer> list = IntStream.range(1, threadNumber + 1).boxed().collect(Collectors.toList());
-            queueThreadExecutions = EnumerationStrategy.threadPermutations(list);
+            queueThreadExecutions = threadPermutations(list);
+        }
+
+        public static List<List<Integer>> threadPermutations(List<Integer> list) {
+
+            if (list.size() == 0) {
+                List<List<Integer>> result = new ArrayList<List<Integer>>();
+                result.add(new ArrayList<Integer>());
+                return result;
+            }
+
+            List<List<Integer>> returnMe = new ArrayList<List<Integer>>();
+            Integer firstElement = list.remove(0);
+            List<List<Integer>> recursiveReturn = threadPermutations(list);
+            for (List<Integer> li : recursiveReturn) {
+                for (int index = 0; index <= li.size(); index++) {
+                    List<Integer> temp = new ArrayList<Integer>(li);
+                    temp.add(index, firstElement);
+                    returnMe.add(temp);
+                }
+            }
+            return returnMe;
         }
 
     }
