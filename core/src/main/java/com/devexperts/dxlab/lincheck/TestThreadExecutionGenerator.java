@@ -69,7 +69,7 @@ class TestThreadExecutionGenerator {
     private static final Method RESULT_CREATE_VALUE_RESULT = new Method("createValueResult", RESULT_TYPE, new Type[]{OBJECT_TYPE});
     private static final Method RESULT_CREATE_EXCEPTION_RESULT = new Method("createExceptionResult", RESULT_TYPE, new Type[]{CLASS_TYPE});
 
-    private static int generatedClassNumber = 0;
+    private static volatile int generatedClassNumber = 0;
 
     static {
         try {
