@@ -36,7 +36,7 @@ public class ExecutionsStrandPool {
      */
     ExecutionsStrandPool(final StrandType type) {
         this.strandType = type;
-        FiberExecutorScheduler exe = new FiberExecutorScheduler("demo", Runnable::run);
+        FiberExecutorScheduler exe = new FiberExecutorScheduler("executions-pool", Runnable::run);
         if (type == StrandType.FIBER)
             this.FACTORY = callable -> {
                 Fiber<Result[]> strand = new Fiber<>(exe, callable::call);
@@ -104,7 +104,6 @@ public class ExecutionsStrandPool {
         isRuning = true;
         for (Strand strand : pool) {
                 strand.start();
-//            if (!strand.isAlive())
         }
         return futureTasks;
     }
