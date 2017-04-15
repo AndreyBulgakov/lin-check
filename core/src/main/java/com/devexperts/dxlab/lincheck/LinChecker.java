@@ -72,7 +72,13 @@ public class LinChecker {
             Object newInstance = instrumentedTestInstance.newInstance();
             Method m = instrumentedLincheckClass.getMethod("check", Object.class);
             m.invoke(null, newInstance);
-        } catch (NoSuchMethodException | InstantiationException | InvocationTargetException | NoSuchFieldException | ClassNotFoundException | IllegalAccessException e) {
+        } catch (InvocationTargetException e) {
+            if (e.getCause() instanceof AssertionError) {
+                throw ((AssertionError) e.getCause());
+            } else {
+                e.printStackTrace();
+            }
+        } catch (NoSuchMethodException | InstantiationException | NoSuchFieldException | ClassNotFoundException | IllegalAccessException e) {
             e.printStackTrace();
         }
 
