@@ -25,6 +25,7 @@ package com.devexperts.dxlab.lincheck;
 import sun.misc.URLClassPath;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -71,7 +72,7 @@ public class LinChecker {
             Object newInstance = instrumentedTestInstance.newInstance();
             Method m = instrumentedLincheckClass.getMethod("check", Object.class);
             m.invoke(null, newInstance);
-        } catch (Exception e) {
+        } catch (NoSuchMethodException | InstantiationException | InvocationTargetException | NoSuchFieldException | ClassNotFoundException | IllegalAccessException e) {
             e.printStackTrace();
         }
 
