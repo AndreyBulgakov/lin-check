@@ -22,7 +22,6 @@ package com.devexperts.dxlab.lincheck;
  * #L%
  */
 
-import co.paralleluniverse.common.util.Exceptions;
 import co.paralleluniverse.fibers.Suspendable;
 import co.paralleluniverse.fibers.instrument.SuspendableHelper;
 import com.devexperts.dxlab.lincheck.report.Reporter;
@@ -189,8 +188,7 @@ public class LinChecker0 {
             reportBuilder.strategy(currentStrategy.getClass().getSimpleName().replace("Strategy", ""));
 
             currentStrategy.beforeStartIteration();
-            for (int iteration = 1; iteration <= 1; iteration++) {
-
+            for (int iteration = 1; iteration <= testCfg.getIterations(); iteration++) {
                 currentStrategy.onStartIteration();
                 //индекс потока, в котором делаем прерывание
                 reportBuilder.incIterations();
@@ -240,8 +238,6 @@ public class LinChecker0 {
                 currentStrategy.onEndIteration();
             }
             reportBuilder.result(TestReport.Result.SUCCESS);
-        } catch (Throwable e) {
-            throw Exceptions.rethrow(e);
         } finally {
             reportBuilder.time(Instant.now().toEpochMilli() - startTime.toEpochMilli());
             writeReportIfNeeded(reportBuilder);
@@ -265,14 +261,6 @@ public class LinChecker0 {
             System.out.println("Number of iterations: " + testCfg.getIterations());
             System.out.println("Number of invocations per iteration: " + testCfg.getInvocationsPerIteration());
 
-            // Run iterations
-//            IntStream.rangeClosed(1, testCfg.getIterations()).parallel().forEach(iteration -> {
-//                try {
-//                    inParallel(iteration, reportBuilder, testCfg);
-//                } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
-//                    throw Exceptions.rethrow(e);
-//                }
-//            });
             for (int iteration = 0; iteration < testCfg.getIterations(); iteration++) {
                 reportBuilder.incIterations();
 
@@ -339,58 +327,6 @@ public class LinChecker0 {
             }
         }
     }
-//
-//    public void inParallel(int iteration, TestReport.Builder reportBuilder, CTestConfiguration testCfg) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-//        reportBuilder.incIterations();
-//
-//        //Set strategy and initialize transformation in classes
-//        ExecutionsStrandPool strandPool = new ExecutionsStrandPool(ExecutionsStrandPool.StrandType.FIBER);
-//        StrategyHolder.setCurrentStrategy(new RandomUnparkStrategy());
-//
-//        //Create loader, load and instantiate testInstance by this loader
-//        final ExecutionClassLoader loader = new ExecutionClassLoader(this.getClass().getClassLoader(), testClassName);
-////                final ExecutionClassLoader loader = new ExecutionClassLoader(testClassName);
-//        final Object testInstance = loader.loadClass(testClassName).newInstance();
-//
-//        List<List<Actor>> actorsPerThread = generateActors(testCfg);
-//        printIterationHeader(iteration, actorsPerThread);
-//        // Create TestThreadExecution's
-//        List<TestThreadExecution> testThreadExecutions = actorsPerThread.stream()
-//                .map(actors -> TestThreadExecutionGenerator.create(testInstance, new Phaser(1), actors, false, loader))
-////                    .map(actors -> TestThreadExecutionGenerator.create(testInstance, phaser, actors, false, loader))
-//                .collect(Collectors.toList());
-//        Set<List<List<Result>>> possibleResultsSet = generatePossibleResults(actorsPerThread, testInstance, loader);
-//        // Run invocations
-//        for (int invocation = 1; invocation <= testCfg.getInvocationsPerIteration(); invocation++) {
-//            reportBuilder.incInvocations();
-//            // Reset the state of test
-//            invokeReset(testInstance);
-//            // Specify waits
-//            int maxWait = (int) ((float) invocation * MAX_WAIT / testCfg.getInvocationsPerIteration()) + 1;
-//            setWaits(actorsPerThread, testThreadExecutions, maxWait);
-//            // Run multithreaded test and get operation results for each thread
-//            List<List<Result>> results = strandPool
-//                    .add(testThreadExecutions)
-//                    .invokeAll().stream()
-//                    .map(f -> {
-//                        try {
-//                            return Arrays.asList(f.get());
-//                        } catch (ExecutionException | InterruptedException e) {
-//                            throw new IllegalStateException(e);
-//                        }
-//                    })
-//                    .collect(Collectors.toList());
-//            strandPool.clear();
-//            // Check correctness& Throw an AssertionError if current execution
-//            // is not linearizable and log invalid execution
-//            System.out.println(results);
-//            if (!possibleResultsSet.contains(results)) {
-//                System.out.println("Iteration Failed");
-//                reportBuilder.result(TestReport.Result.FAILURE);
-//                throw new AssertionError("Non-linearizable execution detected, see log for details");
-//            }
-//        }
-//    }
 
     private void writeReportIfNeeded(TestReport.Builder reportBuilder) {
         if (WRITE_REPORT) {
