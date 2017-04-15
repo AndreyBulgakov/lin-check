@@ -34,7 +34,7 @@ public class StrandDriver implements Driver {
     @Suspendable
     @Override
     public void waitFor(int targetThreadId) {
-        while (getCurrentThreadId() + 1 != targetThreadId) {
+        if (getCurrentThreadId() + 1 != targetThreadId) {
             try {
                 Strand.park();
             } catch (SuspendExecution suspendExecution) {
