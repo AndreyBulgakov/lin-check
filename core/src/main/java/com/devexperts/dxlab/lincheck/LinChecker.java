@@ -57,6 +57,7 @@ public class LinChecker {
     public static void check(Object testInstance) throws AssertionError {
 //        System.out.println(testInstance.getClass().getAnnotations()[0].getClass());
 //        LinChecker0.check(testInstance);
+//        QuasarInstrumentor
         try {
             // Get current URLs from parrent classLoader
             Field ucp = URLClassLoader.class.getDeclaredField("ucp");
@@ -72,13 +73,15 @@ public class LinChecker {
             Object newInstance = instrumentedTestInstance.newInstance();
             Method m = instrumentedLincheckClass.getMethod("check", Object.class);
             m.invoke(null, newInstance);
-        } catch (InvocationTargetException e) {
-            if (e.getCause() instanceof AssertionError) {
-                throw ((AssertionError) e.getCause());
-            } else {
-                e.printStackTrace();
-            }
-        } catch (NoSuchMethodException | InstantiationException | NoSuchFieldException | ClassNotFoundException | IllegalAccessException e) {
+        }
+//        catch (InvocationTargetException e) {
+//            if (e.getCause() instanceof AssertionError) {
+//                throw ((AssertionError) e.getCause());
+//            } else {
+//                e.printStackTrace();
+//            }
+//        }
+        catch (InvocationTargetException | NoSuchMethodException | InstantiationException | NoSuchFieldException | ClassNotFoundException | IllegalAccessException e) {
             e.printStackTrace();
         }
 

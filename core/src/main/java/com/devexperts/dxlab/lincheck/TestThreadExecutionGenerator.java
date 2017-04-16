@@ -24,10 +24,7 @@ package com.devexperts.dxlab.lincheck;
 
 import com.devexperts.dxlab.lincheck.strategy.Strategy;
 import com.devexperts.dxlab.lincheck.strategy.StrategyHolder;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.Type;
+import org.objectweb.asm.*;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 import org.objectweb.asm.commons.TryCatchBlockSorter;
@@ -134,6 +131,9 @@ class TestThreadExecutionGenerator {
                 new TryCatchBlockSorter(cv.visitMethod(access, m.getName(), m.getDescriptor(), null, null),
                         access, m.getName(), m.getDescriptor(), null, null)
         );
+        AnnotationVisitor av0 = mv.visitAnnotation("Lco/paralleluniverse/fibers/Suspendable;", true);
+        av0.visitEnd();
+
         mv.visitCode();
         // Create Result[] array and store it to a local variable
         int resLocal = createResultArray(mv, actors.size());

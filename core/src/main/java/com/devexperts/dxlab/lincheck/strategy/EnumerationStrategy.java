@@ -1,6 +1,27 @@
 package com.devexperts.dxlab.lincheck.strategy;
 
-import co.paralleluniverse.fibers.Suspendable;
+/*
+ * #%L
+ * core
+ * %%
+ * Copyright (C) 2015 - 2017 Devexperts, LLC
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-3.0.html>.
+ * #L%
+ */
+
 import javafx.util.Pair;
 
 import java.io.IOException;
@@ -28,7 +49,8 @@ public class EnumerationStrategy implements Strategy {
     private volatile boolean needChangeFirstThread = false;
     private volatile List<CheckPoint> history = new ArrayList<>();
     private final String strandName = "LinCheckStrand";
-    private EnumerationStrategyHelper helper;
+    //TODO delete threadNumber2 and initialization
+    private EnumerationStrategyHelper helper = new EnumerationStrategyHelper(2);
     private Driver driver;
 
     public EnumerationStrategy(Driver driver) {
@@ -36,7 +58,7 @@ public class EnumerationStrategy implements Strategy {
     }
     
     //region Logic
-    @Suspendable
+//    @Suspendable
     @Override
     public void onSharedVariableRead(int location) {
         if (driver.getCurrentThreadName().equals(strandName)) {
@@ -53,7 +75,7 @@ public class EnumerationStrategy implements Strategy {
         }
     }
 
-    @Suspendable
+    //    @Suspendable
     @Override
     public void onSharedVariableWrite(int location) {
         if (driver.getCurrentThreadName().equals(strandName)) {
@@ -69,7 +91,7 @@ public class EnumerationStrategy implements Strategy {
         }
     }
 
-    @Suspendable
+    //    @Suspendable
     @Override
     public void endOfThread() {
         if (driver.getCurrentThreadName().equals(strandName)) {
@@ -137,7 +159,7 @@ public class EnumerationStrategy implements Strategy {
      * Method contains logic for interleaving thread
      * @param currentPoint pair locationId, threadID
      */
-    @Suspendable
+//    @Suspendable
     private void onSharedVariableAccess(CheckPoint currentPoint) {
         if (currentThread == interleavingThreads.getKey() || currentThread == interleavingThreads.getValue()) {
             if (needInterleave) {

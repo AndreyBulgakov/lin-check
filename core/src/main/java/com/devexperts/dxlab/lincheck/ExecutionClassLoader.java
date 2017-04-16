@@ -1,7 +1,6 @@
 package com.devexperts.dxlab.lincheck;
 
 import co.paralleluniverse.fibers.instrument.QuasarInstrumentor;
-import co.paralleluniverse.fibers.instrument.Retransform;
 import com.devexperts.dxlab.lincheck.transformers.BeforeSharedVariableClassVisitor;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -71,7 +70,8 @@ class ExecutionClassLoader extends ClassLoader {
             cr.accept(cv, ClassReader.SKIP_FRAMES);
             // Get transformed bytecode
             byte[] resultBytecode = cw.toByteArray();
-            resultBytecode = instrumentor.instrumentClass(this, name, resultBytecode);
+            //TODO classes not instrumented by quasar.
+            resultBytecode = instrumentor.instrumentClass(getParent(), name, resultBytecode);
             result = defineClass(name, resultBytecode, 0, resultBytecode.length);
             // Save it to cache and resources
             resources.put(name, resultBytecode);
@@ -107,14 +107,21 @@ class ExecutionClassLoader extends ClassLoader {
                                 !className.startsWith("com.devexperts.dxlab.lincheck.libtest.")
                         ||
                         className.startsWith("sun.") ||
-                        className.startsWith("co.paralleluniverse.fibers.instrument.") ||
+//                        className.startsWith("co.paralleluniverse.fibers.instrument.") ||
+                        className.startsWith("co.paralleluniverse.fibers") ||
                         className.startsWith("java.");
                         // TODO let's transform java.util.concurrent
     }
 
     Class<? extends TestThreadExecution> defineTestThreadExecution(String className, byte[] bytecode) {
-        Retransform.addWaiver(className, "call");
-        bytecode = instrumentor.instrumentClass(this, className, bytecode);
+//        Retransform.addWaiver(className, "call");
+//                try {
+//            FileOutputStream stream = new FileOutputStream(className+".class");
+//            stream.write(bytecode);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+        bytecode = instrumentor.instrumentClass(getParent(), className, bytecode);
         return (Class<? extends TestThreadExecution>) super.defineClass(className, bytecode, 0, bytecode.length);
     }
 
