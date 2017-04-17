@@ -175,16 +175,17 @@ public class LinChecker0 {
         // Fixed thread pool executor to run TestThreadExecution
         //ExecutorService pool = Executors.newFixedThreadPool(testCfg.getThreads());
         // Store start time for counting performance metrics
+        final ExecutionsStrandPool.StrandType type = ExecutionsStrandPool.StrandType.FIBER;
         Instant startTime = Instant.now();
         // Create report builder
         TestReport.Builder reportBuilder = new TestReport.Builder(testCfg)
                 .name(testClassName);
+        ExecutionsStrandPool strandPool = new ExecutionsStrandPool(type);
         try {
             // Reusable phaser
             final Phaser phaser = new Phaser(testCfg.getThreads());
             //Set strategy and initialize transformation in classes
-            ExecutionsStrandPool strandPool = new ExecutionsStrandPool(ExecutionsStrandPool.StrandType.FIBER);
-            Driver driver = new StrandDriver(strandPool);
+            StrandDriver driver = new StrandDriver(strandPool);
             EnumerationStrategy currentStrategy = new EnumerationStrategy(driver);
             StrategyHolder.setCurrentStrategy(currentStrategy);
             reportBuilder.strategy(currentStrategy.getClass().getSimpleName().replace("Strategy", ""));
@@ -226,6 +227,7 @@ public class LinChecker0 {
                             })
                             .collect(Collectors.toList());
                     strandPool.clear();
+                    driver.setPool(new ExecutionsStrandPool(type));
                     currentStrategy.onEndInvocation();
                     // Check correctness& Throw an AssertionError if current execution
                     // is not linearizable and log invalid execution

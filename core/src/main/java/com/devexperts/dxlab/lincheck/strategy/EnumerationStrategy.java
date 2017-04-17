@@ -22,6 +22,7 @@ package com.devexperts.dxlab.lincheck.strategy;
  * #L%
  */
 
+import co.paralleluniverse.fibers.Suspendable;
 import javafx.util.Pair;
 
 import java.io.IOException;
@@ -56,9 +57,9 @@ public class EnumerationStrategy implements Strategy {
     public EnumerationStrategy(Driver driver) {
         this.driver = driver;
     }
-    
+
     //region Logic
-//    @Suspendable
+    @Suspendable
     @Override
     public void onSharedVariableRead(int location) {
         if (driver.getCurrentThreadName().equals(strandName)) {
@@ -75,7 +76,7 @@ public class EnumerationStrategy implements Strategy {
         }
     }
 
-    //    @Suspendable
+    @Suspendable
     @Override
     public void onSharedVariableWrite(int location) {
         if (driver.getCurrentThreadName().equals(strandName)) {
@@ -91,7 +92,7 @@ public class EnumerationStrategy implements Strategy {
         }
     }
 
-    //    @Suspendable
+    @Suspendable
     @Override
     public void endOfThread() {
         if (driver.getCurrentThreadName().equals(strandName)) {
@@ -159,7 +160,7 @@ public class EnumerationStrategy implements Strategy {
      * Method contains logic for interleaving thread
      * @param currentPoint pair locationId, threadID
      */
-//    @Suspendable
+    @Suspendable
     private void onSharedVariableAccess(CheckPoint currentPoint) {
         if (currentThread == interleavingThreads.getKey() || currentThread == interleavingThreads.getValue()) {
             if (needInterleave) {

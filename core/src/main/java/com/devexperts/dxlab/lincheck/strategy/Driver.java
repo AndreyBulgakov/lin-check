@@ -23,31 +23,33 @@ package com.devexperts.dxlab.lincheck.strategy;
  */
 
 
+import co.paralleluniverse.fibers.Suspendable;
+
 public interface Driver {
-    //    @Suspendable
+    @Suspendable
     void switchThread(int targetThreadId);
 
-    //    @Suspendable
+    @Suspendable
     void switchOnEndOfThread(int targetThreadId);
 
-    //    @Suspendable
+    @Suspendable
     void waitFor(int targetThreadId);
 
-    //    @Suspendable
+    @Suspendable
     void block();
 
-    //    @Suspendable
+    @Suspendable
     void unblock(int targetThreadId);
 
-    //    @Suspendable
+    @Suspendable
     void blockAndUnblock(int targetThreadId);
 
-    //    @Suspendable
+    @Suspendable
     void yield();
 
-    //    @Suspendable
+    @Suspendable
     int getCurrentThreadId();
 
-    //    @Suspendable
+    @Suspendable
     String getCurrentThreadName();
 }

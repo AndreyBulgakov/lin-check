@@ -30,12 +30,15 @@ import com.devexperts.dxlab.lincheck.ExecutionsStrandPool;
 //TODO delete +1 -1 in targetThreadId
 public class StrandDriver implements Driver {
 
-    private final ExecutionsStrandPool pool;
+    private ExecutionsStrandPool pool;
 
     public StrandDriver(ExecutionsStrandPool pool) {
         this.pool = pool;
     }
 
+    public void setPool(ExecutionsStrandPool pool) {
+        this.pool = pool;
+    }
     @Suspendable
     @Override
     public void switchThread(int targetThreadId) {
