@@ -213,7 +213,7 @@ public class LinChecker0 {
                     reportBuilder.incInvocations();
                     // Reset the state of test
                     invokeReset(testInstance);
-
+                    System.out.println("111");
                     List<List<Result>> results = strandPool
                             .add(testThreadExecutions)
                             .invokeAll().stream()
