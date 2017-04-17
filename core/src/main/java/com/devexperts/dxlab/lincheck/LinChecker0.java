@@ -22,6 +22,7 @@ package com.devexperts.dxlab.lincheck;
  * #L%
  */
 
+import co.paralleluniverse.common.util.Exceptions;
 import co.paralleluniverse.fibers.Suspendable;
 import co.paralleluniverse.fibers.instrument.SuspendableHelper;
 import com.devexperts.dxlab.lincheck.report.Reporter;
@@ -104,6 +105,7 @@ public class LinChecker0 {
                 checkImpl(testConfiguration);
 //                checkImplFiber(testConfiguration);
             } catch (InterruptedException | ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+                e.printStackTrace();
                 throw new IllegalStateException(e);
             }
         });
@@ -179,15 +181,15 @@ public class LinChecker0 {
                 .name(testClassName);
         try {
             // Reusable phaser
-            final Phaser phaser = new Phaser(testCfg.getThreads());
+            final Phaser phaser = new Phaser(1);
             //Set strategy and initialize transformation in classes
-            ExecutionsStrandPool strandPool = new ExecutionsStrandPool(ExecutionsStrandPool.StrandType.FIBER);
+            ExecutionsStrandPool strandPool = new ExecutionsStrandPool(ExecutionsStrandPool.StrandType.THREAD);
             Driver driver = new StrandDriver(strandPool);
             EnumerationStrategy currentStrategy = new EnumerationStrategy(driver);
             StrategyHolder.setCurrentStrategy(currentStrategy);
             reportBuilder.strategy(currentStrategy.getClass().getSimpleName().replace("Strategy", ""));
 
-            currentStrategy.beforeStartIteration();
+            currentStrategy.beforeStartIteration(testCfg.getThreads());
             for (int iteration = 1; iteration <= testCfg.getIterations(); iteration++) {
                 currentStrategy.onStartIteration();
                 //индекс потока, в котором делаем прерывание
@@ -238,6 +240,9 @@ public class LinChecker0 {
                 currentStrategy.onEndIteration();
             }
             reportBuilder.result(TestReport.Result.SUCCESS);
+        } catch (Throwable e) {
+            e.printStackTrace();
+            throw Exceptions.rethrow(e);
         } finally {
             reportBuilder.time(Instant.now().toEpochMilli() - startTime.toEpochMilli());
             writeReportIfNeeded(reportBuilder);
