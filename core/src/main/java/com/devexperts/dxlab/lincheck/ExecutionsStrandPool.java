@@ -17,7 +17,7 @@ public class ExecutionsStrandPool {
     private final ArrayList<Strand> pool = new ArrayList<>();
     private final List<Future<Result[]>> futureTasks = new ArrayList<>();
     private final StrandType strandType;
-    private final CallableStrandFactory FACTORY;
+    private CallableStrandFactory FACTORY;
     private boolean isRuning = false;
 
     public enum StrandType {
@@ -36,26 +36,8 @@ public class ExecutionsStrandPool {
      */
     ExecutionsStrandPool(final StrandType type) {
         this.strandType = type;
-        FiberExecutorScheduler exe = new FiberExecutorScheduler("executions-pool", Runnable::run);
-        if (type == StrandType.FIBER)
-            this.FACTORY = callable -> {
-                Fiber<Result[]> strand = new Fiber<>(exe, callable::call);
-                String name = "LinCheckStrand";
-                strand.setName(name);
-                futureTasks.add(strand);
-                pool.add(strand);
-                return strand;
-            };
-        else
-            this.FACTORY = callable -> {
-                FutureTask<Result[]> futureTask = new FutureTask<>(callable);
-                Strand strand = Strand.of(new Thread(futureTask));
-                String name = "LinCheckStrand";
-                strand.setName(name);
-                futureTasks.add(futureTask);
-                pool.add(strand);
-                return strand;
-            };
+        createFactory();
+
     }
 
     public ExecutionsStrandPool add(Collection<? extends TestThreadExecution> tasks) {
@@ -111,7 +93,31 @@ public class ExecutionsStrandPool {
     public void clear() {
         pool.clear();
         futureTasks.clear();
+        createFactory();
         isRuning = false;
+    }
+
+    private void createFactory() {
+        FiberExecutorScheduler exe = new FiberExecutorScheduler("executions-pool", Runnable::run);
+        if (this.strandType == StrandType.FIBER)
+            this.FACTORY = callable -> {
+                Fiber<Result[]> strand = new Fiber<>(exe, callable::call);
+                String name = "LinCheckStrand";
+                strand.setName(name);
+                futureTasks.add(strand);
+                pool.add(strand);
+                return strand;
+            };
+        else
+            this.FACTORY = callable -> {
+                FutureTask<Result[]> futureTask = new FutureTask<>(callable);
+                Strand strand = Strand.of(new Thread(futureTask));
+                String name = "LinCheckStrand";
+                strand.setName(name);
+                futureTasks.add(futureTask);
+                pool.add(strand);
+                return strand;
+            };
     }
 
     public boolean isTerminated() {
@@ -131,6 +137,7 @@ public class ExecutionsStrandPool {
     public boolean isDone() {
         return pool.stream().allMatch(Strand::isDone);
     }
+
 
     private interface CallableStrandFactory {
         Strand newStrand(TestThreadExecution callable);
