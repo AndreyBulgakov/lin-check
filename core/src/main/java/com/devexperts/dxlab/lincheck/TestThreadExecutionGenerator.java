@@ -135,6 +135,8 @@ class TestThreadExecutionGenerator {
                         access, m.getName(), m.getDescriptor(), null, null)
         );
         mv.visitCode();
+        mv. invokeStatic(Type.getType(StrategyHolder.class), new Method("getCurrentStrategy", Type.getType(Strategy.class), new Type[]{}));
+        mv.invokeInterface(Type.getType(Strategy.class), new Method("startOfThread", Type.VOID_TYPE, NO_ARGS));
         // Create Result[] array and store it to a local variable
         int resLocal = createResultArray(mv, actors.size());
         // Wait for other threads
