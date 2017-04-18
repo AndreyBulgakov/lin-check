@@ -23,18 +23,19 @@ package com.devexperts.dxlab.lincheck;
  */
 
 import co.paralleluniverse.common.util.Exceptions;
+import co.paralleluniverse.fibers.Suspendable;
+import co.paralleluniverse.fibers.instrument.SuspendableHelper;
 import com.devexperts.dxlab.lincheck.report.Reporter;
 import com.devexperts.dxlab.lincheck.report.TestReport;
-import com.devexperts.dxlab.lincheck.strategy.Driver;
-import com.devexperts.dxlab.lincheck.strategy.EnumerationStrategy;
-import com.devexperts.dxlab.lincheck.strategy.StrandDriver;
-import com.devexperts.dxlab.lincheck.strategy.StrategyHolder;
+import com.devexperts.dxlab.lincheck.strategy.*;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
 import java.util.stream.Collectors;
 
@@ -183,7 +184,7 @@ public class LinChecker0 {
         ExecutionsStrandPool strandPool = new ExecutionsStrandPool(type);
         try {
             // Reusable phaser
-            final Phaser phaser = new Phaser(testCfg.getThreads());
+            final Phaser phaser = new Phaser(1);
             //Set strategy and initialize transformation in classes
             StrandDriver driver = new StrandDriver(strandPool);
             EnumerationStrategy currentStrategy = new EnumerationStrategy(driver);
@@ -214,7 +215,7 @@ public class LinChecker0 {
                     reportBuilder.incInvocations();
                     // Reset the state of test
                     invokeReset(testInstance);
-                    System.out.println("111");
+
                     List<List<Result>> results = strandPool
                             .add(testThreadExecutions)
                             .invokeAll().stream()

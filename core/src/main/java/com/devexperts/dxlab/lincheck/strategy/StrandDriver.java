@@ -1,27 +1,5 @@
 package com.devexperts.dxlab.lincheck.strategy;
 
-/*
- * #%L
- * core
- * %%
- * Copyright (C) 2015 - 2017 Devexperts, LLC
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Lesser Public License for more details.
- * 
- * You should have received a copy of the GNU General Lesser Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/lgpl-3.0.html>.
- * #L%
- */
-
 import co.paralleluniverse.fibers.SuspendExecution;
 import co.paralleluniverse.fibers.Suspendable;
 import co.paralleluniverse.strands.Strand;
@@ -32,13 +10,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 //TODO delete +1 -1 in targetThreadId
 public class StrandDriver implements Driver {
 
-    public ExecutionsStrandPool pool;
+    public final ExecutionsStrandPool pool;
 
     public StrandDriver(ExecutionsStrandPool pool) {
-        this.pool = pool;
-    }
-
-    public void setPool(ExecutionsStrandPool pool) {
         this.pool = pool;
     }
 
@@ -48,7 +22,7 @@ public class StrandDriver implements Driver {
         try {
             Strand srt = pool.getStrand(targetThreadId.get() - 1);
             Strand.unpark(srt);
-            while ((getCurrentThreadId() + 1) != targetThreadId.get()) {
+            while ((getCurrentThreadId() + 1) != targetThreadId.get()){
                 Strand.park();
             }
         } catch (SuspendExecution suspendExecution) {
@@ -67,7 +41,7 @@ public class StrandDriver implements Driver {
     public void waitFor(AtomicInteger targetThreadId) {
         if (getCurrentThreadId() + 1 != targetThreadId.get()) {
             try {
-                while ((getCurrentThreadId() + 1) != targetThreadId.get()) {
+                while ((getCurrentThreadId() + 1) != targetThreadId.get()){
                     Strand.park();
                 }
             } catch (SuspendExecution suspendExecution) {
