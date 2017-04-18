@@ -1,7 +1,0 @@
-com.devexperts.dxlab.lincheck.strategy.Driver.block()V
-com.devexperts.dxlab.lincheck.strategy.Driver.blockAndUnblock(I)V
-com.devexperts.dxlab.lincheck.strategy.Driver.switchThread(I)V
-com.devexperts.dxlab.lincheck.strategy.Driver.waitFor(I)V
-com.devexperts.dxlab.lincheck.strategy.Driver.yield()V
-com.devexperts.dxlab.lincheck.strategy.Strategy.onSharedVariableRead(I)V
-com.devexperts.dxlab.lincheck.strategy.Strategy.onSharedVariableWrite(I)V

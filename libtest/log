@@ -1,0 +1,120 @@
+Current queue of threads execution[1, 2]
+Current interleaving threads id's1=2
+Iteration №1 Invocation №1 FirstCheckPointnull
+park thread with id1
+		Enter on SharedRead
+		Thread id: 1 currentID: 1
+		CurrentLocation id2
+park thread with id2
+		Enter on SharedRead
+		Thread id: 2 currentID: 2
+		CurrentLocation id2
+		Enter on SharedRead
+		Thread id: 1 currentID: 1
+		CurrentLocation id3
+was Interleavings = 2
+		Enter on SharedWrite
+		Thread id: 1 currentID: 1
+		CurrentLocation id4
+was Interleavings = 2
+		Enter on SharedRead
+		Thread id: 1 currentID: 1
+		CurrentLocation id5
+was Interleavings = 2
+		Enter on SharedRead
+		Thread id: 1 currentID: 1
+		CurrentLocation id2
+was Interleavings = 2
+		Enter on SharedRead
+		Thread id: 1 currentID: 1
+		CurrentLocation id3
+was Interleavings = 2
+		Enter on SharedWrite
+		Thread id: 1 currentID: 1
+		CurrentLocation id4
+was Interleavings = 2
+		Enter on SharedRead
+		Thread id: 1 currentID: 1
+		CurrentLocation id5
+was Interleavings = 2
+		Enter on SharedRead
+		Thread id: 1 currentID: 1
+		CurrentLocation id2
+was Interleavings = 2
+		Enter on SharedRead
+		Thread id: 1 currentID: 1
+		CurrentLocation id3
+was Interleavings = 2
+		Enter on SharedWrite
+		Thread id: 1 currentID: 1
+		CurrentLocation id4
+was Interleavings = 2
+		Enter on SharedRead
+		Thread id: 1 currentID: 1
+		CurrentLocation id5
+was Interleavings = 2
+		Enter on SharedRead
+		Thread id: 1 currentID: 1
+		CurrentLocation id2
+was Interleavings = 2
+		Enter on SharedRead
+		Thread id: 1 currentID: 1
+		CurrentLocation id3
+was Interleavings = 2
+		Enter on SharedWrite
+		Thread id: 1 currentID: 1
+		CurrentLocation id4
+was Interleavings = 2
+		Enter on SharedRead
+		Thread id: 1 currentID: 1
+		CurrentLocation id5
+was Interleavings = 2
+	EndOfThread 1with interleavings:2
+		Enter on SharedRead
+		Thread id: 2 currentID: 2
+		CurrentLocation id3
+was Interleavings = 2
+		Enter on SharedWrite
+		Thread id: 2 currentID: 2
+		CurrentLocation id4
+was Interleavings = 2
+		Enter on SharedRead
+		Thread id: 2 currentID: 2
+		CurrentLocation id5
+was Interleavings = 2
+		Enter on SharedRead
+		Thread id: 2 currentID: 2
+		CurrentLocation id2
+was Interleavings = 2
+		Enter on SharedRead
+		Thread id: 2 currentID: 2
+		CurrentLocation id3
+was Interleavings = 2
+		Enter on SharedWrite
+		Thread id: 2 currentID: 2
+		CurrentLocation id4
+was Interleavings = 2
+		Enter on SharedRead
+		Thread id: 2 currentID: 2
+		CurrentLocation id5
+was Interleavings = 2
+		Enter on SharedRead
+		Thread id: 2 currentID: 2
+		CurrentLocation id2
+was Interleavings = 2
+		Enter on SharedRead
+		Thread id: 2 currentID: 2
+		CurrentLocation id3
+was Interleavings = 2
+		Enter on SharedWrite
+		Thread id: 2 currentID: 2
+		CurrentLocation id4
+was Interleavings = 2
+		Enter on SharedRead
+		Thread id: 2 currentID: 2
+		CurrentLocation id5
+was Interleavings = 2
+	EndOfThread 2with interleavings:2
+Iteration №1 Invocation №2 FirstCheckPointCheckPoint<2, 1>
+park thread with id0
+park thread with id0

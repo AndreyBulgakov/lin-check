@@ -25,15 +25,17 @@ package com.devexperts.dxlab.lincheck.strategy;
 
 import co.paralleluniverse.fibers.Suspendable;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public interface Driver {
     @Suspendable
-    void switchThread(int targetThreadId);
+    void switchThread(AtomicInteger targetThreadId);
 
     @Suspendable
-    void switchOnEndOfThread(int targetThreadId);
+    void switchOnEndOfThread(AtomicInteger targetThreadId);
 
     @Suspendable
-    void waitFor(int targetThreadId);
+    void waitFor(AtomicInteger targetThreadId);
 
     @Suspendable
     void block();
