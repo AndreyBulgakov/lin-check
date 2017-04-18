@@ -27,10 +27,12 @@ import co.paralleluniverse.fibers.Suspendable;
 import co.paralleluniverse.strands.Strand;
 import com.devexperts.dxlab.lincheck.ExecutionsStrandPool;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 //TODO delete +1 -1 in targetThreadId
 public class StrandDriver implements Driver {
 
-    private ExecutionsStrandPool pool;
+    public ExecutionsStrandPool pool;
 
     public StrandDriver(ExecutionsStrandPool pool) {
         this.pool = pool;
@@ -39,29 +41,35 @@ public class StrandDriver implements Driver {
     public void setPool(ExecutionsStrandPool pool) {
         this.pool = pool;
     }
+
     @Suspendable
     @Override
-    public void switchThread(int targetThreadId) {
+    public void switchThread(AtomicInteger targetThreadId) {
         try {
-            Strand srt = pool.getStrand(targetThreadId - 1);
-            Strand.parkAndUnpark(srt);
+            Strand srt = pool.getStrand(targetThreadId.get() - 1);
+            Strand.unpark(srt);
+            while ((getCurrentThreadId() + 1) != targetThreadId.get()) {
+                Strand.park();
+            }
         } catch (SuspendExecution suspendExecution) {
             suspendExecution.printStackTrace();
         }
     }
 
-    //    @Suspendable
+    @Suspendable
     @Override
-    public void switchOnEndOfThread(int targetThreadId) {
-        Strand.unpark(pool.getStrand(targetThreadId - 1));
+    public void switchOnEndOfThread(AtomicInteger targetThreadId) {
+        Strand.unpark(pool.getStrand(targetThreadId.get() - 1));
     }
 
     @Suspendable
     @Override
-    public void waitFor(int targetThreadId) {
-        if (getCurrentThreadId() + 1 != targetThreadId) {
+    public void waitFor(AtomicInteger targetThreadId) {
+        if (getCurrentThreadId() + 1 != targetThreadId.get()) {
             try {
-                Strand.park();
+                while ((getCurrentThreadId() + 1) != targetThreadId.get()) {
+                    Strand.park();
+                }
             } catch (SuspendExecution suspendExecution) {
                 suspendExecution.printStackTrace();
             }

@@ -47,4 +47,30 @@ public interface Strategy {
      */
     default void endOfThread() {
     }
+
+    /**
+     * Execute implemented strategy at start of thread
+     */
+    default void startOfThread() {
+    }
+
+    default void beforeStartIteration(int threadNumber) {
+    }
+
+    default void onStartIteration() {
+    }
+
+    default void onStartInvocation(int iteration, int invocation) {
+    }
+
+    default void onEndInvocation() {
+    }
+
+    default void onEndIteration() {
+    }
+
+    default boolean isNeedStopIteration() {
+        return false;
+    }
+
 }

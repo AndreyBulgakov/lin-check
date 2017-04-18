@@ -190,7 +190,7 @@ public class LinChecker0 {
             StrategyHolder.setCurrentStrategy(currentStrategy);
             reportBuilder.strategy(currentStrategy.getClass().getSimpleName().replace("Strategy", ""));
 
-            currentStrategy.beforeStartIteration();
+            currentStrategy.beforeStartIteration(testCfg.getThreads());
             for (int iteration = 1; iteration <= testCfg.getIterations(); iteration++) {
                 currentStrategy.onStartIteration();
                 //индекс потока, в котором делаем прерывание
