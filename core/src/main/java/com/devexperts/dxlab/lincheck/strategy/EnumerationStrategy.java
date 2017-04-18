@@ -1,27 +1,5 @@
 package com.devexperts.dxlab.lincheck.strategy;
 
-/*
- * #%L
- * core
- * %%
- * Copyright (C) 2015 - 2017 Devexperts, LLC
- * %%
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Lesser Public License for more details.
- * 
- * You should have received a copy of the GNU General Lesser Public
- * License along with this program.  If not, see
- * <http://www.gnu.org/licenses/lgpl-3.0.html>.
- * #L%
- */
-
 import co.paralleluniverse.fibers.SuspendExecution;
 import co.paralleluniverse.fibers.Suspendable;
 import co.paralleluniverse.strands.Strand;
@@ -59,7 +37,7 @@ public class EnumerationStrategy implements Strategy {
     public EnumerationStrategy(Driver driver) {
         this.driver = driver;
     }
-
+    
     //region Logic
     @Suspendable
     @Override
@@ -67,16 +45,14 @@ public class EnumerationStrategy implements Strategy {
         if (driver.getCurrentThreadName().equals(strandName)) {
             int th = driver.getCurrentThreadId();
             //ждем, пока можно будет продолжить выполнение
-            while (th + 1 != currentThreadNum.get()) {
-            }
+            while (th + 1 != currentThreadNum.get()) {}
             //driver.waitFor(currentThread);
             logger.println("\t\tEnter on SharedRead");
             logger.println("\t\tThread id: " + (th + 1) + " currentID: " + currentThreadNum.get());
             logger.println("\t\tCurrentLocation id" + location);
             CheckPoint currentPoint = new CheckPoint(location, (th + 1));
             onSharedVariableAccess(currentPoint);
-            while (th + 1 != currentThreadNum.get()) {
-            }
+            while (th + 1 != currentThreadNum.get()) {}
         }
     }
 
@@ -86,15 +62,13 @@ public class EnumerationStrategy implements Strategy {
         if (driver.getCurrentThreadName().equals(strandName)) {
             int th = driver.getCurrentThreadId();
             //driver.waitFor(currentThread);
-            while (th + 1 != currentThreadNum.get()) {
-            }
+            while (th + 1 != currentThreadNum.get()) {}
             logger.println("\t\tEnter on SharedWrite");
             logger.println("\t\tThread id: " + (th + 1) + " currentID: " + currentThreadNum.get());
             logger.println("\t\tCurrentLocation id" + location);
             CheckPoint currentPoint = new CheckPoint(location, (th + 1));
             onSharedVariableAccess(currentPoint);
-            while (th + 1 != currentThreadNum.get()) {
-            }
+            while (th + 1 != currentThreadNum.get()) {}
         }
     }
 
@@ -145,7 +119,8 @@ public class EnumerationStrategy implements Strategy {
                     driver.switchOnEndOfThread(currentThreadNum);
 //                    switchEndOFThread(interleavingThreads.getKey());
                     //currentThread = interleavingThreads.getKey();
-                } else if (currentThreadNum.get() == interleavingThreads.getKey()) {
+                }
+                else if (currentThreadNum.get() == interleavingThreads.getKey()) {
                     int index = helper.threadQueue.indexOf(currentThreadNum.get()) + 1;
                     if (index < helper.threadQueue.size() - 1) {
                         currentThreadNum.set(helper.threadQueue.get(helper.threadQueue.indexOf(currentThreadNum.get()) + 2));
@@ -216,7 +191,8 @@ public class EnumerationStrategy implements Strategy {
                 }
                 //если не нужно искать новую точку, но мы не на ней - не переключаемся
                 else if (wasInterleavings == 0 && firstCheckPoint != null && !currentPoint.equals(firstCheckPoint)) {
-                } else if (wasInterleavings == 1 && !passedPaths.get(firstCheckPoint).contains(currentPoint)) {
+                }
+                else if (wasInterleavings == 1 && !passedPaths.get(firstCheckPoint).contains(currentPoint)) {
                     passedPaths.get(firstCheckPoint).add(currentPoint);
                     wasInterleavings++;
                     if (currentThreadNum.get() == interleavingThreads.getKey()) {
@@ -228,7 +204,8 @@ public class EnumerationStrategy implements Strategy {
                         driver.switchThread(currentThreadNum);
 //                        changeCurrentThreadTo(interleavingThreads.getKey());
                     }
-                } else if (wasInterleavings == 2) {
+                }
+                else if (wasInterleavings == 2) {
                     logger.println("was Interleavings = " + wasInterleavings);
                 }
             }
