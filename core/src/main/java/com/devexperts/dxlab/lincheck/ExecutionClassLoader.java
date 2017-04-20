@@ -130,7 +130,7 @@ class ExecutionClassLoader extends ClassLoader {
                         ||
                         className.startsWith("sun.") ||
 //                        className.startsWith("co.paralleluniverse.fibers.instrument.") ||
-                        className.startsWith("co.paralleluniverse.fibers") ||
+                        className.startsWith("co.paralleluniverse.") ||
                         className.startsWith("java.");
                         // TODO let's transform java.util.concurrent
     }
@@ -143,7 +143,11 @@ class ExecutionClassLoader extends ClassLoader {
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //        }
-        bytecode = instrumentor.instrumentClass(getParent(), className, bytecode);
+        try {
+            bytecode = instrumentor.instrumentClass(getParent(), className, bytecode);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return (Class<? extends TestThreadExecution>) super.defineClass(className, bytecode, 0, bytecode.length);
     }
 
