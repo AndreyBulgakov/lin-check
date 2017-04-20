@@ -23,19 +23,18 @@ package com.devexperts.dxlab.lincheck;
  */
 
 import co.paralleluniverse.common.util.Exceptions;
-import co.paralleluniverse.fibers.Suspendable;
-import co.paralleluniverse.fibers.instrument.SuspendableHelper;
 import com.devexperts.dxlab.lincheck.report.Reporter;
 import com.devexperts.dxlab.lincheck.report.TestReport;
-import com.devexperts.dxlab.lincheck.strategy.*;
+import com.devexperts.dxlab.lincheck.strategy.Driver;
+import com.devexperts.dxlab.lincheck.strategy.EnumerationStrategy;
+import com.devexperts.dxlab.lincheck.strategy.StrandDriver;
+import com.devexperts.dxlab.lincheck.strategy.StrategyHolder;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Phaser;
 import java.util.stream.Collectors;
 
@@ -228,7 +227,6 @@ public class LinChecker0 {
                             })
                             .collect(Collectors.toList());
                     strandPool.clear();
-                    driver.setPool(new ExecutionsStrandPool(type));
                     currentStrategy.onEndInvocation();
                     // Check correctness& Throw an AssertionError if current execution
                     // is not linearizable and log invalid execution

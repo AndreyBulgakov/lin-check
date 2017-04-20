@@ -24,10 +24,7 @@ package com.devexperts.dxlab.lincheck;
 
 import com.devexperts.dxlab.lincheck.strategy.Strategy;
 import com.devexperts.dxlab.lincheck.strategy.StrategyHolder;
-import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.Type;
+import org.objectweb.asm.*;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 import org.objectweb.asm.commons.TryCatchBlockSorter;
