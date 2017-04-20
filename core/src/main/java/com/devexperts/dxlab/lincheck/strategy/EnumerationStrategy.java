@@ -45,16 +45,14 @@ public class EnumerationStrategy implements Strategy {
         if (driver.getCurrentThreadName().equals(strandName)) {
             int th = driver.getCurrentThreadId();
             //ждем, пока можно будет продолжить выполнение
-            while (th + 1 != currentThreadNum.get()) {
-            }
+//            while (th + 1 != currentThreadNum.get()) {}
             //driver.waitFor(currentThread);
             logger.println("\t\tEnter on SharedRead");
             logger.println("\t\tThread id: " + (th + 1) + " currentID: " + currentThreadNum.get());
             logger.println("\t\tCurrentLocation id" + location);
             CheckPoint currentPoint = new CheckPoint(location, (th + 1));
             onSharedVariableAccess(currentPoint);
-            while (th + 1 != currentThreadNum.get()) {
-            }
+//            while (th + 1 != currentThreadNum.get()) {}
         }
     }
 
@@ -64,15 +62,13 @@ public class EnumerationStrategy implements Strategy {
         if (driver.getCurrentThreadName().equals(strandName)) {
             int th = driver.getCurrentThreadId();
             //driver.waitFor(currentThread);
-            while (th + 1 != currentThreadNum.get()) {
-            }
+//            while (th + 1 != currentThreadNum.get()) {}
             logger.println("\t\tEnter on SharedWrite");
             logger.println("\t\tThread id: " + (th + 1) + " currentID: " + currentThreadNum.get());
             logger.println("\t\tCurrentLocation id" + location);
             CheckPoint currentPoint = new CheckPoint(location, (th + 1));
             onSharedVariableAccess(currentPoint);
-            while (th + 1 != currentThreadNum.get()) {
-            }
+//            while (th + 1 != currentThreadNum.get()) {}
         }
     }
 
