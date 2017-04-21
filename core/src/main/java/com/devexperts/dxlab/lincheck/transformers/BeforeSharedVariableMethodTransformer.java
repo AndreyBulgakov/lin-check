@@ -121,12 +121,14 @@ class BeforeSharedVariableMethodTransformer extends GeneratorAdapter {
     }
 
     private void insertMethod(Method method) {
-        // Get or create current locationId
-        int id = lm.getLocationId(className, methodName, methodDesc, instructionNumber);
-        // Get current strategy
-        invokeStatic(STRATEGYHOLDER_TYPE, STRATEGYHOLDER_GET);
-        // Insert Strategy.onSharedVariableWrite interface method call
-        push(id);
-        invokeInterface(STRATEGY_ITF_TYPE, method);
+        if (!methodName.equals("com.devexperts.dxlab.lincheck.tests.amino_cbbs.DequeTest".replace(".", "/"))) {
+            // Get or create current locationId
+            int id = lm.getLocationId(className, methodName, methodDesc, instructionNumber);
+            // Get current strategy
+            invokeStatic(STRATEGYHOLDER_TYPE, STRATEGYHOLDER_GET);
+            // Insert Strategy.onSharedVariableWrite interface method call
+            push(id);
+            invokeInterface(STRATEGY_ITF_TYPE, method);
+        }
     }
 }

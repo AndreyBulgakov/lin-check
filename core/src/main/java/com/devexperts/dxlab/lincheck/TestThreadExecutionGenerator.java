@@ -125,11 +125,12 @@ class TestThreadExecutionGenerator {
 
     private static void generateRun(ClassVisitor cv, Type testType, List<Actor> actors, List<Object> objArgs, boolean waitsEnabled) {
         int access = ACC_PUBLIC;
-        Method m = new Method("call", RESULT_ARRAY_TYPE, NO_ARGS);
+        Method m = new Method("run", RESULT_ARRAY_TYPE, NO_ARGS);
+//        Method m = new Method("call", RESULT_ARRAY_TYPE, NO_ARGS);
         GeneratorAdapter mv = new GeneratorAdapter(access, m,
                 // Try-catch blocks sorting is required
-                new TryCatchBlockSorter(cv.visitMethod(access, m.getName(), m.getDescriptor(), null, null),
-                        access, m.getName(), m.getDescriptor(), null, null)
+                new TryCatchBlockSorter(cv.visitMethod(access, m.getName(), m.getDescriptor(), null, new String[]{"co/paralleluniverse/fibers/SuspendExecution", "java/lang/InterruptedException"}),
+                        access, m.getName(), m.getDescriptor(), null, new String[]{"co/paralleluniverse/fibers/SuspendExecution", "java/lang/InterruptedException"})
         );
         AnnotationVisitor av0 = mv.visitAnnotation("Lco/paralleluniverse/fibers/Suspendable;", true);
         av0.visitEnd();
@@ -141,7 +142,7 @@ class TestThreadExecutionGenerator {
         // Create Result[] array and store it to a local variable
         int resLocal = createResultArray(mv, actors.size());
         // Wait for other threads
-        arriveAndAwaitAdvance(mv);
+//        arriveAndAwaitAdvance(mv);
         // Number of current operation (starts with 0)
         int iLocal = mv.newLocal(Type.INT_TYPE);
         mv.push(0);

@@ -123,7 +123,9 @@ public class ExecutionsStrandPool {
         FiberExecutorScheduler exe = new FiberExecutorScheduler("executions-pool", Runnable::run);
         if (this.strandType == StrandType.FIBER)
             this.FACTORY = callable -> {
-                Fiber<Result[]> strand = new Fiber<>(exe, callable::call);
+                Fiber<Result[]> strand = new Fiber<>(exe, callable);
+//                Fiber<Result[]> strand = new Fiber<>(exe, callable::call);
+//                Fiber<Result[]> strand = new Fiber<>(callable::call);
                 String name = "LinCheckStrand";
                 strand.setName(name);
                 futureTasks.add(strand);
@@ -132,7 +134,7 @@ public class ExecutionsStrandPool {
             };
         else
             this.FACTORY = callable -> {
-                FutureTask<Result[]> futureTask = new FutureTask<>(callable);
+                FutureTask<Result[]> futureTask = new FutureTask<>(callable::run);
                 Strand strand = Strand.of(new Thread(futureTask));
                 String name = "LinCheckStrand";
                 strand.setName(name);

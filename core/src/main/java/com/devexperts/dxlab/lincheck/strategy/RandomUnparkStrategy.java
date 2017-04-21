@@ -24,6 +24,7 @@ package com.devexperts.dxlab.lincheck.strategy;
 
 import co.paralleluniverse.fibers.Fiber;
 import co.paralleluniverse.fibers.SuspendExecution;
+import co.paralleluniverse.fibers.Suspendable;
 import co.paralleluniverse.strands.Strand;
 import com.devexperts.dxlab.lincheck.ExecutionsStrandPool;
 
@@ -44,58 +45,29 @@ public class RandomUnparkStrategy implements Strategy {
         this.pool = pool;
     }
 
-    //    @Suspendable
+    public RandomUnparkStrategy(Driver driver) {
+
+    }
+
+    @Suspendable
     @Override
     public void onSharedVariableRead(int location) {
         try {
             if (Fiber.isCurrentFiber()) {
-                Strand randomFiber = pool.getNotCurrentStrandAndAlive();
-                logger.println("\t\tEnter on SharedRead");
-                logger.println("\t\tCurrentLocation id" + location);
-                logger.println("\t\tCurrent fiber state " + Strand.currentStrand().getState());
-                logger.println("\t\tTarget fiber state " + randomFiber.getState());
-                logger.println("\t\tTry to switch thread "
-                        + pool.getStrandId(Strand.currentStrand()) + " to " + pool.getStrandId(randomFiber));
-                logger.println();
-                logger.flush();
-                if (randomFiber.isAlive()) {
-//                        Strand.un
-                    if (randomFiber.getState() == Strand.State.RUNNING || randomFiber.getState() == Strand.State.STARTED) {
-//                        Strand.unpark(Strand.currentStrand());
-                        Strand.park();
-                    } else {
-                        Strand.parkAndUnpark(randomFiber);
-                    }
+                Strand.parkNanos(100);
                 }
                 out = 0;
-            }
         } catch (SuspendExecution suspendExecution) {
             throw new AssertionError(suspendExecution);
         }
     }
 
-    //    @Suspendable
+    @Suspendable
     @Override
     public void onSharedVariableWrite(int location) {
         try {
             if (Fiber.isCurrentFiber()) {
-                Strand randomFiber = pool.getNotCurrentStrandAndAlive();
-                logger.println("\t\tEnter on SharedWrite");
-                logger.println("\t\tCurrentLocation id" + location);
-                logger.println("\t\tCurrent fiber state " + Strand.currentStrand().getState());
-                logger.println("\t\tTarget fiber state " + randomFiber.getState());
-                logger.println("\t\tTry to switch thread "
-                        + pool.getStrandId(Strand.currentStrand()) + " to " + pool.getStrandId(randomFiber));
-                logger.println();
-                logger.flush();
-                if (randomFiber.isAlive()) {
-                    if (randomFiber.getState() == Strand.State.RUNNING || randomFiber.getState() == Strand.State.STARTED) {
-//                        Strand.unpark(Strand.currentStrand());
-                        Strand.park();
-                    } else {
-                        Strand.parkAndUnpark(randomFiber);
-                    }
-                }
+                Strand.parkNanos(100);
                 out = 0;
             }
 
@@ -104,7 +76,7 @@ public class RandomUnparkStrategy implements Strategy {
         }
     }
 
-    //    @Suspendable
+    @Suspendable
     @Override
     public void endOfThread() {
         if (Fiber.isCurrentFiber()) {

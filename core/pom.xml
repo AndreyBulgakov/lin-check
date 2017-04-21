@@ -29,6 +29,11 @@
             <version>1.0.2</version>
         </dependency>
 
+        <!--<dependency>-->
+        <!--<groupId>co.paralleluniverse</groupId>-->
+        <!--<artifactId>quasar-core</artifactId>-->
+        <!--<version>0.7.7</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>com.github.puniverse.quasar</groupId>
             <artifactId>quasar-core</artifactId>
