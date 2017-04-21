@@ -23,12 +23,10 @@ package com.devexperts.dxlab.lincheck;
  */
 
 import co.paralleluniverse.common.util.Exceptions;
+import co.paralleluniverse.fibers.Suspendable;
 import com.devexperts.dxlab.lincheck.report.Reporter;
 import com.devexperts.dxlab.lincheck.report.TestReport;
-import com.devexperts.dxlab.lincheck.strategy.Driver;
-import com.devexperts.dxlab.lincheck.strategy.EnumerationStrategy;
-import com.devexperts.dxlab.lincheck.strategy.StrandDriver;
-import com.devexperts.dxlab.lincheck.strategy.StrategyHolder;
+import com.devexperts.dxlab.lincheck.strategy.*;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -186,7 +184,9 @@ public class LinChecker0 {
             final Phaser phaser = new Phaser(1);
             //Set strategy and initialize transformation in classes
             StrandDriver driver = new StrandDriver(strandPool);
-            EnumerationStrategy currentStrategy = new EnumerationStrategy(driver);
+//            EnumerationStrategy currentStrategy = new EnumerationStrategy(driver);
+            RandomUnparkStrategy currentStrategy = new RandomUnparkStrategy(driver);
+//            DummyStrategy currentStrategy = new DummyStrategy(driver);
             StrategyHolder.setCurrentStrategy(currentStrategy);
             reportBuilder.strategy(currentStrategy.getClass().getSimpleName().replace("Strategy", ""));
 
@@ -214,7 +214,6 @@ public class LinChecker0 {
                     reportBuilder.incInvocations();
                     // Reset the state of test
                     invokeReset(testInstance);
-
                     List<List<Result>> results = strandPool
                             .add(testThreadExecutions)
                             .invokeAll().stream()
@@ -380,6 +379,7 @@ public class LinChecker0 {
         }
     }
 
+    @Suspendable
     private List<Result> executeActors(List<Actor> actors, Object testInstance, ExecutionClassLoader loader) {
         invokeReset(testInstance);
         //TODO phaser correct?

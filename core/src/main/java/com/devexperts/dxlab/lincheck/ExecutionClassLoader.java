@@ -29,6 +29,7 @@ import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -93,7 +94,9 @@ class ExecutionClassLoader extends ClassLoader {
             // Get transformed bytecode
             byte[] resultBytecode = cw.toByteArray();
             //TODO classes not instrumented by quasar.
-            resultBytecode = instrumentor.instrumentClass(getParent(), name, resultBytecode);
+//            resultBytecode = Retransform.getInstrumentor().instrumentClass(getParent(), name, resultBytecode);
+//            resultBytecode = instrumentor.instrumentClass(getParent(), name, resultBytecode);
+            writeToFile(name, resultBytecode);
             result = defineClass(name, resultBytecode, 0, resultBytecode.length);
             // Save it to cache and resources
             resources.put(name, resultBytecode);
@@ -137,18 +140,23 @@ class ExecutionClassLoader extends ClassLoader {
 
     Class<? extends TestThreadExecution> defineTestThreadExecution(String className, byte[] bytecode) {
 //        Retransform.addWaiver(className, "call");
-//                try {
-//            FileOutputStream stream = new FileOutputStream(className+".class");
-//            stream.write(bytecode);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+
         try {
-            bytecode = instrumentor.instrumentClass(getParent(), className, bytecode);
+//            bytecode = Retransform.getInstrumentor().instrumentClass(getParent(), className, bytecode);
+//            bytecode = instrumentor.instrumentClass(getParent(), className, bytecode);
         } catch (Exception e) {
             e.printStackTrace();
         }
+        writeToFile(className, bytecode);
         return (Class<? extends TestThreadExecution>) super.defineClass(className, bytecode, 0, bytecode.length);
     }
 
+    void writeToFile(String className, byte[] bytecode) {
+        try {
+            FileOutputStream stream = new FileOutputStream("out/" + className + ".class");
+            stream.write(bytecode);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
