@@ -183,9 +183,9 @@ public class LinChecker0 {
             // Reusable phaser
             final Phaser phaser = new Phaser(1);
             //Set strategy and initialize transformation in classes
-            StrandDriver driver = new StrandDriver(strandPool);
+            Driver driver = new StrandDriver(strandPool);
 //            EnumerationStrategy currentStrategy = new EnumerationStrategy(driver);
-            RandomUnparkStrategy currentStrategy = new RandomUnparkStrategy(driver);
+            Strategy currentStrategy = new RandomUnparkStrategy(driver);
 //            DummyStrategy currentStrategy = new DummyStrategy(driver);
             StrategyHolder.setCurrentStrategy(currentStrategy);
             reportBuilder.strategy(currentStrategy.getClass().getSimpleName().replace("Strategy", ""));
