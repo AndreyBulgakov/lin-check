@@ -4,7 +4,6 @@ import com.devexperts.dxlab.lincheck.LinChecker;
 import com.devexperts.dxlab.lincheck.annotations.CTest;
 import com.devexperts.dxlab.lincheck.annotations.Operation;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
-import com.devexperts.dxlab.lincheck.libtest.counter.Counter;
 import com.devexperts.dxlab.lincheck.libtest.counter.SimpleWrongCounter1;
 import org.junit.Test;
 
@@ -13,7 +12,7 @@ import org.junit.Test;
  */
 @CTest(iterations = 50, actorsPerThread = {"2:5", "2:5"})
 public class SimpleWrongCounterTest1 {
-    private Counter counter;
+    private SimpleWrongCounter1 counter;
 
 
     @Reset

@@ -23,7 +23,6 @@ package com.devexperts.dxlab.lincheck.strategy;
  */
 
 import co.paralleluniverse.fibers.Fiber;
-import co.paralleluniverse.fibers.SuspendExecution;
 import co.paralleluniverse.fibers.Suspendable;
 import co.paralleluniverse.strands.Strand;
 import com.devexperts.dxlab.lincheck.ExecutionsStrandPool;
@@ -51,13 +50,31 @@ public class RandomUnparkStrategy implements Strategy {
 
     @Suspendable
     @Override
+    public void startOfThread() {
+//        if (Fiber.isCurrentFiber()) {
+//            try {
+//                Fiber.park();
+//                out = 0;
+//            } catch (SuspendExecution suspendExecution) {
+//                suspendExecution.printStackTrace();
+//            }
+//        }
+    }
+
+    @Suspendable
+    @Override
     public void onSharedVariableRead(int location) {
         try {
             if (Fiber.isCurrentFiber()) {
-                Strand.parkNanos(100);
+                System.out.println();
+                System.out.println(Strand.isCurrentFiber());
+                System.out.println(Strand.currentStrand());
+                System.out.println(Strand.currentStrand().getState());
+//                while (true){if (!Fiber.isCurrentFiber()) break;}
+                Fiber.park(100);
                 }
                 out = 0;
-        } catch (SuspendExecution suspendExecution) {
+        } catch (Exception suspendExecution) {
             throw new AssertionError(suspendExecution);
         }
     }
@@ -67,11 +84,11 @@ public class RandomUnparkStrategy implements Strategy {
     public void onSharedVariableWrite(int location) {
         try {
             if (Fiber.isCurrentFiber()) {
-                Strand.parkNanos(100);
+//                Fiber.park(100, TimeUnit.NANOSECONDS);
                 out = 0;
             }
+        } catch (Exception suspendExecution) {
 
-        } catch (SuspendExecution suspendExecution) {
             throw new AssertionError(suspendExecution);
         }
     }
@@ -80,12 +97,13 @@ public class RandomUnparkStrategy implements Strategy {
     @Override
     public void endOfThread() {
         if (Fiber.isCurrentFiber()) {
-            Strand randomFiber = pool.getNotCurrentStrandAndAlive();
-            logger.println("\t\tEnter on End of thread " + pool.getStrandId(Strand.currentStrand()));
-            logger.println("\t\tTry to unpark" + pool.getStrandId(randomFiber));
-            logger.println();
-            logger.flush();
-            Fiber.unpark(randomFiber);
+//            Strand randomFiber = pool.getNotCurrentStrandAndAlive();
+//            Strand randomFiber = pool.getNotCurrentStrandAndAlive();
+//            logger.println("\t\tEnter on End of thread " + pool.getStrandId(Strand.currentStrand()));
+//            logger.println("\t\tTry to unpark" + pool.getStrandId(randomFiber));
+//            logger.println();
+//            logger.flush();
+//            Fiber.unpark(randomFiber);
         }
         out = 0;
     }

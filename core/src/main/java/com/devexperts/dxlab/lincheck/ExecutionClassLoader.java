@@ -43,7 +43,8 @@ class ExecutionClassLoader extends ClassLoader {
     private final Map<String, Class<?>> cache = new ConcurrentHashMap<>();
     private final Map<String, byte[]> resources = new ConcurrentHashMap<>();
     private final String testClassName; // TODO we should transform test class (it contains algorithm logic)
-    private final QuasarInstrumentor instrumentor = new QuasarInstrumentor(this); //TODO is instrumentor must be single?
+    private final QuasarInstrumentor instrumentor = new QuasarInstrumentor(); //TODO is instrumentor must be single?
+//    private final QuasarInstrumentor instrumentor = new QuasarInstrumentor(this); //TODO is instrumentor must be single?
 
     ExecutionClassLoader(String testClassName) {
         this.testClassName = testClassName;
@@ -96,7 +97,8 @@ class ExecutionClassLoader extends ClassLoader {
             //TODO classes not instrumented by quasar.
 //            resultBytecode = Retransform.getInstrumentor().instrumentClass(getParent(), name, resultBytecode);
 //            resultBytecode = instrumentor.instrumentClass(getParent(), name, resultBytecode);
-            resultBytecode = instrumentor.instrumentClass(name, resultBytecode);
+            resultBytecode = instrumentor.instrumentClass(this, name, resultBytecode);
+//            resultBytecode = instrumentor.instrumentClass(name, resultBytecode);
             writeToFile(name, resultBytecode);
             result = defineClass(name, resultBytecode, 0, resultBytecode.length);
             // Save it to cache and resources
@@ -145,7 +147,8 @@ class ExecutionClassLoader extends ClassLoader {
         try {
 //            bytecode = Retransform.getInstrumentor().instrumentClass(getParent(), className, bytecode);
 //            bytecode = instrumentor.instrumentClass(getParent(), className, bytecode);
-            bytecode = instrumentor.instrumentClass(className, bytecode);
+            bytecode = instrumentor.instrumentClass(this, className, bytecode);
+//            bytecode = instrumentor.instrumentClass(className, bytecode);
         } catch (Exception e) {
             e.printStackTrace();
         }
