@@ -22,7 +22,7 @@ package com.devexperts.dxlab.lincheck.libtest.counter;
  * #L%
  */
 
-public class SimpleWrongCounter1 implements Counter {
+public class SimpleWrongCounter1 {
     private int c;
 
 
@@ -30,7 +30,6 @@ public class SimpleWrongCounter1 implements Counter {
         c = 0;
     }
 
-    @Override
     public int incrementAndGet() {
         c++;
         return c;

@@ -210,6 +210,7 @@ public class LinChecker0 {
 
                 // Run invocations
                 for (int invocation = 1; invocation <= testCfg.getInvocationsPerIteration() && !currentStrategy.isNeedStopIteration(); invocation++) {
+                    System.out.println(invocation);
                     currentStrategy.onStartInvocation(iteration, invocation);
                     reportBuilder.incInvocations();
                     // Reset the state of test
