@@ -35,6 +35,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 /**
@@ -251,101 +252,115 @@ public class LinChecker0 {
         // Create report builder
         TestReport.Builder reportBuilder = new TestReport.Builder(testCfg).name(testClassName);
         try {
-            final boolean[] arr = new boolean[1];
-            final ThreadGroup root = new ThreadGroup("RootLincheckGroup");
+            AtomicBoolean flag = new AtomicBoolean(false);
+            Map<Thread, Throwable> throwableMap = new ConcurrentHashMap<>();
+            int poolCount = Runtime.getRuntime().availableProcessors();
+            final ThreadGroup root = new ThreadGroup("RootLinCheckGroup");
+            ThreadPoolExecutor service = new ThreadPoolExecutor(
+                    poolCount,
+                    poolCount,
+                    0L,
+                    TimeUnit.MILLISECONDS,
+                    new LinkedBlockingQueue<Runnable>()
+            );
+
             final Thread.UncaughtExceptionHandler handler = (t, e) -> {
-                root.destroy();
-                root.interrupt();
-                e.printStackTrace();
-            };
-            ThreadFactory factory = new ThreadFactory() {
-                @Override
-                public Thread newThread(Runnable r) {
-                    ThreadGroup lincheckGroup = new ThreadGroup(root, "LinCheckGroup");
-                    Thread thread = new Thread(lincheckGroup, r);
-                    thread.setUncaughtExceptionHandler(handler);
-                    return thread;
+                if (e instanceof AssertionError) {
+                    flag.set(true);
+                    service.shutdownNow();
+                } else if (!(e.getCause() instanceof InterruptedException)) {
+                    throwableMap.put(t, e);
+                    service.shutdownNow();
                 }
             };
-            ExecutorService service = Executors
-                    .newFixedThreadPool(Runtime.getRuntime().availableProcessors(), factory);
+            ThreadFactory factory = r -> {
+                ThreadGroup lincheckGroup = new ThreadGroup(root, "LinCheckGroup");
+                Thread thread = new Thread(lincheckGroup, r);
+                thread.setUncaughtExceptionHandler(handler);
+                return thread;
+            };
+            service.setThreadFactory(factory);
 
             for (int i = 0; i < testCfg.getIterations(); i++) {
                 int finalI = i;
-                service.execute(() -> {
-                    try {
-                        iteration(finalI, testCfg, reportBuilder);
-                    } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
-                        e.printStackTrace();
-                    }
-                });
+                service.execute(() -> iteration(finalI, testCfg, reportBuilder));
             }
-            service.shutdown();
-            while (!root.isDestroyed()) {
+            service.awaitTermination(888, TimeUnit.HOURS);
+            if (flag.get()) {
+                throw new AssertionError();
+            } else if (!throwableMap.isEmpty()) {
+                System.err.println("Additional exceptions were detected");
+                for (Map.Entry<Thread, Throwable> entry : throwableMap.entrySet()) {
+                    System.err.println("In thread " + entry.getKey());
+                    entry.getValue().printStackTrace();
+                }
             }
-            service.shutdownNow();
             reportBuilder.result(TestReport.Result.SUCCESS);
         } finally {
             reportBuilder.time(Instant.now().toEpochMilli() - startTime.toEpochMilli());
-//            writeReportIfNeeded(reportBuilder);
+            writeReportIfNeeded(reportBuilder);
         }
     }
 
     @SuppressWarnings("Duplicates")
 //    @Suspendable
-    private void iteration(int iteration, CTestConfiguration testCfg, TestReport.Builder reportBuilder) throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-        //Set strategy and initialize transformation in classes
-        ExecutionsStrandPool strandPool = new ExecutionsStrandPool(ExecutionsStrandPool.StrandType.THREAD);
-        Driver driver = new StrandDriver(strandPool);
-        EnumerationStrategy currentStrategy = new EnumerationStrategy(driver);
-        StrategyHolder.setCurrentStrategy(Thread.currentThread().getThreadGroup(), currentStrategy);
-        reportBuilder.strategy(currentStrategy.getClass().getSimpleName().replace("Strategy", ""));
-        //Create loader, load and instantiate testInstance by this loader
-        final ExecutionClassLoader loader = new ExecutionClassLoader(this.getClass().getClassLoader(), testClassName);
-        final Object testInstance = loader.loadClass(testClassName).newInstance();
-        currentStrategy.beforeStartIteration(testCfg.getThreads());
-        currentStrategy.onStartIteration();
-        //индекс потока, в котором делаем прерывание
-        reportBuilder.incIterations();
+    private void iteration(int iteration, CTestConfiguration testCfg, TestReport.Builder reportBuilder) {
+        try {
+            //Set strategy and initialize transformation in classes
+            ExecutionsStrandPool strandPool = new ExecutionsStrandPool(ExecutionsStrandPool.StrandType.THREAD);
+            Driver driver = new StrandDriver(strandPool);
+            EnumerationStrategy currentStrategy = new EnumerationStrategy(driver);
+            StrategyHolder.setCurrentStrategy(Thread.currentThread().getThreadGroup(), currentStrategy);
+            reportBuilder.strategy(currentStrategy.getClass().getSimpleName().replace("Strategy", ""));
+            //Create loader, load and instantiate testInstance by this loader
+            final ExecutionClassLoader loader = new ExecutionClassLoader(this.getClass().getClassLoader(), testClassName);
+            final Object testInstance = loader.loadClass(testClassName).newInstance();
+            currentStrategy.beforeStartIteration(testCfg.getThreads());
+            currentStrategy.onStartIteration();
+            //индекс потока, в котором делаем прерывание
+            reportBuilder.incIterations();
 
-        List<List<Actor>> actorsPerThread = generateActors(testCfg);
-//        printIterationHeader(iteration, actorsPerThread);
-        // Create TestThreadExecution's
-        List<TestThreadExecution> testThreadExecutions = actorsPerThread.stream()
-                .map(actors -> TestThreadExecutionGenerator.create(testInstance, new Phaser(1), actors, false, loader))
-                .collect(Collectors.toList());
-        Set<List<List<Result>>> possibleResultsSet = generatePossibleResults(actorsPerThread, testInstance, loader);
-
-        // Run invocations
-        for (int invocation = 1; invocation <= testCfg.getInvocationsPerIteration() && !currentStrategy.isNeedStopIteration(); invocation++) {
-            currentStrategy.onStartInvocation(iteration, invocation);
-            reportBuilder.incInvocations();
-            // Reset the state of test
-            invokeReset(testInstance);
-
-            List<List<Result>> results = strandPool
-                    .add(testThreadExecutions)
-                    .invokeAll().stream()
-                    .map(f -> {
-                        try {
-                            return Arrays.asList(f.get());
-                        } catch (ExecutionException | InterruptedException e) {
-                            throw new IllegalStateException(e);
-                        }
-                    })
+            List<List<Actor>> actorsPerThread = generateActors(testCfg);
+            //        printIterationHeader(iteration, actorsPerThread);
+            // Create TestThreadExecution's
+            List<TestThreadExecution> testThreadExecutions = actorsPerThread.stream()
+                    .map(actors -> TestThreadExecutionGenerator.create(testInstance, new Phaser(1), actors, false, loader))
                     .collect(Collectors.toList());
-            currentStrategy.onEndInvocation();
-            strandPool.clear();
-            // Check correctness& Throw an AssertionError if current execution
-            // is not linearizable and log invalid execution
-            if (!possibleResultsSet.contains(results)) {
-                printExecutionResult(results);
-                printPossibleResults(possibleResultsSet);
-                reportBuilder.result(TestReport.Result.FAILURE);
-                throw new AssertionError("Non-linearizable execution detected, see log for details");
+            Set<List<List<Result>>> possibleResultsSet = generatePossibleResults(actorsPerThread, testInstance, loader);
+
+            // Run invocations
+            for (int invocation = 1; invocation <= testCfg.getInvocationsPerIteration() && !currentStrategy.isNeedStopIteration(); invocation++) {
+                currentStrategy.onStartInvocation(iteration, invocation);
+                reportBuilder.incInvocations();
+                // Reset the state of test
+                invokeReset(testInstance);
+
+                List<List<Result>> results = strandPool
+                        .add(testThreadExecutions)
+                        .invokeAll().stream()
+                        .map(f -> {
+                            try {
+                                return Arrays.asList(f.get());
+                            } catch (ExecutionException | InterruptedException e) {
+                                throw new IllegalStateException(e);
+                            }
+                        })
+                        .collect(Collectors.toList());
+                currentStrategy.onEndInvocation();
+                strandPool.clear();
+                // Check correctness& Throw an AssertionError if current execution
+                // is not linearizable and log invalid execution
+                if (!possibleResultsSet.contains(results)) {
+                    printExecutionResult(results);
+                    printPossibleResults(possibleResultsSet);
+                    reportBuilder.result(TestReport.Result.FAILURE);
+                    throw new AssertionError("Non-linearizable execution detected, see log for details");
+                }
             }
+            currentStrategy.onEndIteration();
+        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+            throw new IllegalStateException(e);
         }
-        currentStrategy.onEndIteration();
     }
 
 

@@ -37,6 +37,7 @@ public abstract class StrategyHolder {
     public static ArrayList<LinCheckThread> threads = new ArrayList<>();
 
     private static Map<ThreadGroup, Strategy> strategyMap = new ConcurrentHashMap<>();
+    private static Map<Integer, Strategy> strategyIntMap = new ConcurrentHashMap<>();
 
     public static void setCurrentStrategy(Strategy curentStrategy) {
         strategyMap.put(Thread.currentThread().getThreadGroup(), curentStrategy);
@@ -49,6 +50,14 @@ public abstract class StrategyHolder {
 //        StrategyHolder.currentStrategy = curentStrategy;
     }
 
+    public static void setCurrentStrategy(int iteration, Strategy curentStrategy) {
+        strategyIntMap.put(iteration, curentStrategy);
+    }
+
+    @SuppressWarnings("unused") // invoked from transformed code
+    public static Strategy getCurrentStrategy(int iteration) {
+        return strategyIntMap.get(iteration);
+    }
 
     @SuppressWarnings("unused") // invoked from transformed code
     public static Strategy getCurrentStrategy() {
