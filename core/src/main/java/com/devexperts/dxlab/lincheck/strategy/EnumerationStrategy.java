@@ -23,7 +23,6 @@ package com.devexperts.dxlab.lincheck.strategy;
  */
 
 import co.paralleluniverse.fibers.SuspendExecution;
-import co.paralleluniverse.fibers.SuspendExecution;
 import co.paralleluniverse.fibers.Suspendable;
 import co.paralleluniverse.strands.Strand;
 import javafx.util.Pair;
@@ -68,14 +67,14 @@ public class EnumerationStrategy implements Strategy {
         if (driver.getCurrentThreadName().equals(strandName)) {
             int th = driver.getCurrentThreadId();
             //ждем, пока можно будет продолжить выполнение
-            while (th + 1 != currentThreadNum.get()) {}
+//            while (th + 1 != currentThreadNum.get()) {}
             //driver.waitFor(currentThread);
             logger.println("\t\tEnter on SharedRead");
             logger.println("\t\tThread id: " + (th + 1) + " currentID: " + currentThreadNum.get());
             logger.println("\t\tCurrentLocation id" + location);
             CheckPoint currentPoint = new CheckPoint(location, (th + 1));
             onSharedVariableAccess(currentPoint);
-            while (th + 1 != currentThreadNum.get()) {}
+//            while (th + 1 != currentThreadNum.get()) {}
         }
     }
 
@@ -85,13 +84,13 @@ public class EnumerationStrategy implements Strategy {
         if (driver.getCurrentThreadName().equals(strandName)) {
             int th = driver.getCurrentThreadId();
             //driver.waitFor(currentThread);
-            while (th + 1 != currentThreadNum.get()) {}
+//            while (th + 1 != currentThreadNum.get()) {}
             logger.println("\t\tEnter on SharedWrite");
             logger.println("\t\tThread id: " + (th + 1) + " currentID: " + currentThreadNum.get());
             logger.println("\t\tCurrentLocation id" + location);
             CheckPoint currentPoint = new CheckPoint(location, (th + 1));
             onSharedVariableAccess(currentPoint);
-            while (th + 1 != currentThreadNum.get()) {}
+//            while (th + 1 != currentThreadNum.get()) {}
         }
     }
 
@@ -142,12 +141,11 @@ public class EnumerationStrategy implements Strategy {
                     driver.switchOnEndOfThread(currentThreadNum);
 //                    switchEndOFThread(interleavingThreads.getKey());
                     //currentThread = interleavingThreads.getKey();
-                }
-                else if (currentThreadNum.get() == interleavingThreads.getKey()) {
+                } else if (currentThreadNum.get() == interleavingThreads.getKey()) {
                     int index = helper.threadQueue.indexOf(currentThreadNum.get()) + 1;
                     if (index < helper.threadQueue.size() - 1) {
-                        currentThread = helper.threadQueue.get(helper.threadQueue.indexOf(currentThread) + 2);
-                        driver.switchOnEndOfThread(currentThread);
+                        currentThreadNum.set(helper.threadQueue.get(helper.threadQueue.indexOf(currentThreadNum.get()) + 2));
+                        driver.switchOnEndOfThread(currentThreadNum);
 //                        switchEndOFThread(executionQueue.get(executionQueue.indexOf(currentThread) + 2));
                     }
                 }
@@ -214,8 +212,7 @@ public class EnumerationStrategy implements Strategy {
                 }
                 //если не нужно искать новую точку, но мы не на ней - не переключаемся
                 else if (wasInterleavings == 0 && firstCheckPoint != null && !currentPoint.equals(firstCheckPoint)) {
-                }
-                else if (wasInterleavings == 1 && !passedPaths.get(firstCheckPoint).contains(currentPoint)) {
+                } else if (wasInterleavings == 1 && !passedPaths.get(firstCheckPoint).contains(currentPoint)) {
                     passedPaths.get(firstCheckPoint).add(currentPoint);
                     wasInterleavings++;
                     if (currentThreadNum.get() == interleavingThreads.getKey()) {
@@ -227,8 +224,7 @@ public class EnumerationStrategy implements Strategy {
                         driver.switchThread(currentThreadNum);
 //                        changeCurrentThreadTo(interleavingThreads.getKey());
                     }
-                }
-                else if (wasInterleavings == 2) {
+                } else if (wasInterleavings == 2) {
                     logger.println("was Interleavings = " + wasInterleavings);
                 }
             }
@@ -444,5 +440,4 @@ public class EnumerationStrategy implements Strategy {
         }
 
     }
-
 }
