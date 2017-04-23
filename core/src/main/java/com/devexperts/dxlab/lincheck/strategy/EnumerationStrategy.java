@@ -21,21 +21,27 @@ import static java.nio.file.StandardOpenOption.APPEND;
  * Strategy
  */
 public class EnumerationStrategy implements Strategy {
-    private Map<CheckPoint, Set<CheckPoint>> passedPaths = new HashMap<>();
-    private CheckPoint firstCheckPoint;
+    private Map<CheckPoint, Set<CheckPoint>> passedPaths;
+    private CheckPoint openWindowPoint;
+    private InterleavedPoint firstInterLeavedPoint;
     PrintStream logger = getLogger();
     private AtomicInteger currentThreadNum;
-    private volatile int wasInterleavings = 0;
+    private volatile int wasInterleavings;
     private volatile Pair<Integer, Integer> interleavingThreads;
-    private volatile boolean needInterleave = true;
-    private volatile boolean needChangeFirstThread = false;
-    private volatile List<CheckPoint> history = new ArrayList<>();
+    private volatile boolean needInterleave;
+    private volatile boolean needChangeFirstThread;
+    private volatile List<CheckPoint> history;
     private final String strandName = "LinCheckStrand";
     private EnumerationStrategyHelper helper;
     private Driver driver;
 
     public EnumerationStrategy(Driver driver) {
         this.driver = driver;
+        wasInterleavings = 0;
+        history = new ArrayList<>();
+        needInterleave = true;
+        needChangeFirstThread = false;
+        passedPaths = new HashMap<>();
     }
     
     //region Logic
@@ -44,15 +50,17 @@ public class EnumerationStrategy implements Strategy {
     public void onSharedVariableRead(int location) {
         if (driver.getCurrentThreadName().equals(strandName)) {
             int th = driver.getCurrentThreadId();
-            //ждем, пока можно будет продолжить выполнение
-            while (th + 1 != currentThreadNum.get()) {}
-            //driver.waitFor(currentThread);
+            //если история не пуста, то, возможно, стоит переключиться
             logger.println("\t\tEnter on SharedRead");
             logger.println("\t\tThread id: " + (th + 1) + " currentID: " + currentThreadNum.get());
             logger.println("\t\tCurrentLocation id" + location);
-            CheckPoint currentPoint = new CheckPoint(location, (th + 1));
-            onSharedVariableAccess(currentPoint);
-            while (th + 1 != currentThreadNum.get()) {}
+            CheckPoint currentPoint = new CheckPoint(location, (th + 1), AccessType.READ);
+            if (wasInterleavings < 2 && history.size() > 0){
+                CheckPoint prevoiusPoint = history.get(history.size() - 1);
+                onSharedVariableAccess(currentPoint, prevoiusPoint);
+            }
+            history.add(currentPoint);
+            logger.println("\tEnd Of Read" + location);
         }
     }
 
@@ -61,14 +69,16 @@ public class EnumerationStrategy implements Strategy {
     public void onSharedVariableWrite(int location) {
         if (driver.getCurrentThreadName().equals(strandName)) {
             int th = driver.getCurrentThreadId();
-            //driver.waitFor(currentThread);
-            while (th + 1 != currentThreadNum.get()) {}
             logger.println("\t\tEnter on SharedWrite");
             logger.println("\t\tThread id: " + (th + 1) + " currentID: " + currentThreadNum.get());
             logger.println("\t\tCurrentLocation id" + location);
-            CheckPoint currentPoint = new CheckPoint(location, (th + 1));
-            onSharedVariableAccess(currentPoint);
-            while (th + 1 != currentThreadNum.get()) {}
+            CheckPoint currentPoint = new CheckPoint(location, (th + 1), AccessType.WRITE);
+            if (wasInterleavings < 2 && history.size() > 0){
+                CheckPoint prevoiusPoint = history.get(history.size() - 1);
+                onSharedVariableAccess(currentPoint, prevoiusPoint);
+            }
+            history.add(currentPoint);
+            logger.println("\tEnd Of Write" + location);
         }
     }
 
@@ -98,7 +108,7 @@ public class EnumerationStrategy implements Strategy {
             //иначе - выполняем некоторую логику.
             if (wasInterleavings == 0) {
                 if (currentThreadNum.get() == interleavingThreads.getKey()) {
-                    firstCheckPoint = null;
+                    openWindowPoint = null;
                     needInterleave = false;
                     needChangeFirstThread = true;
                 }
@@ -108,24 +118,21 @@ public class EnumerationStrategy implements Strategy {
 
                     currentThreadNum.set(helper.threadQueue.get(helper.threadQueue.indexOf(currentThreadNum.get()) + 1));
                     driver.switchOnEndOfThread(currentThreadNum);
-//                    switchEndOFThread(executionQueue.get(executionQueue.indexOf(currentThread) + 1));
                 }
             }
             else if (wasInterleavings == 1) {
-                firstCheckPoint = null;
+                openWindowPoint = null;
                 needInterleave = false;
+
                 if (currentThreadNum.get() == interleavingThreads.getValue()) {
                     currentThreadNum.set(interleavingThreads.getKey());
                     driver.switchOnEndOfThread(currentThreadNum);
-//                    switchEndOFThread(interleavingThreads.getKey());
-                    //currentThread = interleavingThreads.getKey();
                 }
                 else if (currentThreadNum.get() == interleavingThreads.getKey()) {
                     int index = helper.threadQueue.indexOf(currentThreadNum.get()) + 1;
                     if (index < helper.threadQueue.size() - 1) {
                         currentThreadNum.set(helper.threadQueue.get(helper.threadQueue.indexOf(currentThreadNum.get()) + 2));
                         driver.switchOnEndOfThread(currentThreadNum);
-//                        switchEndOFThread(executionQueue.get(executionQueue.indexOf(currentThread) + 2));
                     }
                 }
                 else {
@@ -133,7 +140,6 @@ public class EnumerationStrategy implements Strategy {
                     if (index < helper.threadQueue.size()) {
                         currentThreadNum.set(helper.threadQueue.get(helper.threadQueue.indexOf(currentThreadNum.get()) + 1));
                         driver.switchOnEndOfThread(currentThreadNum);
-//                        switchEndOFThread(executionQueue.get(executionQueue.indexOf(currentThread) + 1));
                     }
                 }
             }
@@ -142,7 +148,6 @@ public class EnumerationStrategy implements Strategy {
                 if (index < helper.threadQueue.size()) {
                     currentThreadNum.set(helper.threadQueue.get(helper.threadQueue.indexOf(currentThreadNum.get()) + 1));
                     driver.switchOnEndOfThread(currentThreadNum);
-//                    switchEndOFThread(executionQueue.get(executionQueue.indexOf(currentThread) + 1));
                 }
             }
             else {
@@ -153,62 +158,50 @@ public class EnumerationStrategy implements Strategy {
 
     /**
      * Method contains logic for interleaving thread
-     * @param currentPoint pair locationId, threadID
+     * @param checkPoint pair locationId, threadID
      */
     @Suspendable
-    private void onSharedVariableAccess(CheckPoint currentPoint) {
+    private void onSharedVariableAccess(CheckPoint checkPoint, CheckPoint previousPoint) {
         if (currentThreadNum.get() == interleavingThreads.getKey() || currentThreadNum.get() == interleavingThreads.getValue()) {
             if (needInterleave) {
-                //если нам нужно найти новую точку и находим - переключаемся
-                if (wasInterleavings == 0 && firstCheckPoint == null && !passedPaths.containsKey(currentPoint)) {
-                    passedPaths.put(currentPoint, new HashSet<>());
-                    firstCheckPoint = currentPoint;
-                    wasInterleavings++;
-                    if (currentThreadNum.get() == interleavingThreads.getKey()) {
-                        currentThreadNum.set(interleavingThreads.getValue());
-                        driver.switchThread(currentThreadNum);
-//                        changeCurrentThreadTo(interleavingThreads.getValue());
-                    } else {
-                        currentThreadNum.set(interleavingThreads.getKey());
-                        driver.switchThread(currentThreadNum);
+                //CheckPoint previousPoint = history.get(history.size() - 1);
+                if (wasInterleavings == 0){
+                    if (openWindowPoint == null){
+                        if (!passedPaths.containsKey(previousPoint)){
+                            passedPaths.put(previousPoint, new HashSet<>());
+                            this.openWindowPoint = previousPoint;
+                            firstInterLeavedPoint = new InterleavedPoint(previousPoint, history.subList(0, history.indexOf(previousPoint)));
+                            logger.println("\tFind interleavingPoint:" + firstInterLeavedPoint);
+                            wasInterleavings++;
+                            switchInterleavingThread();
+                        }
+                    }
+                    else if (previousPoint.equals(this.openWindowPoint)){
+                        wasInterleavings++;
+                        switchInterleavingThread();
                     }
                 }
-                //если нужно найти новую точку и не находим - пропускаем
-                else if (wasInterleavings == 0 && firstCheckPoint == null && passedPaths.containsKey(currentPoint)) {
-                }
-                //если не нужно искать новую точку и мы на ней - переключаемся
-                else if (wasInterleavings == 0 && firstCheckPoint != null && currentPoint.equals(firstCheckPoint)) {
-                    wasInterleavings++;
-                    if (currentThreadNum.get() == interleavingThreads.getKey()) {
-                        currentThreadNum.set(interleavingThreads.getValue());
-                        driver.switchThread(currentThreadNum);
-//                        changeCurrentThreadTo(interleavingThreads.getValue());
-                    } else {
-                        currentThreadNum.set(interleavingThreads.getKey());
-                        driver.switchThread(currentThreadNum);
-//                        changeCurrentThreadTo(interleavingThreads.getKey());
-                    }
-                }
-                //если не нужно искать новую точку, но мы не на ней - не переключаемся
-                else if (wasInterleavings == 0 && firstCheckPoint != null && !currentPoint.equals(firstCheckPoint)) {
-                }
-                else if (wasInterleavings == 1 && !passedPaths.get(firstCheckPoint).contains(currentPoint)) {
-                    passedPaths.get(firstCheckPoint).add(currentPoint);
-                    wasInterleavings++;
-                    if (currentThreadNum.get() == interleavingThreads.getKey()) {
-                        currentThreadNum.set(interleavingThreads.getValue());
-                        driver.switchThread(currentThreadNum);
-//                        changeCurrentThreadTo(interleavingThreads.getValue());
-                    } else {
-                        currentThreadNum.set(interleavingThreads.getKey());
-                        driver.switchThread(currentThreadNum);
-//                        changeCurrentThreadTo(interleavingThreads.getKey());
+                else if (wasInterleavings == 1) {
+                    if (previousPoint.threadId == checkPoint.threadId && !passedPaths.get(this.openWindowPoint).contains(previousPoint)) {
+                        passedPaths.get(this.openWindowPoint).add(previousPoint);
+                        wasInterleavings++;
+                        switchInterleavingThread();
                     }
                 }
                 else if (wasInterleavings == 2) {
                     logger.println("was Interleavings = " + wasInterleavings);
                 }
             }
+        }
+    }
+
+    private void switchInterleavingThread(){
+        if (currentThreadNum.get() == interleavingThreads.getKey()) {
+            currentThreadNum.set(interleavingThreads.getValue());
+            driver.switchThread(currentThreadNum);
+        } else {
+            currentThreadNum.set(interleavingThreads.getKey());
+            driver.switchThread(currentThreadNum);
         }
     }
     //endregion
@@ -220,7 +213,7 @@ public class EnumerationStrategy implements Strategy {
      * @param invocation - current invocation
      */
     public void printHeader(int iteration, int invocation) {
-        logger.println("Iteration №" + iteration + " Invocation №" + invocation + " FirstCheckPoint" + firstCheckPoint);
+        logger.println("Iteration №" + iteration + " Invocation №" + invocation + " FirstCheckPoint" + openWindowPoint);
     }
 
     public static PrintStream getLogger() {
@@ -253,6 +246,7 @@ public class EnumerationStrategy implements Strategy {
      * @param needChangeFirstThread
      */
     public void prepareInvocation(int firstThread, boolean needChangeFirstThread){
+        history.clear();
         needInterleave = true;
         currentThreadNum = new AtomicInteger(helper.threadQueue.get(0));
         this.needChangeFirstThread = needChangeFirstThread;
@@ -268,7 +262,7 @@ public class EnumerationStrategy implements Strategy {
      */
     public void prepareIteration() {
         printTraces();
-        firstCheckPoint = null;
+        openWindowPoint = null;
         passedPaths = new HashMap<>();
         prepareInvocation(1, false);
     }
@@ -281,17 +275,9 @@ public class EnumerationStrategy implements Strategy {
         logger.println("Current interleaving threads id's" + interleavedThreads);
     }
 
-    public static ArrayList<Pair<Integer, Integer>> generateInterleavedPairs(int threadNumber) {
-        ArrayList<Pair<Integer, Integer>> pairList = new ArrayList<>();
-        for (int i = 1; i < threadNumber; i++) {
-            for (int j = i+1; j <= threadNumber; j++) {
-                pairList.add(new Pair<>(i, j));
-            }
-        }
-        return pairList;
-    }
     //endregion
 
+    //region WorkFromLincheck
     @Override
     public void beforeStartIteration(int threadNumber) {
         helper = new EnumerationStrategyHelper(threadNumber);
@@ -342,22 +328,31 @@ public class EnumerationStrategy implements Strategy {
     public boolean isNeedStopIteration() {
         return helper.needNextIteration;
     }
+    //endregion
+
+    private enum AccessType {
+        READ,
+        WRITE
+    }
 
     /**
      * Class describing Point with respect to location and thread id`s
      */
     private class CheckPoint{
-        private final int location;
-        private final int threadId;
+        public final int location;
+        public final int threadId;
+        public final AccessType type;
 
-        public CheckPoint(int location, int threadId) {
+        public CheckPoint(int location, int threadId, AccessType type) {
             this.location = location;
             this.threadId = threadId;
+            this.type = type;
         }
 
         @Override
         public String toString() {
             return "CheckPoint<" +
+                    type +
                     location +
                     ", " + threadId + '>';
         }
@@ -369,9 +364,8 @@ public class EnumerationStrategy implements Strategy {
 
             CheckPoint that = (CheckPoint) o;
 
-            if (location != that.location) return false;
-            return threadId == that.threadId;
 
+            return threadId == that.threadId && location == that.location && type == that.type;
         }
 
         @Override
@@ -379,6 +373,40 @@ public class EnumerationStrategy implements Strategy {
             int result = location;
             result = 31 * result + threadId;
             return result;
+        }
+    }
+
+    private class InterleavedPoint{
+        public final CheckPoint point;
+        public final List<CheckPoint> history;
+
+
+        public InterleavedPoint(CheckPoint point, List<CheckPoint> history) {
+            this.point = point;
+            this.history = history;
+        }
+
+        @Override
+        public int hashCode() {
+            return super.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (obj == null || getClass() != obj.getClass()) return false;
+
+            InterleavedPoint that = (InterleavedPoint) obj;
+
+            return (this.history == that.history && this.point == that.point);
+        }
+
+        @Override
+        public String toString() {
+            return "InterleavedPoint{" +
+                    "point=" + point +
+                    ", history=" + history +
+                    '}';
         }
     }
 
