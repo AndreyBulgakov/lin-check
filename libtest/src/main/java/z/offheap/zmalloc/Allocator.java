@@ -85,7 +85,7 @@ import static z.util.Unsafes.*;
  * <p>
  * Generally, the zmalloc is more like as slab allocator.
  * It has the possible to meet "pathological case"
- * (There are workaround suggestions). But as my investigate to public bug
+ * (There are workaround suggestions). But as my investigate to public out
  * reports, ptmalloc and tcmalloc also has this problem.
  *
  * <p>

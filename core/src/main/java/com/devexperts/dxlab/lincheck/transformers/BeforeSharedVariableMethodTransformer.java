@@ -121,7 +121,7 @@ class BeforeSharedVariableMethodTransformer extends GeneratorAdapter {
     }
 
     private void insertMethod(Method method) {
-        if (!methodName.equals("com.devexperts.dxlab.lincheck.tests.amino_cbbs.DequeTest".replace(".", "/"))) {
+        if (!isReset) {
             // Get or create current locationId
             int id = lm.getLocationId(className, methodName, methodDesc, instructionNumber);
             // Get current strategy

@@ -123,8 +123,8 @@ public class ExecutionsStrandPool {
         FiberExecutorScheduler exe = new FiberExecutorScheduler("executions-pool", Runnable::run);
         if (this.strandType == StrandType.FIBER)
             this.FACTORY = callable -> {
-                Fiber<Result[]> strand = new Fiber<>(exe, callable);
-//                Fiber<Result[]> strand = new Fiber<>(exe, callable::call);
+//                Fiber<Result[]> strand = new Fiber<>(exe, callable);
+                Fiber<Result[]> strand = new Fiber<>(exe, callable::call);
 //                Fiber<Result[]> strand = new Fiber<>(callable::call);
                 String name = "LinCheckStrand";
                 strand.setName(name);
