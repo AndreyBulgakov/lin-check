@@ -24,19 +24,19 @@ package com.devexperts.dxlab.lincheck.strategy;
 
 import co.paralleluniverse.fibers.Fiber;
 import co.paralleluniverse.fibers.Suspendable;
-import co.paralleluniverse.strands.Strand;
 import com.devexperts.dxlab.lincheck.ExecutionsStrandPool;
 
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.TimeUnit;
 
 import static java.nio.file.StandardOpenOption.APPEND;
 
 
 public class RandomUnparkStrategy implements Strategy {
-    public static int out;
+    public static int bug;
     volatile PrintStream logger = getLogger();
     ExecutionsStrandPool pool;
 
@@ -66,14 +66,12 @@ public class RandomUnparkStrategy implements Strategy {
     public void onSharedVariableRead(int location) {
         try {
             if (Fiber.isCurrentFiber()) {
-                System.out.println();
-                System.out.println(Strand.isCurrentFiber());
-                System.out.println(Strand.currentStrand());
-                System.out.println(Strand.currentStrand().getState());
-//                while (true){if (!Fiber.isCurrentFiber()) break;}
-                Fiber.park(100);
+//                Fiber.park(100);
+                Fiber.park(100, TimeUnit.NANOSECONDS);
+
+//                Fiber.parkNanos(100);
                 }
-                out = 0;
+            bug = 0;
         } catch (Exception suspendExecution) {
             throw new AssertionError(suspendExecution);
         }
@@ -84,8 +82,9 @@ public class RandomUnparkStrategy implements Strategy {
     public void onSharedVariableWrite(int location) {
         try {
             if (Fiber.isCurrentFiber()) {
-//                Fiber.park(100, TimeUnit.NANOSECONDS);
-                out = 0;
+//                Fiber.parkNanos(100);
+                Fiber.park(100, TimeUnit.NANOSECONDS);
+                bug = 0;
             }
         } catch (Exception suspendExecution) {
 
@@ -97,35 +96,16 @@ public class RandomUnparkStrategy implements Strategy {
     @Override
     public void endOfThread() {
         if (Fiber.isCurrentFiber()) {
-//            Strand randomFiber = pool.getNotCurrentStrandAndAlive();
-//            Strand randomFiber = pool.getNotCurrentStrandAndAlive();
-//            logger.println("\t\tEnter on End of thread " + pool.getStrandId(Strand.currentStrand()));
-//            logger.println("\t\tTry to unpark" + pool.getStrandId(randomFiber));
-//            logger.println();
-//            logger.flush();
-//            Fiber.unpark(randomFiber);
         }
-        out = 0;
+        bug = 0;
     }
 
-    //    public Fiber getRandomParkedFiber() {
-//        int currentId = pool.getStrandId(Strand.currentStrand());
-//        Fiber current = Fiber.currentFiber();
-//        for (Fiber fiber : StrategyHolder.fibers) {
-//            if (fiber != current) {
-//                return fiber;
-//            }
-//        }
-//        return current;
-//    }
     public static PrintStream getLogger() {
         try {
             Path p = Paths.get(System.getProperty("user.dir"), "log");
             if (Files.exists(p)) {
-//                return System.out;
                 return new PrintStream(Files.newOutputStream(p, APPEND));
             } else {
-//                return System.out;
                 return new PrintStream(Files.newOutputStream(p));
             }
         } catch (Throwable e) {

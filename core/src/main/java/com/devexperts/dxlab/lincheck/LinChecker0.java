@@ -206,7 +206,9 @@ public class LinChecker0 {
                 List<TestThreadExecution> testThreadExecutions = actorsPerThread.stream()
                         .map(actors -> TestThreadExecutionGenerator.create(testInstance, new Phaser(1), actors, false, loader))
                         .collect(Collectors.toList());
-                Set<List<List<Result>>> possibleResultsSet = generatePossibleResults(actorsPerThread, testInstance, loader);
+//                Set<List<List<Result>>> possibleResultsSet = new Fiber<>(() -> generatePossibleResults(actorsPerThread, testInstance, loader)).start().get();
+                Set<List<List<Result>>> possibleResultsSet =
+                        generatePossibleResults(actorsPerThread, testInstance, loader);
 
                 // Run invocations
                 for (int invocation = 1; invocation <= testCfg.getInvocationsPerIteration() && !currentStrategy.isNeedStopIteration(); invocation++) {

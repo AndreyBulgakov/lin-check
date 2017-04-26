@@ -9,13 +9,6 @@
 
     <artifactId>core</artifactId>
 
-    <repositories>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-    </repositories>
-
     <dependencies>
         <dependency>
             <groupId>org.ow2.asm</groupId>
@@ -23,62 +16,58 @@
             <version>5.1</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.ea.agentloader</groupId>
-            <artifactId>ea-agent-loader</artifactId>
-            <version>1.0.2</version>
-        </dependency>
+        <!--Version 0.7.8-->
+        <!--<dependency>-->
+        <!--<groupId>co.paralleluniverse</groupId>-->
+        <!--<artifactId>quasar-core</artifactId>-->
+        <!--<version>0.7.8-SNAPSHOT</version>-->
+        <!--<scope>system</scope>-->
+        <!--<systemPath>${basedir}/libs/quasar-core-0.7.8-SNAPSHOT-jdk8.jar</systemPath>-->
+        <!--</dependency>-->
+        <!--<dependency>-->
+        <!--<groupId>com.esotericsoftware</groupId>-->
+        <!--<artifactId>kryo</artifactId>-->
+        <!--<version>4.0.0</version>-->
+        <!--</dependency>-->
 
-        <!--<dependency>-->
-        <!--<groupId>co.paralleluniverse</groupId>-->
-        <!--<artifactId>quasar-core</artifactId>-->
-        <!--<version>0.7.7</version>-->
-        <!--</dependency>-->
         <dependency>
-            <groupId>com.github.puniverse.quasar</groupId>
+            <groupId>co.paralleluniverse</groupId>
             <artifactId>quasar-core</artifactId>
-            <version>-v0.7.7-gdf07c60-54</version>
+            <version>0.7.7</version>
         </dependency>
-        <!--<dependency>-->
-        <!--<groupId>co.paralleluniverse</groupId>-->
-        <!--<artifactId>quasar-core</artifactId>-->
-        <!--<version>0.7.6</version>-->
-        <!--</dependency>-->
-        <!---->
-        <!--<dependency>-->
-        <!--<groupId>co.paralleluniverse</groupId>-->
-        <!--<artifactId>quasar-core</artifactId>-->
-        <!--<version>0.7.5</version>-->
-        <!--</dependency>-->
     </dependencies>
+
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.8</version>
-                <executions>
-                    <execution>
-                        <id>compile</id>
-                        <phase>compile</phase>
-                        <configuration>
-                            <target>
-                                <taskdef name="scanSuspendables"
-                                         classname="co.paralleluniverse.fibers.instrument.SuspendablesScanner"
-                                         classpathref="maven.dependency.classpath"/>
-                                <scanSuspendables auto="true"
-                                                  supersFile="target/classes/META-INF/suspendable-supers"
-                                                  suspendablesFile="target/classes/META-INF/suspendables">
-                                    <fileset dir="target/classes/"/>
-                                </scanSuspendables>
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+
+            <!--Works only on 0.7.7 version. Need to detect suspendables-->
+            <!--<plugin>-->
+            <!--<groupId>org.apache.maven.plugins</groupId>-->
+            <!--<artifactId>maven-antrun-plugin</artifactId>-->
+            <!--<version>1.8</version>-->
+            <!--<executions>-->
+            <!--<execution>-->
+            <!--<id>compile</id>-->
+            <!--<phase>compile</phase>-->
+            <!--<configuration>-->
+            <!--<target>-->
+            <!--<taskdef name="scanSuspendables"-->
+            <!--classname="co.paralleluniverse.fibers.instrument.SuspendablesScanner"-->
+            <!--classpathref="maven.dependency.classpath"/>-->
+            <!--<scanSuspendables auto="true"-->
+            <!--supersFile="target/classes/META-INF/suspendable-supers"-->
+            <!--suspendablesFile="target/classes/META-INF/suspendables">-->
+            <!--<fileset dir="target/classes/"/>-->
+            <!--</scanSuspendables>-->
+            <!--</target>-->
+            <!--</configuration>-->
+            <!--<goals>-->
+            <!--<goal>run</goal>-->
+            <!--</goals>-->
+            <!--</execution>-->
+            <!--</executions>-->
+            <!--</plugin>-->
+
         </plugins>
     </build>
 

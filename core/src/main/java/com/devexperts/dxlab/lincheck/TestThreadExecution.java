@@ -46,7 +46,7 @@ public abstract class TestThreadExecution implements SuspendableCallable<Result[
     // It is better to return List<Result>,
     // but such implementation requires to have a synthetic
     // method to support generics and the byte-code generation
-    // is more bug-prone as well. If you need to use
+    // is more out-prone as well. If you need to use
     // List<Result>, see Arrays.asList(..) method.
     public abstract Result[] run() throws SuspendExecution, InterruptedException;
     @Suspendable
