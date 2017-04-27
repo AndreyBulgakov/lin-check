@@ -130,7 +130,7 @@ class TestThreadExecutionGenerator {
         GeneratorAdapter mv = new GeneratorAdapter(access, m,
                 // Try-catch blocks sorting is required
                 new TryCatchBlockSorter(cv.visitMethod(access, m.getName(), m.getDescriptor(), null, new String[]{"co/paralleluniverse/fibers/SuspendExecution", "java/lang/InterruptedException"}),
-                        access, m.getName(), m.getDescriptor(), null, new String[]{"co/paralleluniverse/fibers/SuspendExecution", "java/lang/InterruptedException"})
+                        access, m.getName(), m.getDescriptor(), null, null)
         );
         AnnotationVisitor av0 = mv.visitAnnotation("Lco/paralleluniverse/fibers/Suspendable;", true);
         av0.visitEnd();
@@ -149,6 +149,7 @@ class TestThreadExecutionGenerator {
         mv.storeLocal(iLocal);
         // Invoke actors
         for (int i = 0; i < actors.size(); i++) {
+//        for (int i = 0; i < actors.size(); i++) {
             Actor actor = actors.get(i);
             // Add busy-wait before operation execution (for non-first operations only)
 //            if (waitsEnabled && i > 0) {

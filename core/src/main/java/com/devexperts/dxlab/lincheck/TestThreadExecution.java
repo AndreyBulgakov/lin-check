@@ -52,6 +52,7 @@ public abstract class TestThreadExecution implements SuspendableCallable<Result[
     @Suspendable
     public Result[] call() {
         try {
+//            System.out.println(SuspendableHelper.isInstrumented(getClass()));
             return run();
         } catch (SuspendExecution | InterruptedException suspendExecution) {
             suspendExecution.printStackTrace();
