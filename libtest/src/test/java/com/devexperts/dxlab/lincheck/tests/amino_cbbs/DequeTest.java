@@ -48,14 +48,16 @@ public class DequeTest {
         lfdeque.add(value);
     }
 
-    @Operation
-    public boolean contains(@Param(gen = IntGen.class) int value) {
-        return lfdeque.contains(value);
-    }
+//    @Operation
+//    public Boolean contains(@Param(gen = IntGen.class) int value) {
+//        return lfdeque.contains(value);
+//    }
 
     @Operation
-    public boolean isEmpty(){
-        return lfdeque.isEmpty();
+    public Boolean isEmpty() {
+        Boolean bool = lfdeque.isEmpty();
+        return bool;
+//        return lfdeque.isEmpty();
     }
 
     @Operation
@@ -64,8 +66,10 @@ public class DequeTest {
     }
 
     @Operation
-    public int size() {
-        return lfdeque.size();
+    public Integer size() {
+        Integer integer = lfdeque.size();
+        return integer;
+//        return lfdeque.size();
     }
 
     @Operation

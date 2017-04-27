@@ -95,9 +95,10 @@ class ExecutionClassLoader extends ClassLoader {
             // Get transformed bytecode
             byte[] resultBytecode = cw.toByteArray();
             //TODO classes not instrumented by quasar.
+//            resultBytecode = Retransform.getInstrumentor().instrumentClass(this, name, resultBytecode);
 //            resultBytecode = Retransform.getInstrumentor().instrumentClass(getParent(), name, resultBytecode);
 //            resultBytecode = instrumentor.instrumentClass(getParent(), name, resultBytecode);
-            resultBytecode = instrumentor.instrumentClass(this, name, resultBytecode);
+//            resultBytecode = instrumentor.instrumentClass(this, name, resultBytecode);
 //            resultBytecode = instrumentor.instrumentClass(name, resultBytecode);
             writeToFile(name, resultBytecode);
             result = defineClass(name, resultBytecode, 0, resultBytecode.length);
@@ -145,9 +146,10 @@ class ExecutionClassLoader extends ClassLoader {
 //        Retransform.addWaiver(className, "call");
 
         try {
+//            bytecode = Retransform.getInstrumentor().instrumentClass(this, className, bytecode);
 //            bytecode = Retransform.getInstrumentor().instrumentClass(getParent(), className, bytecode);
 //            bytecode = instrumentor.instrumentClass(getParent(), className, bytecode);
-            bytecode = instrumentor.instrumentClass(this, className, bytecode);
+//            bytecode = instrumentor.instrumentClass(this, className, bytecode);
 //            bytecode = instrumentor.instrumentClass(className, bytecode);
         } catch (Exception e) {
             e.printStackTrace();

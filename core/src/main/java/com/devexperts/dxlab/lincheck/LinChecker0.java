@@ -26,7 +26,10 @@ import co.paralleluniverse.common.util.Exceptions;
 import co.paralleluniverse.fibers.Suspendable;
 import com.devexperts.dxlab.lincheck.report.Reporter;
 import com.devexperts.dxlab.lincheck.report.TestReport;
-import com.devexperts.dxlab.lincheck.strategy.*;
+import com.devexperts.dxlab.lincheck.strategy.Driver;
+import com.devexperts.dxlab.lincheck.strategy.EnumerationStrategy;
+import com.devexperts.dxlab.lincheck.strategy.StrandDriver;
+import com.devexperts.dxlab.lincheck.strategy.StrategyHolder;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -184,8 +187,8 @@ public class LinChecker0 {
             final Phaser phaser = new Phaser(1);
             //Set strategy and initialize transformation in classes
             Driver driver = new StrandDriver(strandPool);
-//            EnumerationStrategy currentStrategy = new EnumerationStrategy(driver);
-            Strategy currentStrategy = new RandomUnparkStrategy(driver);
+            EnumerationStrategy currentStrategy = new EnumerationStrategy(driver);
+//            Strategy currentStrategy = new RandomUnparkStrategy(driver);
 //            DummyStrategy currentStrategy = new DummyStrategy(driver);
             StrategyHolder.setCurrentStrategy(currentStrategy);
             reportBuilder.strategy(currentStrategy.getClass().getSimpleName().replace("Strategy", ""));
@@ -210,9 +213,17 @@ public class LinChecker0 {
                 Set<List<List<Result>>> possibleResultsSet =
                         generatePossibleResults(actorsPerThread, testInstance, loader);
 
+//                FiberExecutorScheduler exe = new FiberExecutorScheduler("111", Runnable::run);
+//                Fiber<Result[]> fiber1 = new Fiber<>(exe,testThreadExecutions.get(0));
+//                Fiber<Result[]> fiber2 = new Fiber<>(exe,testThreadExecutions.get(1));
+//                fiber1.start();
+//                fiber2.start();
+//                fiber1.get();
+//                fiber2.get();
+
                 // Run invocations
                 for (int invocation = 1; invocation <= testCfg.getInvocationsPerIteration() && !currentStrategy.isNeedStopIteration(); invocation++) {
-                    System.out.println(invocation);
+                    System.out.println("Invocation " + invocation);
                     currentStrategy.onStartInvocation(iteration, invocation);
                     reportBuilder.incInvocations();
                     // Reset the state of test
