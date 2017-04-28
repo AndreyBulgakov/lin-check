@@ -21,9 +21,12 @@ import static java.nio.file.StandardOpenOption.APPEND;
  * Strategy
  */
 public class EnumerationStrategy implements Strategy {
-    private Map<CheckPoint, Set<CheckPoint>> passedPaths;
+    private Map<ArrayList<CheckPoint>, Set<ArrayList<CheckPoint>>> passedPaths;
+
+    //точка, в которую мы попадем после прерывания
+    private CheckPoint closeWindow;
+    //точка, после которой мы прерываемся
     private CheckPoint openWindowPoint;
-    private InterleavedPoint firstInterLeavedPoint;
     PrintStream logger = getLogger();
     private AtomicInteger currentThreadNum;
     private volatile int wasInterleavings;
@@ -164,26 +167,33 @@ public class EnumerationStrategy implements Strategy {
     private void onSharedVariableAccess(CheckPoint checkPoint, CheckPoint previousPoint) {
         if (currentThreadNum.get() == interleavingThreads.getKey() || currentThreadNum.get() == interleavingThreads.getValue()) {
             if (needInterleave) {
-                //CheckPoint previousPoint = history.get(history.size() - 1);
+                //если ещё не было прерываний
                 if (wasInterleavings == 0){
+                    //если точка не задана
                     if (openWindowPoint == null){
-                        if (!passedPaths.containsKey(previousPoint)){
-                            passedPaths.put(previousPoint, new HashSet<>());
+                        //если ещё не было такой истории
+                        if (!passedPaths.containsKey(history)){
+                            passedPaths.put(new ArrayList<>(history), new HashSet<>());
                             this.openWindowPoint = previousPoint;
-                            firstInterLeavedPoint = new InterleavedPoint(previousPoint, history.subList(0, history.indexOf(previousPoint)));
-                            logger.println("\tFind interleavingPoint:" + firstInterLeavedPoint);
                             wasInterleavings++;
+                            closeWindow = checkPoint;
                             switchInterleavingThread();
                         }
                     }
+                    //если точка задана и мы в ней
                     else if (previousPoint.equals(this.openWindowPoint)){
                         wasInterleavings++;
+                        closeWindow = checkPoint;
                         switchInterleavingThread();
                     }
                 }
+                //еслибыло одно прерывание
                 else if (wasInterleavings == 1) {
-                    if (previousPoint.threadId == checkPoint.threadId && !passedPaths.get(this.openWindowPoint).contains(previousPoint)) {
-                        passedPaths.get(this.openWindowPoint).add(previousPoint);
+                    List<CheckPoint> previousHistory = history.subList(0, history.indexOf(this.openWindowPoint) + 1);
+                    //если мы уже прошли как минимум 1 точку второго потока и эта пройденная точка не была рассмотрена
+                    if (previousPoint.threadId == checkPoint.threadId
+                            && !passedPaths.get(previousHistory).contains(history) && isNeedInterleave(openWindowPoint, closeWindow, previousPoint)) {
+                        passedPaths.get(previousHistory).add(new ArrayList<>(history));
                         wasInterleavings++;
                         switchInterleavingThread();
                     }
@@ -193,6 +203,14 @@ public class EnumerationStrategy implements Strategy {
                 }
             }
         }
+    }
+
+    private boolean isNeedInterleave(CheckPoint openWindow, CheckPoint closeWindow, CheckPoint anotherPoint) {
+        if (openWindow.type == AccessType.WRITE)
+            return true;
+        else if (anotherPoint.type == AccessType.WRITE)
+            return true;
+        return false;
     }
 
     private void switchInterleavingThread(){
