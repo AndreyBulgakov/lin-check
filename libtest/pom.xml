@@ -7,6 +7,10 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <properties>
+        <quasar.version>0.7.7</quasar.version>
+    </properties>
+
     <build>
         <plugins>
             <plugin>
@@ -26,6 +30,29 @@
                 </configuration>
             </plugin>
 
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-agents</id>
+                        <phase>process-test-classes</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>co.paralleluniverse</groupId>
+                                    <artifactId>quasar-core</artifactId>
+                                    <version>${quasar.version}</version>
+                                    <outputDirectory>${project.build.directory}</outputDirectory>
+                                    <destFileName>quasar.jar</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -33,10 +60,10 @@
                 <version>2.19.1</version>
                 <configuration>
                     <argLine>
-                        -javaagent:${basedir}/libs/quasar-core-0.7.7.jar
+                        -javaagent:${project.build.directory}/quasar.jar
                         <!-- -javaagent:${basedir}/libs/quasar-core-0.7.8-SNAPSHOT-jdk8.jar-->
                         <!-- -javaagent:${basedir}/libs/quasar-core-0.7.8-SNAPSHOT.jar-->
-                        <!-- -Dco.paralleluniverse.fibers.verifyInstrumentation=true-->
+                         -Dco.paralleluniverse.fibers.verifyInstrumentation=true
                     </argLine>
                 </configuration>
             </plugin>
@@ -87,6 +114,13 @@
             <artifactId>core</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>co.paralleluniverse</groupId>
+            <artifactId>quasar-core</artifactId>
+            <version>${quasar.version}</version>
+            <classifier>jdk8</classifier>
         </dependency>
     </dependencies>
 </project>

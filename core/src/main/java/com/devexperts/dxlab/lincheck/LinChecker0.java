@@ -28,7 +28,9 @@ import com.devexperts.dxlab.lincheck.report.Reporter;
 import com.devexperts.dxlab.lincheck.report.TestReport;
 import com.devexperts.dxlab.lincheck.strategy.Driver;
 import com.devexperts.dxlab.lincheck.strategy.EnumerationStrategy;
+import com.devexperts.dxlab.lincheck.strategy.RandomUnparkStrategy;
 import com.devexperts.dxlab.lincheck.strategy.StrandDriver;
+import com.devexperts.dxlab.lincheck.strategy.Strategy;
 import com.devexperts.dxlab.lincheck.strategy.StrategyHolder;
 
 import java.io.IOException;
@@ -187,8 +189,8 @@ public class LinChecker0 {
             final Phaser phaser = new Phaser(1);
             //Set strategy and initialize transformation in classes
             Driver driver = new StrandDriver(strandPool);
-            EnumerationStrategy currentStrategy = new EnumerationStrategy(driver);
-//            Strategy currentStrategy = new RandomUnparkStrategy(driver);
+//            EnumerationStrategy currentStrategy = new EnumerationStrategy(driver);
+            Strategy currentStrategy = new RandomUnparkStrategy(driver);
 //            DummyStrategy currentStrategy = new DummyStrategy(driver);
             StrategyHolder.setCurrentStrategy(currentStrategy);
             reportBuilder.strategy(currentStrategy.getClass().getSimpleName().replace("Strategy", ""));

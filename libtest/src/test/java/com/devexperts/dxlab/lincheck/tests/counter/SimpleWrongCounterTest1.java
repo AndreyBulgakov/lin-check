@@ -29,9 +29,6 @@ import com.devexperts.dxlab.lincheck.annotations.Reset;
 import com.devexperts.dxlab.lincheck.libtest.counter.SimpleWrongCounter1;
 import org.junit.Test;
 
-/**
- * Created by alexander on 26.02.17.
- */
 @CTest(iterations = 50, actorsPerThread = {"2:5", "2:5"})
 public class SimpleWrongCounterTest1 {
     private SimpleWrongCounter1 counter;
