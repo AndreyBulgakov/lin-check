@@ -56,26 +56,22 @@ public class RandomUnparkStrategy implements Strategy {
     @Suspendable
     @Override
     public void onSharedVariableRead(int location) {
-        try {
-            if (Fiber.isCurrentFiber()) {
-                Fiber.park(100, TimeUnit.NANOSECONDS);
-                }
-            bug = 0;
-        } catch (Exception suspendExecution) {
-            throw new AssertionError(suspendExecution);
-        }
+        onSharedVariableAccess(location);
     }
 
     @Suspendable
     @Override
     public void onSharedVariableWrite(int location) {
+        onSharedVariableAccess(location);
+    }
+
+    private void onSharedVariableAccess(int location) {
         try {
             if (Fiber.isCurrentFiber()) {
                 Fiber.park(100, TimeUnit.NANOSECONDS);
-                bug = 0;
             }
+//            bug = 0;
         } catch (Exception suspendExecution) {
-
             throw new AssertionError(suspendExecution);
         }
     }

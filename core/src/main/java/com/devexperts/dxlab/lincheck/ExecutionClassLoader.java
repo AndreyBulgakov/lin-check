@@ -100,7 +100,7 @@ class ExecutionClassLoader extends ClassLoader {
 //            resultBytecode = instrumentor.instrumentClass(getParent(), name, resultBytecode);
 //            resultBytecode = instrumentor.instrumentClass(this, name, resultBytecode);
 //            resultBytecode = instrumentor.instrumentClass(name, resultBytecode);
-            writeToFile(name, resultBytecode);
+            //writeToFile(name, resultBytecode);
             result = defineClass(name, resultBytecode, 0, resultBytecode.length);
             // Save it to cache and resources
             resources.put(name, resultBytecode);
@@ -154,7 +154,7 @@ class ExecutionClassLoader extends ClassLoader {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        writeToFile(className, bytecode);
+        //writeToFile(className, bytecode);
         return (Class<? extends TestThreadExecution>) super.defineClass(className, bytecode, 0, bytecode.length);
     }
 
