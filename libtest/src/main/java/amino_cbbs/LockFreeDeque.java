@@ -782,7 +782,11 @@ public class LockFreeDeque<E> extends AbstractQueue<E> implements Deque<E> {
      */
     private class DeqIterator implements Iterator<E> {
 
-        private DequeNode<E> cursor = anchor.get().left;
+        private DequeNode<E> cursor;//= anchor.get().left;
+
+        public DeqIterator() {
+            cursor = anchor.get().left;
+        }
 
         public boolean hasNext() {
             return cursor != null;
