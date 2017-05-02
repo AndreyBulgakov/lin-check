@@ -7,10 +7,6 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <properties>
-        <quasar.version>0.7.7</quasar.version>
-    </properties>
-
     <build>
         <plugins>
             <plugin>
@@ -18,7 +14,12 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <argLine>
-                        -Dlincheck.writeReport=true
+                        <!-- -Dlincheck.writeReport=true-->
+                        <!-- -javaagent:${basedir}/libs/quasar-core-0.7.7.jar-->
+                        -javaagent:${basedir}/libs/quasar-core-0.7.8-SNAPSHOT-jdk8.jar
+                        <!-- -javaagent:${basedir}/libs/quasar-core-0.7.8-SNAPSHOT-jdk8.jar-->
+                        <!-- -javaagent:${basedir}/libs/quasar-core-0.7.8-SNAPSHOT.jar-->
+                        -Dco.paralleluniverse.fibers.verifyInstrumentation=true
                     </argLine>
                 </configuration>
             </plugin>
@@ -29,45 +30,6 @@
                     <compilerArgument>-parameters</compilerArgument>
                 </configuration>
             </plugin>
-
-            <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-agents</id>
-                        <phase>process-test-classes</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>co.paralleluniverse</groupId>
-                                    <artifactId>quasar-core</artifactId>
-                                    <version>${quasar.version}</version>
-                                    <outputDirectory>${project.build.directory}</outputDirectory>
-                                    <destFileName>quasar.jar</destFileName>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.19.1</version>
-                <configuration>
-                    <argLine>
-                        -javaagent:${project.build.directory}/quasar.jar
-                        <!-- -javaagent:${basedir}/libs/quasar-core-0.7.8-SNAPSHOT-jdk8.jar-->
-                        <!-- -javaagent:${basedir}/libs/quasar-core-0.7.8-SNAPSHOT.jar-->
-                         -Dco.paralleluniverse.fibers.verifyInstrumentation=true
-                    </argLine>
-                </configuration>
-            </plugin>
-
 
         </plugins>
     </build>
@@ -91,13 +53,6 @@
             <version>0.6</version>
             <scope>provided</scope>
         </dependency>
-
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>18.0</version>
-        </dependency>
-
         <dependency>
             <groupId>com.boundary</groupId>
             <artifactId>high-scale-lib</artifactId>
@@ -115,12 +70,35 @@
             <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
-            <groupId>co.paralleluniverse</groupId>
-            <artifactId>quasar-core</artifactId>
-            <version>${quasar.version}</version>
-            <classifier>jdk8</classifier>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>20.0</version>
+        </dependency>
+        <dependency>
+            <groupId>de.javakaffee</groupId>
+            <artifactId>kryo-serializers</artifactId>
+            <version>0.41</version>
+        </dependency>
+        <dependency>
+            <groupId>com.esotericsoftware</groupId>
+            <artifactId>kryo</artifactId>
+            <version>4.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.latencyutils</groupId>
+            <artifactId>LatencyUtils</artifactId>
+            <version>2.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-core</artifactId>
+            <version>3.1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hdrhistogram</groupId>
+            <artifactId>HdrHistogram</artifactId>
+            <version>2.1.9</version>
         </dependency>
     </dependencies>
 </project>

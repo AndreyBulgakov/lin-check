@@ -23,6 +23,5 @@ package com.devexperts.dxlab.lincheck.libtest.counter;
  */
 
 public interface Counter {
-
     public int incrementAndGet();
 }
