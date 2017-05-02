@@ -43,7 +43,7 @@ public class AtomicCounterTest {
     }
 
     @Operation
-    public int incAndGet() {
+    public Integer incAndGet() {
         return counter.incrementAndGet();
     }
 

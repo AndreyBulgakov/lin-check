@@ -41,6 +41,7 @@ public class ExecutionsStrandPool {
     private final StrandType strandType;
     private CallableStrandFactory FACTORY;
     private boolean isRuning = false;
+    private FiberExecutorScheduler exe = new FiberExecutorScheduler("executions-pool", Runnable::run);
 
     public enum StrandType {
         THREAD,
@@ -120,7 +121,6 @@ public class ExecutionsStrandPool {
     }
 
     private void createFactory() {
-        FiberExecutorScheduler exe = new FiberExecutorScheduler("executions-pool", Runnable::run);
         if (this.strandType == StrandType.FIBER)
             this.FACTORY = callable -> {
 //                Fiber<Result[]> strand = new Fiber<>(exe, callable);

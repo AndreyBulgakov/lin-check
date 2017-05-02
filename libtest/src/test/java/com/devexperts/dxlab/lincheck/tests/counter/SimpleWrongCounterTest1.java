@@ -40,10 +40,8 @@ public class SimpleWrongCounterTest1 {
     }
 
 
-    //    @Suspendable
     @Operation
     public Integer incAndGet() {
-//        StrategyHolder.getCurrentStrategy().onSharedVariableRead(0);
         return counter.incrementAndGet();
     }
 

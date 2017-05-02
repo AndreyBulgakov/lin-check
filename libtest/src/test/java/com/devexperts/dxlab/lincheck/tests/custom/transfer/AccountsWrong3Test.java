@@ -45,7 +45,7 @@ public class AccountsWrong3Test {
 
     @ReadOnly
     @Operation(params = {"id"})
-    public int getAmount(int key) {
+    public Integer getAmount(int key) {
         return acc.getAmount(key);
     }
 
