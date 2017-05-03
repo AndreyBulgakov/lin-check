@@ -22,9 +22,7 @@ package com.devexperts.dxlab.lincheck.strategy;
  * #L%
  */
 
-import co.paralleluniverse.fibers.SuspendExecution;
 import co.paralleluniverse.fibers.Suspendable;
-import co.paralleluniverse.strands.Strand;
 import javafx.util.Pair;
 
 import java.io.IOException;
@@ -108,14 +106,7 @@ public class EnumerationStrategy implements Strategy {
     @Override
     public void startOfThread() {
         if (driver.getCurrentThreadName().equals(strandName)) {
-            try {
-                while (driver.getCurrentThreadId() != currentThreadNum.get()) {
-                    logger.println("park thread with id" + (driver.getCurrentThreadId()));
-                    Strand.park();
-                }
-            } catch (SuspendExecution suspendExecution) {
-                suspendExecution.printStackTrace();
-            }
+            driver.waitFor(currentThreadNum);
         }
     }
 
