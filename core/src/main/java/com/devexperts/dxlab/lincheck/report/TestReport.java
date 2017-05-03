@@ -58,7 +58,7 @@ public class TestReport {
         this.invocations = builder.invocations;
         this.iterations = builder.iterations;
         this.time = builder.time;
-        this.result = Objects.requireNonNull(builder.result);
+        this.result = builder.result == null ? Result.ERROR : builder.result;
     }
 
     //region Getters
@@ -116,7 +116,7 @@ public class TestReport {
      * Enum which specifies test result
      */
     public enum Result {
-        SUCCESS, FAILURE
+        SUCCESS, FAILURE, ERROR
     }
 
     public static class Builder {
