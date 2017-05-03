@@ -29,7 +29,6 @@ import com.devexperts.dxlab.lincheck.ExecutionsStrandPool;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-//TODO delete +1 -1 in targetThreadId
 public class StrandDriver implements Driver {
 
     public final ExecutionsStrandPool pool;
@@ -42,9 +41,9 @@ public class StrandDriver implements Driver {
     @Override
     public void switchThread(AtomicInteger targetThreadId) {
         try {
-            Strand srt = pool.getStrand(targetThreadId.get() - 1);
+            Strand srt = pool.getStrand(targetThreadId.get());
             Strand.unpark(srt);
-            while ((getCurrentThreadId() + 1) != targetThreadId.get()){
+            while (getCurrentThreadId() != targetThreadId.get()){
                 Strand.park();
             }
         } catch (SuspendExecution suspendExecution) {
@@ -55,15 +54,15 @@ public class StrandDriver implements Driver {
     @Suspendable
     @Override
     public void switchOnEndOfThread(AtomicInteger targetThreadId) {
-        Strand.unpark(pool.getStrand(targetThreadId.get() - 1));
+        Strand.unpark(pool.getStrand(targetThreadId.get()));
     }
 
     @Suspendable
     @Override
     public void waitFor(AtomicInteger targetThreadId) {
-        if (getCurrentThreadId() + 1 != targetThreadId.get()) {
+        if (getCurrentThreadId() != targetThreadId.get()) {
             try {
-                while ((getCurrentThreadId() + 1) != targetThreadId.get()){
+                while (getCurrentThreadId() != targetThreadId.get()){
                     Strand.park();
                 }
             } catch (SuspendExecution suspendExecution) {
