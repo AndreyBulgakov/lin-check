@@ -45,10 +45,11 @@ import static java.nio.file.StandardOpenOption.APPEND;
 public class EnumerationStrategy implements Strategy {
     private Map<ArrayList<CheckPoint>, Set<ArrayList<CheckPoint>>> passedPaths;
 
-    //точка, в которую мы попадем после прерывания
-    private CheckPoint closeWindow;
     //точка, после которой мы прерываемся
     private CheckPoint openWindowPoint;
+    //история прохождения точек, после которого последовало переключение
+    private ArrayList<CheckPoint> openWindowPoints;
+
     PrintStream logger = getLogger();
     private AtomicInteger currentThreadNum;
     private volatile int wasInterleavings;
@@ -76,16 +77,14 @@ public class EnumerationStrategy implements Strategy {
         if (driver.getCurrentThreadName().equals(strandName)) {
             int th = driver.getCurrentThreadId();
             //если история не пуста, то, возможно, стоит переключиться
-            logger.println("\t\tEnter on SharedRead");
-            logger.println("\t\tThread id: " + (th + 1) + " currentID: " + currentThreadNum.get());
-            logger.println("\t\tCurrentLocation id" + location);
             CheckPoint currentPoint = new CheckPoint(location, (th + 1), AccessType.READ);
+            logger.println("\n\t\tEnter on " + currentPoint + " currentID: " + currentThreadNum.get());
             if (wasInterleavings < 2 && history.size() > 0){
                 CheckPoint prevoiusPoint = history.get(history.size() - 1);
                 onSharedVariableAccess(currentPoint, prevoiusPoint);
             }
             history.add(currentPoint);
-            logger.println("\tEnd Of Read" + location);
+            logger.println("\tEnd of " + currentPoint);
         }
     }
 
@@ -94,16 +93,14 @@ public class EnumerationStrategy implements Strategy {
     public void onSharedVariableWrite(int location) {
         if (driver.getCurrentThreadName().equals(strandName)) {
             int th = driver.getCurrentThreadId();
-            logger.println("\t\tEnter on SharedWrite");
-            logger.println("\t\tThread id: " + (th + 1) + " currentID: " + currentThreadNum.get());
-            logger.println("\t\tCurrentLocation id" + location);
             CheckPoint currentPoint = new CheckPoint(location, (th + 1), AccessType.WRITE);
+            logger.println("\n\t\tEnter on " + currentPoint + " currentID: " + currentThreadNum.get());
             if (wasInterleavings < 2 && history.size() > 0){
                 CheckPoint prevoiusPoint = history.get(history.size() - 1);
                 onSharedVariableAccess(currentPoint, prevoiusPoint);
             }
             history.add(currentPoint);
-            logger.println("\tEnd Of Write" + location);
+            logger.println("\tEnd of " + currentPoint);
         }
     }
 
@@ -111,9 +108,9 @@ public class EnumerationStrategy implements Strategy {
     @Override
     public void startOfThread() {
         if (driver.getCurrentThreadName().equals(strandName)) {
-            logger.println("park thread with id" + (driver.getCurrentThreadId() + 1));
             try {
                 while ((driver.getCurrentThreadId() + 1) != currentThreadNum.get()) {
+                    logger.println("park thread with id" + (driver.getCurrentThreadId() + 1));
                     Strand.park();
                 }
             } catch (SuspendExecution suspendExecution) {
@@ -127,13 +124,13 @@ public class EnumerationStrategy implements Strategy {
     public void endOfThread() {
         if (driver.getCurrentThreadName().equals(strandName)) {
             int th = driver.getCurrentThreadId();
-//            Strand th = Strand.currentStrand();
             logger.println("\tEndOfThread " + (th + 1) + "with interleavings:" + wasInterleavings);
             //В конце потока смотрим, если это поток, который не надо было прерывать - выполняем слеующий в расписании
             //иначе - выполняем некоторую логику.
             if (wasInterleavings == 0) {
                 if (currentThreadNum.get() == interleavingThreads.getKey()) {
                     openWindowPoint = null;
+                    openWindowPoints = null;
                     needInterleave = false;
                     needChangeFirstThread = true;
                 }
@@ -147,6 +144,7 @@ public class EnumerationStrategy implements Strategy {
             }
             else if (wasInterleavings == 1) {
                 openWindowPoint = null;
+                openWindowPoints = null;
                 needInterleave = false;
 
                 if (currentThreadNum.get() == interleavingThreads.getValue()) {
@@ -196,40 +194,42 @@ public class EnumerationStrategy implements Strategy {
                         //если ещё не было такой истории
                         if (!passedPaths.containsKey(history)){
                             passedPaths.put(new ArrayList<>(history), new HashSet<>());
+                            openWindowPoints = new ArrayList<>(history);
+                            history.clear();
                             this.openWindowPoint = previousPoint;
                             wasInterleavings++;
-                            closeWindow = checkPoint;
                             switchInterleavingThread();
                         }
                     }
-                    //если точка задана и мы в ней
+                    //если точка задана и мы только что прошли её
                     else if (previousPoint.equals(this.openWindowPoint)){
+                        history.clear();
                         wasInterleavings++;
-                        closeWindow = checkPoint;
                         switchInterleavingThread();
                     }
                 }
                 //еслибыло одно прерывание
                 else if (wasInterleavings == 1) {
-                    List<CheckPoint> previousHistory = history.subList(0, history.indexOf(this.openWindowPoint) + 1);
                     //если мы уже прошли как минимум 1 точку второго потока и эта пройденная точка не была рассмотрена
                     if (previousPoint.threadId == checkPoint.threadId
-                            && !passedPaths.get(previousHistory).contains(history) && isNeedInterleave(openWindowPoint, closeWindow, previousPoint)) {
-                        passedPaths.get(previousHistory).add(new ArrayList<>(history));
+                            && !passedPaths.get(openWindowPoints).contains(history)
+                            && isNeedInterleave(openWindowPoint, previousPoint)) {
+                        passedPaths.get(openWindowPoints).add(new ArrayList<>(history));
                         wasInterleavings++;
                         switchInterleavingThread();
                     }
-                } else if (wasInterleavings == 2) {
+                }
+                else if (wasInterleavings == 2) {
                     logger.println("was Interleavings = " + wasInterleavings);
                 }
             }
         }
     }
 
-    private boolean isNeedInterleave(CheckPoint openWindow, CheckPoint closeWindow, CheckPoint anotherPoint) {
+    private boolean isNeedInterleave(CheckPoint openWindow, CheckPoint anotherThreadPoint) {
         if (openWindow.type == AccessType.WRITE)
             return true;
-        else if (anotherPoint.type == AccessType.WRITE)
+        else if (anotherThreadPoint.type == AccessType.WRITE)
             return true;
         return false;
     }
@@ -252,7 +252,7 @@ public class EnumerationStrategy implements Strategy {
      * @param invocation - current invocation
      */
     public void printHeader(int iteration, int invocation) {
-        logger.println("Iteration №" + iteration + " Invocation №" + invocation + " FirstCheckPoint" + openWindowPoint);
+        logger.println("Iteration №" + iteration + " Invocation №" + invocation + " FirstCheckPoint" + openWindowPoints);
     }
 
     public static PrintStream getLogger() {
@@ -302,6 +302,7 @@ public class EnumerationStrategy implements Strategy {
     public void prepareIteration() {
         printTraces();
         openWindowPoint = null;
+        openWindowPoints = null;
         passedPaths = new HashMap<>();
         prepareInvocation(1, false);
     }
@@ -391,9 +392,9 @@ public class EnumerationStrategy implements Strategy {
         @Override
         public String toString() {
             return "CheckPoint<" +
-                    type +
-                    location +
-                    ", " + threadId + '>';
+                    "loc = " + location +
+                    ", type = " + type +
+                    ", tid = " + threadId + '>';
         }
 
         @Override
