@@ -416,40 +416,6 @@ public class EnumerationStrategy implements Strategy {
         }
     }
 
-    private class InterleavedPoint{
-        public final CheckPoint point;
-        public final List<CheckPoint> history;
-
-
-        public InterleavedPoint(CheckPoint point, List<CheckPoint> history) {
-            this.point = point;
-            this.history = history;
-        }
-
-        @Override
-        public int hashCode() {
-            return super.hashCode();
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) return true;
-            if (obj == null || getClass() != obj.getClass()) return false;
-
-            InterleavedPoint that = (InterleavedPoint) obj;
-
-            return (this.history == that.history && this.point == that.point);
-        }
-
-        @Override
-        public String toString() {
-            return "InterleavedPoint{" +
-                    "point=" + point +
-                    ", history=" + history +
-                    '}';
-        }
-    }
-
     private static class EnumerationStrategyHelper {
         //список возможных запусков
         public List<List<Integer>> queueThreadExecutions;
