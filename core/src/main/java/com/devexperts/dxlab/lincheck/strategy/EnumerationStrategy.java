@@ -77,7 +77,7 @@ public class EnumerationStrategy implements Strategy {
         if (driver.getCurrentThreadName().equals(strandName)) {
             int th = driver.getCurrentThreadId();
             //если история не пуста, то, возможно, стоит переключиться
-            CheckPoint currentPoint = new CheckPoint(location, (th + 1), AccessType.READ);
+            CheckPoint currentPoint = new CheckPoint(location, th, AccessType.READ);
             logger.println("\n\t\tEnter on " + currentPoint + " currentID: " + currentThreadNum.get());
             if (wasInterleavings < 2 && history.size() > 0){
                 CheckPoint prevoiusPoint = history.get(history.size() - 1);
@@ -93,7 +93,7 @@ public class EnumerationStrategy implements Strategy {
     public void onSharedVariableWrite(int location) {
         if (driver.getCurrentThreadName().equals(strandName)) {
             int th = driver.getCurrentThreadId();
-            CheckPoint currentPoint = new CheckPoint(location, (th + 1), AccessType.WRITE);
+            CheckPoint currentPoint = new CheckPoint(location, th, AccessType.WRITE);
             logger.println("\n\t\tEnter on " + currentPoint + " currentID: " + currentThreadNum.get());
             if (wasInterleavings < 2 && history.size() > 0){
                 CheckPoint prevoiusPoint = history.get(history.size() - 1);
@@ -109,8 +109,8 @@ public class EnumerationStrategy implements Strategy {
     public void startOfThread() {
         if (driver.getCurrentThreadName().equals(strandName)) {
             try {
-                while ((driver.getCurrentThreadId() + 1) != currentThreadNum.get()) {
-                    logger.println("park thread with id" + (driver.getCurrentThreadId() + 1));
+                while (driver.getCurrentThreadId() != currentThreadNum.get()) {
+                    logger.println("park thread with id" + (driver.getCurrentThreadId()));
                     Strand.park();
                 }
             } catch (SuspendExecution suspendExecution) {
@@ -124,7 +124,7 @@ public class EnumerationStrategy implements Strategy {
     public void endOfThread() {
         if (driver.getCurrentThreadName().equals(strandName)) {
             int th = driver.getCurrentThreadId();
-            logger.println("\tEndOfThread " + (th + 1) + "with interleavings:" + wasInterleavings);
+            logger.println("\tEndOfThread " + th + "with interleavings:" + wasInterleavings);
             //В конце потока смотрим, если это поток, который не надо было прерывать - выполняем слеующий в расписании
             //иначе - выполняем некоторую логику.
             if (wasInterleavings == 0) {
@@ -429,12 +429,11 @@ public class EnumerationStrategy implements Strategy {
         List<Integer> threadQueue;
 
         public EnumerationStrategyHelper(int threadNumber) {
-            List<Integer> list = IntStream.range(1, threadNumber + 1).boxed().collect(Collectors.toList());
+            List<Integer> list = IntStream.range(0, threadNumber).boxed().collect(Collectors.toList());
             queueThreadExecutions = threadPermutations(list);
         }
 
         public static List<List<Integer>> threadPermutations(List<Integer> list) {
-
             if (list.size() == 0) {
                 List<List<Integer>> result = new ArrayList<List<Integer>>();
                 result.add(new ArrayList<Integer>());
