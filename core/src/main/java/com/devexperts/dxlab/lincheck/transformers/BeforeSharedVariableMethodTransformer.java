@@ -25,6 +25,7 @@ package com.devexperts.dxlab.lincheck.transformers;
 import co.paralleluniverse.fibers.instrument.Retransform;
 import com.devexperts.dxlab.lincheck.strategy.Strategy;
 import com.devexperts.dxlab.lincheck.strategy.StrategyHolder;
+import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -53,14 +54,21 @@ class BeforeSharedVariableMethodTransformer extends GeneratorAdapter {
 
     private int instructionNumber;
 
+    private boolean isReset = false;
+
     BeforeSharedVariableMethodTransformer(int api, MethodVisitor mv, int access, String name, String desc, String className) {
         super(api, mv, access, name, desc);
         this.className = className;
         this.methodName = name;
         this.methodDesc = desc;
-        Retransform.addWaiver(className.replace("/", "."), name);
     }
 
+    @Override
+    public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+        if (desc.equals("Lcom/devexperts/dxlab/lincheck/annotations/Reset;"))
+            this.isReset = true;
+        return super.visitAnnotation(desc, visible);
+    }
 
     @Override
     public void visitVarInsn(int opcode, int var) {
@@ -106,12 +114,14 @@ class BeforeSharedVariableMethodTransformer extends GeneratorAdapter {
     }
 
     private void insertMethod(Method method) {
-        // Get or create current locationId
-        int id = lm.getLocationId(className, methodName, methodDesc, instructionNumber);
-        // Get current strategy
-        invokeStatic(STRATEGYHOLDER_TYPE, STRATEGYHOLDER_GET);
-        // Insert Strategy.onSharedVariableWrite interface method call
-        push(id);
-        invokeInterface(STRATEGY_ITF_TYPE, method);
+        if (!isReset) {
+            // Get or create current locationId
+                int id = lm.getLocationId(className, methodName, methodDesc, instructionNumber);
+            // Get current strategy
+            invokeStatic(STRATEGYHOLDER_TYPE, STRATEGYHOLDER_GET);
+            // Insert Strategy.onSharedVariableWrite interface method call
+            push(id);
+            invokeInterface(STRATEGY_ITF_TYPE, method);
+        }
     }
 }
