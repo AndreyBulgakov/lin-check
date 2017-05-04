@@ -152,13 +152,13 @@ class TestThreadExecutionGenerator {
 //        for (int i = 0; i < actors.size(); i++) {
             Actor actor = actors.get(i);
             // Add busy-wait before operation execution (for non-first operations only)
-//            if (waitsEnabled && i > 0) {
-//                mv.loadThis();
-//                mv.getField(TEST_THREAD_EXECUTION_TYPE, "waits", INT_ARRAY_TYPE);
-//                mv.push(i - 1);
-//                mv.arrayLoad(Type.INT_TYPE);
-//                mv.invokeStatic(UTILS_TYPE, UTILS_CONSUME_CPU);
-//            }
+            if (waitsEnabled && i > 0) {
+                mv.loadThis();
+                mv.getField(TEST_THREAD_EXECUTION_TYPE, "waits", INT_ARRAY_TYPE);
+                mv.push(i - 1);
+                mv.arrayLoad(Type.INT_TYPE);
+                mv.invokeStatic(UTILS_TYPE, UTILS_CONSUME_CPU);
+            }
             // Start of try-catch block for exceptions which this actor should handle
             Label start, end = null, handler = null, handlerEnd = null;
             if (actor.handlesExceptions()) {

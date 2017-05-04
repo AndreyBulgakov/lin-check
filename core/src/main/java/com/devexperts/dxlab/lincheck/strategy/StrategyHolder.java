@@ -23,8 +23,6 @@ package com.devexperts.dxlab.lincheck.strategy;
  */
 
 
-import com.devexperts.dxlab.lincheck.LinCheckThread;
-
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -44,7 +42,6 @@ public abstract class StrategyHolder {
 
     public static void setCurrentStrategy(ThreadGroup group, Strategy curentStrategy) {
         strategyMap.put(group, curentStrategy);
-//        StrategyHolder.currentStrategy = curentStrategy;
     }
 
 
