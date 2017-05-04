@@ -23,6 +23,7 @@ package com.devexperts.dxlab.lincheck.transformers;
  */
 
 import com.devexperts.dxlab.lincheck.Utils;
+import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 
@@ -48,8 +49,8 @@ public class BeforeSharedVariableClassVisitor extends ClassVisitor {
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         // TODO We shouldn't ignore all constructors !!!
-//        if (!Modifier.isNative(access) && !name.equals("<init>")) {
-        if (!Modifier.isNative(access) && !name.startsWith("<") && !name.contains("$")) {
+        if (!Modifier.isNative(access) && !name.startsWith("<")) {
+//        if (!Modifier.isNative(access) && !name.startsWith("<") && !name.contains("$")) {
             MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
             return new BeforeSharedVariableMethodTransformer(api, mv, access, name, desc, className);
         }

@@ -34,30 +34,19 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public abstract class StrategyHolder {
     private static Strategy currentStrategy;
-    public static ArrayList<LinCheckThread> threads = new ArrayList<>();
 
     private static Map<ThreadGroup, Strategy> strategyMap = new ConcurrentHashMap<>();
     private static Map<Integer, Strategy> strategyIntMap = new ConcurrentHashMap<>();
 
     public static void setCurrentStrategy(Strategy curentStrategy) {
         strategyMap.put(Thread.currentThread().getThreadGroup(), curentStrategy);
-//        StrategyHolder.currentStrategy = curentStrategy;
     }
-
 
     public static void setCurrentStrategy(ThreadGroup group, Strategy curentStrategy) {
         strategyMap.put(group, curentStrategy);
 //        StrategyHolder.currentStrategy = curentStrategy;
     }
 
-    public static void setCurrentStrategy(int iteration, Strategy curentStrategy) {
-        strategyIntMap.put(iteration, curentStrategy);
-    }
-
-    @SuppressWarnings("unused") // invoked from transformed code
-    public static Strategy getCurrentStrategy(int iteration) {
-        return strategyIntMap.get(iteration);
-    }
 
     @SuppressWarnings("unused") // invoked from transformed code
     public static Strategy getCurrentStrategy() {
@@ -69,12 +58,6 @@ public abstract class StrategyHolder {
                 .orElse(null);
 
     }
-
-//    @SuppressWarnings("unused") // invoked from transformed code
-//    public static Strategy getCurrentStrategy() {
-//        return currentStrategy;
-//    }
-
 
     //Maybe it works faster
     private static Strategy getThreadGroupsStrategyOrNull() {

@@ -71,7 +71,7 @@ public class QueueUnCorrect {
         return q.takeOrNull();
     }
 
-    @Test
+    @Test(expected = AssertionError.class)
     public void test() {
         LinChecker.check(this);
     }
