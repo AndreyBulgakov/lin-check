@@ -25,6 +25,7 @@ package amino_cbbs;
 /**
  * Created by alexander on 18.02.17.
  */
+
 import java.util.AbstractQueue;
 import java.util.Deque;
 import java.util.Iterator;
@@ -294,7 +295,7 @@ public class LockFreeDeque<E> extends AbstractQueue<E> implements Deque<E> {
      */
     public boolean contains(Object o) {
         E element;
-        Iterator<E> itr = new DeqIterator();
+        DeqIterator itr = new DeqIterator();
 
         /**
          * Iterate through the list to see if the object is present or not
@@ -322,7 +323,9 @@ public class LockFreeDeque<E> extends AbstractQueue<E> implements Deque<E> {
      * {@inheritDoc}
      */
     public Iterator<E> iterator() {
-        return new DeqIterator();
+//        return new DeqIterator();
+        System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+        return null;
     }
 
     /**
@@ -802,7 +805,7 @@ public class LockFreeDeque<E> extends AbstractQueue<E> implements Deque<E> {
      * Iterator definition of deque. This iterator is NOT thread-safe
      *
      */
-    private class DeqIterator implements Iterator<E> {
+    private class DeqIterator {
 
         private DequeNode<E> cursor = anchor.get().left;
 

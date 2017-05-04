@@ -26,7 +26,10 @@ import co.paralleluniverse.common.util.Exceptions;
 import co.paralleluniverse.fibers.Suspendable;
 import com.devexperts.dxlab.lincheck.report.Reporter;
 import com.devexperts.dxlab.lincheck.report.TestReport;
-import com.devexperts.dxlab.lincheck.strategy.*;
+import com.devexperts.dxlab.lincheck.strategy.Driver;
+import com.devexperts.dxlab.lincheck.strategy.EnumerationStrategy;
+import com.devexperts.dxlab.lincheck.strategy.StrandDriver;
+import com.devexperts.dxlab.lincheck.strategy.StrategyHolder;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -184,8 +187,8 @@ public class LinChecker0 {
             final Phaser phaser = new Phaser(1);
             //Set strategy and initialize transformation in classes
             Driver driver = new StrandDriver(strandPool);
-//            EnumerationStrategy currentStrategy = new EnumerationStrategy(driver);
-            Strategy currentStrategy = new RandomUnparkStrategy(driver);
+            EnumerationStrategy currentStrategy = new EnumerationStrategy(driver);
+//            Strategy currentStrategy = new RandomUnparkStrategy(driver);
 //            DummyStrategy currentStrategy = new DummyStrategy(driver);
             StrategyHolder.setCurrentStrategy(currentStrategy);
             reportBuilder.strategy(currentStrategy.getClass().getSimpleName().replace("Strategy", ""));
@@ -198,8 +201,8 @@ public class LinChecker0 {
 
                 //Create loader, load and instantiate testInstance by this loader
                 final ExecutionClassLoader loader = new ExecutionClassLoader(this.getClass().getClassLoader(), testClassName);
-//                final Object testInstance = loader.loadClass(testClassName).newInstance();
-                final Object testInstance = loader.loadTestClass(testClassName).newInstance();
+                final Object testInstance = loader.loadClass(testClassName).newInstance();
+//                final Object testInstance = loader.loadTestClass(testClassName).newInstance();
 
                 List<List<Actor>> actorsPerThread = generateActors(testCfg);
                 printIterationHeader(iteration, actorsPerThread);

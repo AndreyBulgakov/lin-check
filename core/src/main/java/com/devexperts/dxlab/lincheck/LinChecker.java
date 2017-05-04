@@ -33,6 +33,21 @@ public class LinChecker {
      * @throws AssertionError if find Non-linearizable executions
      */
     public static void check(Object testInstance) throws AssertionError {
+//        try {
+////            FileInputStream stream = new FileInputStream("com/devexperts/dxlab/lincheck/strategy/RandomUnparkStrategy.class");
+//            FileInputStream stream = new FileInputStream("/home/andrey/IdeaProjects/lin-check_NPE_TELEGRAM/lin-check/core/target/classes/com/devexperts/dxlab/lincheck/strategy/RandomUnparkStrategy.class");
+//            byte[] bytes = new byte[stream.available()];
+//            stream.read(bytes);
+//            bytes = Retransform.getInstrumentor().instrumentClass(LinChecker.class.getClassLoader(),
+//                    RandomUnparkStrategy.class.getName(), bytes);
+//            FileOutputStream stream1 = new FileOutputStream("RandomUnparkStrategy.class");
+//            stream1.write(bytes);
+//            stream1.close();
+//        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
         LinChecker0.check(testInstance);
 //        try {
 //            // Get current URLs from parrent classLoader

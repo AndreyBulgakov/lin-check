@@ -22,7 +22,7 @@
             <version>0.7.8-SNAPSHOT</version>
             <classifier>jdk8</classifier>
             <scope>system</scope>
-            <systemPath>${basedir}/libs/quasar-core-0.7.8-SNAPSHOT-jdk8.jar</systemPath>
+            <systemPath>${basedir}/../libs/quasar-core-0.7.8-SNAPSHOT-jdk8.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>

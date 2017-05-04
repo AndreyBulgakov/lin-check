@@ -46,23 +46,23 @@ public class ListTest {
     }
 
     @Operation
-    public boolean contains(@Param(gen = IntGen.class) int value) {
+    public Boolean contains(@Param(gen = IntGen.class) int value) {
         return lflist.contains(value);
     }
 
     @Operation
-    public int indexOf(@Param(gen = IntGen.class) int value) {
+    public Integer indexOf(@Param(gen = IntGen.class) int value) {
         return lflist.indexOf(value);
     }
 
     @Operation
     @HandleExceptionAsResult(NullPointerException.class)
-    public int get(@Param(gen = IntGen.class) int index) {
+    public Integer get(@Param(gen = IntGen.class) int index) {
         return lflist.get(index);
     }
 
     @Operation
-    public int size() {
+    public Integer size() {
         return lflist.size();
     }
 

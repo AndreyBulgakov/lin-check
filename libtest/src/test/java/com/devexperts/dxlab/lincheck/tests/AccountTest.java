@@ -54,7 +54,7 @@ public class AccountTest {
 
     @Operation
     @ReadOnly
-    public int result(){
+    public Integer result() {
         return account.read();
     }
 

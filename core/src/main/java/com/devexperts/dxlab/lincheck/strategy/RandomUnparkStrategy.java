@@ -65,12 +65,13 @@ public class RandomUnparkStrategy implements Strategy {
         onSharedVariableAccess(location);
     }
 
+    @Suspendable
     private void onSharedVariableAccess(int location) {
         try {
             if (Fiber.isCurrentFiber()) {
                 Fiber.park(100, TimeUnit.NANOSECONDS);
             }
-//            bug = 0;
+            bug = 0;
         } catch (Exception suspendExecution) {
             throw new AssertionError(suspendExecution);
         }
