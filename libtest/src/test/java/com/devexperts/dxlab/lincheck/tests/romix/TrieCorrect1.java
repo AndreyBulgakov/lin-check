@@ -46,13 +46,11 @@ import com.devexperts.dxlab.lincheck.generators.IntGen;
 import com.romix.scala.collection.concurrent.TrieMap;
 import org.junit.Test;
 
-import java.util.Map;
-
 @CTest(iterations = 100, actorsPerThread = {"1:3", "1:3", "1:3"})
 @Param(name = "key", gen = IntGen.class)
 @Param(name = "value", gen = IntGen.class)
 public class TrieCorrect1 {
-    private Map<Integer, Integer> m;
+    private TrieMap<Integer, Integer> m;
 
     static {
         System.out.println(TrieCorrect1.class.getClassLoader().toString());

@@ -395,7 +395,7 @@ public final class UnsignedBytes {
              * We want to compare only the first index where left[index] != right[index].
              * This corresponds to the least significant nonzero byte in lw ^ rw, since lw
              * and rw are little-endian.  Long.numberOfTrailingZeros(diff) tells us the least 
-             * significant nonzero bit, and zeroing out the first three bits of L.nTZ gives us the 
+             * significant nonzero bit, and zeroing out the first three bits of L.nTZ gives us the
              * shift to get that least significant nonzero byte.
              */
             int n = Long.numberOfTrailingZeros(lw ^ rw) & ~0x7;

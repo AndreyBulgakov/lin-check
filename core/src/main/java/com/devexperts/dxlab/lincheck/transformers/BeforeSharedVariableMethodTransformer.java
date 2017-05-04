@@ -10,12 +10,12 @@ package com.devexperts.dxlab.lincheck.transformers;
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-3.0.html>.
@@ -23,6 +23,7 @@ package com.devexperts.dxlab.lincheck.transformers;
  */
 
 import co.paralleluniverse.fibers.instrument.Retransform;
+
 import com.devexperts.dxlab.lincheck.strategy.Strategy;
 import com.devexperts.dxlab.lincheck.strategy.StrategyHolder;
 import org.objectweb.asm.AnnotationVisitor;
@@ -116,7 +117,7 @@ class BeforeSharedVariableMethodTransformer extends GeneratorAdapter {
     private void insertMethod(Method method) {
         if (!isReset) {
             // Get or create current locationId
-                int id = lm.getLocationId(className, methodName, methodDesc, instructionNumber);
+            int id = lm.getLocationId(className, methodName, methodDesc, instructionNumber);
             // Get current strategy
             invokeStatic(STRATEGYHOLDER_TYPE, STRATEGYHOLDER_GET);
             // Insert Strategy.onSharedVariableWrite interface method call

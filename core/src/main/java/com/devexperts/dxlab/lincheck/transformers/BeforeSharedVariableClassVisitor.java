@@ -10,12 +10,12 @@ package com.devexperts.dxlab.lincheck.transformers;
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Lesser Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Lesser Public
  * License along with this program.  If not, see
  * <http://www.gnu.org/licenses/lgpl-3.0.html>.
@@ -49,8 +49,8 @@ public class BeforeSharedVariableClassVisitor extends ClassVisitor {
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         // TODO We shouldn't ignore all constructors !!!
-        if (!Modifier.isNative(access) && !name.startsWith("<")) {
-//        if (!Modifier.isNative(access) && !name.startsWith("<") && !name.contains("$")) {
+//        if (!Modifier.isNative(access) && !name.startsWith("<")) {
+        if (!Modifier.isNative(access) && !name.startsWith("<") && !name.startsWith("access")) {
             MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
             return new BeforeSharedVariableMethodTransformer(api, mv, access, name, desc, className);
         }

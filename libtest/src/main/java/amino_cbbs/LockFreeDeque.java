@@ -1,8 +1,31 @@
 package amino_cbbs;
 
+/*
+ * #%L
+ * libtest
+ * %%
+ * Copyright (C) 2015 - 2017 Devexperts, LLC
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-3.0.html>.
+ * #L%
+ */
+
 /**
  * Created by alexander on 18.02.17.
  */
+
 import java.util.AbstractQueue;
 import java.util.Deque;
 import java.util.Iterator;
@@ -272,7 +295,7 @@ public class LockFreeDeque<E> extends AbstractQueue<E> implements Deque<E> {
      */
     public boolean contains(Object o) {
         E element;
-        Iterator<E> itr = new DeqIterator();
+        DeqIterator itr = new DeqIterator();
 
         /**
          * Iterate through the list to see if the object is present or not
@@ -300,7 +323,9 @@ public class LockFreeDeque<E> extends AbstractQueue<E> implements Deque<E> {
      * {@inheritDoc}
      */
     public Iterator<E> iterator() {
-        return new DeqIterator();
+//        return new DeqIterator();
+        System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+        return null;
     }
 
     /**
@@ -780,7 +805,7 @@ public class LockFreeDeque<E> extends AbstractQueue<E> implements Deque<E> {
      * Iterator definition of deque. This iterator is NOT thread-safe
      *
      */
-    private class DeqIterator implements Iterator<E> {
+    private class DeqIterator {
 
         private DequeNode<E> cursor;//= anchor.get().left;
 
