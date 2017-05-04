@@ -1,8 +1,8 @@
-package com.devexperts.dxlab.lincheck.libtest;
+package com.devexperts.dxlab.lincheck.strategy;
 
 /*
  * #%L
- * libtest
+ * core
  * %%
  * Copyright (C) 2015 - 2017 Devexperts, LLC
  * %%
@@ -23,27 +23,21 @@ package com.devexperts.dxlab.lincheck.libtest;
  */
 
 /**
- * Created by alexander on 08.02.17.
+ * Created by andrey on 4/20/17.
  */
-public class Evaluator {
+public class DummyStrategy implements Strategy {
 
-    private volatile int value;
+    public DummyStrategy(Driver driver) {
 
-    public Evaluator(int startvalue){
-        value = startvalue;
     }
 
-    public void addThree2Times(){
-        value += 3;
-        value += 3;
+    @Override
+    public void onSharedVariableRead(int location) {
+
     }
 
-    public void multThree(){
-        value *= 3;
-    }
+    @Override
+    public void onSharedVariableWrite(int location) {
 
-    public int getValue(){
-        return value;
     }
-
 }

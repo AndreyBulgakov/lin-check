@@ -62,12 +62,12 @@ public class NonBlockingSetIntTest {
     }
 
     @Operation(params = {"key"})
-    public boolean add(int key) {
+    public Boolean add(int key) {
         return q.add(key);
     }
 
     @Operation(params = {"key"})
-    public boolean remove(int key) {
+    public Boolean remove(int key) {
         return q.remove(key);
     }
 
