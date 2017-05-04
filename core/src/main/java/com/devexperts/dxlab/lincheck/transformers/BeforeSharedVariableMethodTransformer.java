@@ -51,38 +51,24 @@ class BeforeSharedVariableMethodTransformer extends GeneratorAdapter {
 
     private final LocationManager lm = LocationManager.getInstance();
 
-    private boolean isReset = false;
-    private boolean isSuspendable = false;
-    private boolean isAbstract = false;
     private int instructionNumber;
+
+    private boolean isReset = false;
 
     BeforeSharedVariableMethodTransformer(int api, MethodVisitor mv, int access, String name, String desc, String className) {
         super(api, mv, access, name, desc);
         this.className = className;
         this.methodName = name;
         this.methodDesc = desc;
-//        Retransform.addWaiver(className.replace("/", "."), name);
     }
 
     @Override
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-        if (desc.equals("Lco/paralleluniverse/fibers/Suspendable;")) {
-            isSuspendable = true;
-        }
         if (desc.equals("Lcom/devexperts/dxlab/lincheck/annotations/Reset;"))
-            isReset = true;
+            this.isReset = true;
         return super.visitAnnotation(desc, visible);
     }
 
-    @Override
-    public void visitCode() {
-        if (isSuspendable || isReset) {
-            super.visitCode();
-        } else {
-            super.visitAnnotation("Lco/paralleluniverse/fibers/Suspendable;", true);
-            super.visitCode();
-        }
-    }
     @Override
     public void visitVarInsn(int opcode, int var) {
         this.instructionNumber++;

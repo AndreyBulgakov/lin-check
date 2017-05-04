@@ -29,6 +29,7 @@ import co.paralleluniverse.strands.Strand;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
@@ -41,7 +42,8 @@ public class ExecutionsStrandPool {
     private final StrandType strandType;
     private CallableStrandFactory FACTORY;
     private boolean isRuning = false;
-    private FiberExecutorScheduler exe = new FiberExecutorScheduler("executions-pool", Runnable::run);
+    private FiberExecutorScheduler exe = new FiberExecutorScheduler("executions-pool", Executors.newSingleThreadExecutor());
+//    private FiberExecutorScheduler exe = new FiberExecutorScheduler("executions-pool", Runnable::run);
 
     public enum StrandType {
         THREAD,

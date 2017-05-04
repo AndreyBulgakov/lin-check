@@ -23,7 +23,6 @@ package com.devexperts.dxlab.lincheck.transformers;
  */
 
 import com.devexperts.dxlab.lincheck.Utils;
-import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 
@@ -48,18 +47,10 @@ public class BeforeSharedVariableClassVisitor extends ClassVisitor {
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        // TODO We shouldn't ignore all constructors !!!
-//        if (!Modifier.isNative(access) && !name.equals("<init>")) {
-
-        if (!Modifier.isNative(access) && !name.startsWith("<")) {
+//        if (!Modifier.isNative(access) && !name.startsWith("<")) {
+        if (!Modifier.isNative(access) && !name.startsWith("<") && !name.startsWith("access")) {
             MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
-            MethodVisitor mv2 = new BeforeSharedVariableMethodTransformer(api, mv, access, name, desc, className);
-            if (Modifier.isAbstract(access)) {
-                AnnotationVisitor av0 = mv2.visitAnnotation("Lco/paralleluniverse/fibers/Suspendable;", true);
-                av0.visitEnd();
-            }
-            return mv2;
-//            return new BeforeSharedVariableMethodTransformer(api, mv, access, name, desc, className);
+            return new BeforeSharedVariableMethodTransformer(api, mv, access, name, desc, className);
         }
         return super.visitMethod(access, name, desc, signature, exceptions);
     }
