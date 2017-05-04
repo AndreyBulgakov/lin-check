@@ -61,8 +61,25 @@ public class ExecutionsStrandPool {
      */
     ExecutionsStrandPool(final StrandType type) {
         this.strandType = type;
-        createFactory();
-
+        if (this.strandType == StrandType.FIBER)
+            this.FACTORY = callable -> {
+                Fiber<Result[]> strand = new Fiber<>(exe, callable);
+                String name = "LinCheckStrand";
+                strand.setName(name);
+                futureTasks.add(strand);
+                pool.add(strand);
+                return strand;
+            };
+        else
+            this.FACTORY = callable -> {
+                FutureTask<Result[]> futureTask = new FutureTask<>(callable::run);
+                Strand strand = Strand.of(new Thread(futureTask));
+                String name = "LinCheckStrand";
+                strand.setName(name);
+                futureTasks.add(futureTask);
+                pool.add(strand);
+                return strand;
+            };
     }
 
     public ExecutionsStrandPool add(Collection<? extends TestThreadExecution> tasks) {
@@ -118,32 +135,7 @@ public class ExecutionsStrandPool {
     public void clear() {
         pool.clear();
         futureTasks.clear();
-        createFactory();
         isRuning = false;
-    }
-
-    private void createFactory() {
-        if (this.strandType == StrandType.FIBER)
-            this.FACTORY = callable -> {
-//                Fiber<Result[]> strand = new Fiber<>(exe, callable);
-                Fiber<Result[]> strand = new Fiber<>(exe, callable);
-//                Fiber<Result[]> strand = new Fiber<>(callable::call);
-                String name = "LinCheckStrand";
-                strand.setName(name);
-                futureTasks.add(strand);
-                pool.add(strand);
-                return strand;
-            };
-        else
-            this.FACTORY = callable -> {
-                FutureTask<Result[]> futureTask = new FutureTask<>(callable::run);
-                Strand strand = Strand.of(new Thread(futureTask));
-                String name = "LinCheckStrand";
-                strand.setName(name);
-                futureTasks.add(futureTask);
-                pool.add(strand);
-                return strand;
-            };
     }
 
     public boolean isTerminated() {

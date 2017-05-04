@@ -191,5 +191,15 @@ public class TestReport {
         public TestReport build() {
             return new TestReport(this);
         }
+
+        public Builder setIterations(int iteration){
+            this.iterations = iteration;
+            return this;
+        }
+
+        public Builder setInvocations(int invocation){
+            this.invocations = invocation;
+            return this;
+        }
     }
 }
