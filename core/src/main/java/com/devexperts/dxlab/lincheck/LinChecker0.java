@@ -178,7 +178,7 @@ public class LinChecker0 {
 
                 //Create loader, load and instantiate testInstance by this loader
                 final ExecutionClassLoader loader = new ExecutionClassLoader(this.getClass().getClassLoader(), testClassName);
-                final Object testInstance = loader.loadTestClass(testClassName).newInstance();
+                final Object testInstance = loader.loadClass(testClassName).newInstance();
 
                 List<List<Actor>> actorsPerThread = generateActors(testCfg);
                 printIterationHeader(iteration, actorsPerThread);
