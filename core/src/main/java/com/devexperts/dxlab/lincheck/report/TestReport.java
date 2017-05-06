@@ -185,6 +185,16 @@ public class TestReport {
             return this;
         }
 
+        public Builder setIterations(int iterations) {
+            this.iterations = iterations;
+            return this;
+        }
+
+        public Builder setInvocations(int invocations) {
+            this.invocations = invocations;
+            return this;
+        }
+
         /**
          * Generate TestReport
          */
@@ -192,14 +202,5 @@ public class TestReport {
             return new TestReport(this);
         }
 
-        public Builder setIterations(int iteration){
-            this.iterations = iteration;
-            return this;
-        }
-
-        public Builder setInvocations(int invocation){
-            this.invocations = invocation;
-            return this;
-        }
     }
 }

@@ -108,7 +108,10 @@ class AnchorType<E> {
      *            number of element
      */
     public AnchorType(DequeNode<E> r, DequeNode<E> l, int st, int ne) {
-        setup(r, l, st, ne);
+        right = r;
+        left = l;
+        status = st;
+        numElements = ne;
     }
 
     /**

@@ -33,7 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public abstract class StrategyHolder {
     private static Strategy currentStrategy;
 
-    private static Map<ThreadGroup, Strategy> strategyMap = new ConcurrentHashMap<>();
+    public static Map<ThreadGroup, Strategy> strategyMap = new ConcurrentHashMap<>();
     private static Map<Integer, Strategy> strategyIntMap = new ConcurrentHashMap<>();
 
     public static void setCurrentStrategy(Strategy curentStrategy) {

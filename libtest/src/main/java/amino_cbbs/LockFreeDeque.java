@@ -90,7 +90,8 @@ import java.util.concurrent.atomic.AtomicReference;
  *            type of element in the deque
  */
 
-public class LockFreeDeque<E> extends AbstractQueue<E> implements Deque<E> {
+//extends AbstractQueue<E> implements Deque<E>
+public class LockFreeDeque<E>  {
     /**
      * Change to true if want to use BACKOFF.
      */
@@ -119,6 +120,14 @@ public class LockFreeDeque<E> extends AbstractQueue<E> implements Deque<E> {
      */
     private AtomicReference<AnchorType<E>> anchor = new AtomicReference<AnchorType<E>>(
             new AnchorType<E>());
+
+
+    public boolean add(E e) {
+        if (offer(e))
+            return true;
+        else
+            throw new IllegalStateException("Queue full");
+    }
 
     /**
      * Inserts element e at the tail of this deque. Preferable to
@@ -205,6 +214,7 @@ public class LockFreeDeque<E> extends AbstractQueue<E> implements Deque<E> {
         try {
             addLast(e);
         } catch (Throwable t) {
+            t.printStackTrace();
             return false;
         }
         return true;
@@ -322,10 +332,8 @@ public class LockFreeDeque<E> extends AbstractQueue<E> implements Deque<E> {
     /**
      * {@inheritDoc}
      */
-    public Iterator<E> iterator() {
-//        return new DeqIterator();
-        System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-        return null;
+    public DeqIterator iterator() {
+        return new DeqIterator();
     }
 
     /**
@@ -805,7 +813,7 @@ public class LockFreeDeque<E> extends AbstractQueue<E> implements Deque<E> {
      * Iterator definition of deque. This iterator is NOT thread-safe
      *
      */
-    private class DeqIterator {
+    private class DeqIterator{
 
         private DequeNode<E> cursor;//= anchor.get().left;
 
