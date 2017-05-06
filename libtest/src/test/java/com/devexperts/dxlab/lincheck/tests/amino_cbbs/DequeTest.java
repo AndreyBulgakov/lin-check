@@ -24,12 +24,15 @@ package com.devexperts.dxlab.lincheck.tests.amino_cbbs;
 
 import amino_cbbs.LockFreeDeque;
 import com.devexperts.dxlab.lincheck.LinChecker;
-import com.devexperts.dxlab.lincheck.annotations.CTest;
-import com.devexperts.dxlab.lincheck.annotations.Operation;
-import com.devexperts.dxlab.lincheck.annotations.Param;
-import com.devexperts.dxlab.lincheck.annotations.Reset;
+import com.devexperts.dxlab.lincheck.annotations.*;
 import com.devexperts.dxlab.lincheck.generators.IntGen;
 import org.junit.Test;
+import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Created by alexander on 18.02.17.
@@ -55,9 +58,7 @@ public class DequeTest {
 
     @Operation
     public Boolean isEmpty() {
-        Boolean bool = lfdeque.isEmpty();
-        return bool;
-//        return lfdeque.isEmpty();
+        return lfdeque.isEmpty();
     }
 
     @Operation
@@ -77,6 +78,14 @@ public class DequeTest {
 
     @Test
     public void test() {
-        LinChecker.check(this);
+            LinChecker.check(this);
+//        int counts = 50;
+//        long[] times = new long[counts];
+//        for (int i = 0; i < counts; i++) {
+//            long instant = Instant.now().toEpochMilli();
+//            long end = Instant.now().toEpochMilli() - instant;
+//            times[i]=end;
+//        }
+//        System.out.println(Arrays.stream(times).sum() / counts);
     }
 }
