@@ -22,6 +22,8 @@ package com.devexperts.dxlab.lincheck.transformers;
  * #L%
  */
 
+import co.paralleluniverse.fibers.instrument.MethodDatabase;
+import co.paralleluniverse.fibers.instrument.Retransform;
 import com.devexperts.dxlab.lincheck.Utils;
 import com.devexperts.dxlab.lincheck.annotations.Reset;
 import org.objectweb.asm.AnnotationVisitor;
@@ -39,13 +41,22 @@ import java.util.HashSet;
  */
 public class SuspendableMarkerClassVisitor extends ClassVisitor {
 
-    public SuspendableMarkerClassVisitor(ClassVisitor cv) {
+    private String className;
+    public SuspendableMarkerClassVisitor(ClassVisitor cv, ClassLoader loader) {
         super(Utils.ASM_VERSION, cv);
     }
 
     @Override
+    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+        this.className= name;
+        super.visit(version, access, name, signature, superName, interfaces);
+    }
+
+    @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        if (!Modifier.isNative(access) && name.charAt(0) != '<'){
+//        if (!Modifier.isNative(access) && name.charAt(0) != '<'){
+        if (!Modifier.isNative(access) && !name.startsWith("<") && !name.startsWith("access")) {
+
             MethodVisitor outMV =  super.visitMethod(access, name, desc, signature, exceptions);
 
             //Mark method as @Suspendable

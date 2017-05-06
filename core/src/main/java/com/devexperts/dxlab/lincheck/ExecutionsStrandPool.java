@@ -42,8 +42,8 @@ public class ExecutionsStrandPool {
     private final StrandType strandType;
     private CallableStrandFactory FACTORY;
     private boolean isRuning = false;
-    private FiberExecutorScheduler exe = new FiberExecutorScheduler("executions-pool", Executors.newSingleThreadExecutor());
-//    private FiberExecutorScheduler exe = new FiberExecutorScheduler("executions-pool", Runnable::run);
+//    private FiberExecutorScheduler exe = new FiberExecutorScheduler("",Executors.newSingleThreadExecutor());
+    private FiberExecutorScheduler exe = new FiberExecutorScheduler("executions-pool", Runnable::run);
 
     public enum StrandType {
         THREAD,
@@ -63,7 +63,9 @@ public class ExecutionsStrandPool {
         this.strandType = type;
         if (this.strandType == StrandType.FIBER)
             this.FACTORY = callable -> {
+//                Fiber<Result[]> strand = new Fiber<>(exe, callable);
                 Fiber<Result[]> strand = new Fiber<>(exe, callable);
+//                Fiber<Result[]> strand = new Fiber<>(callable::call);
                 String name = "LinCheckStrand";
                 strand.setName(name);
                 futureTasks.add(strand);
@@ -80,6 +82,7 @@ public class ExecutionsStrandPool {
                 pool.add(strand);
                 return strand;
             };
+
     }
 
     public ExecutionsStrandPool add(Collection<? extends TestThreadExecution> tasks) {
@@ -137,6 +140,7 @@ public class ExecutionsStrandPool {
         futureTasks.clear();
         isRuning = false;
     }
+
 
     public boolean isTerminated() {
         return pool.stream().allMatch(Strand::isTerminated);

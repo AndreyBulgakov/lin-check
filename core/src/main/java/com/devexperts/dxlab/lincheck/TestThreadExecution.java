@@ -48,11 +48,11 @@ public abstract class TestThreadExecution implements SuspendableCallable<Result[
     // method to support generics and the byte-code generation
     // is more out-prone as well. If you need to use
     // List<Result>, see Arrays.asList(..) method.
+    @Suspendable
     public abstract Result[] run() throws SuspendExecution, InterruptedException;
     @Suspendable
     public Result[] call() {
         try {
-//            System.out.println(SuspendableHelper.isInstrumented(getClass()));
             return run();
         } catch (SuspendExecution | InterruptedException suspendExecution) {
             suspendExecution.printStackTrace();
