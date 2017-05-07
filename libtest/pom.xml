@@ -14,7 +14,12 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <argLine>
-                        -Dlincheck.writeReport=true
+                        <!-- -Dlincheck.writeReport=true-->
+                        <!-- -javaagent:${basedir}/libs/quasar-core-0.7.7.jar-->
+                        -javaagent:${basedir}/../libs/quasar-core-0.7.8-SNAPSHOT-jdk8.jar=bm
+                        <!-- -javaagent:${basedir}/libs/quasar-core-0.7.8-SNAPSHOT-jdk8.jar-->
+                        <!-- -javaagent:${basedir}/libs/quasar-core-0.7.8-SNAPSHOT.jar-->
+                          <!-- -Dco.paralleluniverse.fibers.verifyInstrumentation=true-->
                     </argLine>
                 </configuration>
             </plugin>
@@ -25,6 +30,7 @@
                     <compilerArgument>-parameters</compilerArgument>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
 
@@ -47,13 +53,6 @@
             <version>0.6</version>
             <scope>provided</scope>
         </dependency>
-
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>18.0</version>
-        </dependency>
-
         <dependency>
             <groupId>com.boundary</groupId>
             <artifactId>high-scale-lib</artifactId>
@@ -70,6 +69,36 @@
             <artifactId>core</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>20.0</version>
+        </dependency>
+        <dependency>
+            <groupId>de.javakaffee</groupId>
+            <artifactId>kryo-serializers</artifactId>
+            <version>0.41</version>
+        </dependency>
+        <dependency>
+            <groupId>com.esotericsoftware</groupId>
+            <artifactId>kryo</artifactId>
+            <version>4.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.latencyutils</groupId>
+            <artifactId>LatencyUtils</artifactId>
+            <version>2.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-core</artifactId>
+            <version>3.1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hdrhistogram</groupId>
+            <artifactId>HdrHistogram</artifactId>
+            <version>2.1.9</version>
         </dependency>
     </dependencies>
 </project>

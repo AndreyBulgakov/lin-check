@@ -22,7 +22,10 @@ package com.devexperts.dxlab.lincheck;
  * #L%
  */
 
-import java.util.concurrent.Callable;
+import co.paralleluniverse.fibers.SuspendExecution;
+import co.paralleluniverse.fibers.Suspendable;
+import co.paralleluniverse.strands.SuspendableCallable;
+
 import java.util.concurrent.Phaser;
 
 /**
@@ -31,7 +34,9 @@ import java.util.concurrent.Phaser;
  *
  * <p> This class should be public for having access from generated classes.
  */
-public abstract class TestThreadExecution implements Callable<Result[]> {
+//Callable<Result[]>
+public abstract class TestThreadExecution implements SuspendableCallable<Result[]> {
+
     // The following fields are assigned in TestThreadExecutionGenerator
     protected Phaser phaser;
     protected Object testInstance;
@@ -41,7 +46,17 @@ public abstract class TestThreadExecution implements Callable<Result[]> {
     // It is better to return List<Result>,
     // but such implementation requires to have a synthetic
     // method to support generics and the byte-code generation
-    // is more bug-prone as well. If you need to use
+    // is more out-prone as well. If you need to use
     // List<Result>, see Arrays.asList(..) method.
-    public abstract Result[] call();
+    @Suspendable
+    public abstract Result[] run() throws SuspendExecution, InterruptedException;
+    @Suspendable
+    public Result[] call() {
+        try {
+            return run();
+        } catch (SuspendExecution | InterruptedException suspendExecution) {
+            suspendExecution.printStackTrace();
+            throw new IllegalStateException(suspendExecution);
+        }
+    }
 }

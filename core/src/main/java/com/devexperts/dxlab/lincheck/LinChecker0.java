@@ -23,13 +23,13 @@ package com.devexperts.dxlab.lincheck;
  */
 
 import co.paralleluniverse.common.util.Exceptions;
+import co.paralleluniverse.fibers.DefaultFiberScheduler;
+import co.paralleluniverse.fibers.FiberForkJoinScheduler;
 import co.paralleluniverse.fibers.Suspendable;
+import co.paralleluniverse.fibers.instrument.SuspendableHelper;
 import com.devexperts.dxlab.lincheck.report.Reporter;
 import com.devexperts.dxlab.lincheck.report.TestReport;
-import com.devexperts.dxlab.lincheck.strategy.Driver;
-import com.devexperts.dxlab.lincheck.strategy.EnumerationStrategy;
-import com.devexperts.dxlab.lincheck.strategy.StrandDriver;
-import com.devexperts.dxlab.lincheck.strategy.StrategyHolder;
+import com.devexperts.dxlab.lincheck.strategy.*;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -72,28 +72,6 @@ public class LinChecker0 {
 
     public static void check(Object testInstance) throws AssertionError {
         new LinChecker0(testInstance).check();
-//        try {
-//            // Get current URLs from parrent classLoader
-//            Field ucp = URLClassLoader.class.getDeclaredField("ucp");
-//            ucp.setAccessible(true);
-//            URL[] classLoaderUrls = ((URLClassPath) ucp.get(LinChecker.class.getClassLoader())).getURLs();
-//            // Loading instruments
-//            QuasarLoader urlClassLoader = new QuasarLoader(classLoaderUrls);
-//            Thread.getCurrentThreadId().setContextClassLoader(urlClassLoader);
-//            // Log
-//            Class<?> instrumentedLincheckClass = urlClassLoader.loadClass("com.devexperts.dxlab.lincheck.LinChecker0");
-//            Class<?> instrumentedTestInstance = urlClassLoader.loadClass(testInstance.getClass().getName());
-//            Object newInstance = instrumentedTestInstance.newInstance();
-//
-//            Constructor constructor = instrumentedLincheckClass.getDeclaredConstructor(Object.class);
-//            constructor.setAccessible(true);
-//            Object LCInstance = constructor.newInstance(newInstance);
-//            Method m = instrumentedLincheckClass.getDeclaredMethod("check");
-//            m.setAccessible(true);
-//            m.invoke(LCInstance);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
     }
 
     /**
@@ -102,8 +80,8 @@ public class LinChecker0 {
     void check() throws AssertionError {
         testConfigurations.forEach((testConfiguration) -> {
             try {
-//                checkImpl(testConfiguration);
-                checkImplFiber(testConfiguration);
+                checkImpl(testConfiguration);
+//                checkImplFiber(testConfiguration);
             } catch (InterruptedException | ClassNotFoundException | IllegalAccessException | InstantiationException e) {
                 e.printStackTrace();
                 throw new IllegalStateException(e);
@@ -170,7 +148,9 @@ public class LinChecker0 {
                 }).collect(Collectors.toSet());
     }
     //endregion
-    @Suspendable
+
+    @SuppressWarnings("Duplicates")
+//    @Suspendable
     private void checkImpl(CTestConfiguration testCfg) throws InterruptedException, ClassNotFoundException, IllegalAccessException, InstantiationException {
         // Fixed thread pool executor to run TestThreadExecution
         //ExecutorService pool = Executors.newFixedThreadPool(testCfg.getThreads());
@@ -183,7 +163,7 @@ public class LinChecker0 {
             // Reusable phaser
             final Phaser phaser = new Phaser(1);
             //Set strategy and initialize transformation in classes
-            ExecutionsStrandPool strandPool = new ExecutionsStrandPool(ExecutionsStrandPool.StrandType.THREAD);
+            ExecutionsStrandPool strandPool = new ExecutionsStrandPool(ExecutionsStrandPool.StrandType.FIBER);
             Driver driver = new StrandDriver(strandPool);
             EnumerationStrategy currentStrategy = new EnumerationStrategy(driver);
             StrategyHolder.setCurrentStrategy(currentStrategy);
@@ -197,6 +177,7 @@ public class LinChecker0 {
 
                 //Create loader, load and instantiate testInstance by this loader
                 final ExecutionClassLoader loader = new ExecutionClassLoader(this.getClass().getClassLoader(), testClassName);
+//                final Object testInstance = loader.loadTestClass(testClassName).newInstance();
                 final Object testInstance = loader.loadClass(testClassName).newInstance();
 
                 List<List<Actor>> actorsPerThread = generateActors(testCfg);
@@ -229,7 +210,6 @@ public class LinChecker0 {
                     currentStrategy.onEndInvocation();
                     // Check correctness& Throw an AssertionError if current execution
                     // is not linearizable and log invalid execution
-                    StrategyHolder.threads.clear();
                     if (!possibleResultsSet.contains(results)) {
                         printExecutionResult(results);
                         printPossibleResults(possibleResultsSet);
@@ -252,15 +232,17 @@ public class LinChecker0 {
     @SuppressWarnings("Duplicates")
 //    @Suspendable
     private void checkImplFiber(CTestConfiguration testCfg) throws InterruptedException, ClassNotFoundException, IllegalAccessException, InstantiationException {
+        final int parallelism = ((FiberForkJoinScheduler) DefaultFiberScheduler.getInstance()).getForkJoinPool().getParallelism();
+        System.out.println("aaaaaaaaaaaaaaaaaaa"  + parallelism);
         // Store start time for counting performance metrics
-        Instant startTime = Instant.now();
+        long startTime = Instant.now().toEpochMilli();
         // Create report builder
-        TestReport.Builder reportBuilder = new TestReport.Builder(testCfg).name(testClassName);
         try {
-            AtomicBoolean flag = new AtomicBoolean(false);
+            Object lock = new Object();
+            IterationListener listener = new IterationListener(lock, testCfg, testClassName, startTime);
             Map<Thread, Throwable> throwableMap = new ConcurrentHashMap<>();
             int poolCount = Runtime.getRuntime().availableProcessors();
-            final ThreadGroup root = new ThreadGroup("RootLinCheckGroup");
+
             ThreadPoolExecutor service = new ThreadPoolExecutor(
                     poolCount,
                     poolCount,
@@ -270,60 +252,64 @@ public class LinChecker0 {
             );
 
             final Thread.UncaughtExceptionHandler handler = (t, e) -> {
-                if (e instanceof AssertionError) {
-                    flag.set(true);
-                    service.shutdownNow();
-                } else if (!(e.getCause() instanceof InterruptedException)) {
-                    throwableMap.put(t, e);
-                    service.shutdownNow();
-                }
+                e.printStackTrace();
+                throwableMap.put(t, e);
+                service.shutdownNow();
             };
-            ThreadFactory factory = r -> {
+
+            final ThreadGroup root = new ThreadGroup("RootLinCheckGroup");
+            ThreadFactory factory = runnable -> {
                 ThreadGroup lincheckGroup = new ThreadGroup(root, "LinCheckGroup");
-                Thread thread = new Thread(lincheckGroup, r);
+                Thread thread = new Thread(lincheckGroup, runnable);
                 thread.setUncaughtExceptionHandler(handler);
                 return thread;
             };
             service.setThreadFactory(factory);
 
-            for (int i = 0; i < testCfg.getIterations(); i++) {
+            iteration(1,testCfg,listener);
+            for (int i = 2; i <= testCfg.getIterations(); i++) {
                 int finalI = i;
-                service.execute(() -> iteration(finalI, testCfg, reportBuilder));
+                service.execute(() -> iteration(finalI, testCfg, listener));
             }
-            service.awaitTermination(888, TimeUnit.HOURS);
-            if (flag.get()) {
-                throw new AssertionError();
-            } else if (!throwableMap.isEmpty()) {
+
+            synchronized (lock){
+                lock.wait();
+            }
+
+            if (listener.isNonLinearizable())
+                throw new AssertionError("Non-linearizable execution detected, see log for details");
+
+            if (!throwableMap.isEmpty()) {
                 System.err.println("Additional exceptions were detected");
                 for (Map.Entry<Thread, Throwable> entry : throwableMap.entrySet()) {
                     System.err.println("In thread " + entry.getKey());
                     entry.getValue().printStackTrace();
                 }
             }
-            reportBuilder.result(TestReport.Result.SUCCESS);
+
         } finally {
-            reportBuilder.time(Instant.now().toEpochMilli() - startTime.toEpochMilli());
+            TestReport.Builder reportBuilder = new TestReport.Builder(testCfg).name(testClassName);
+            reportBuilder.time(Instant.now().toEpochMilli() - startTime);
             writeReportIfNeeded(reportBuilder);
         }
     }
 
     @SuppressWarnings("Duplicates")
 //    @Suspendable
-    private void iteration(int iteration, CTestConfiguration testCfg, TestReport.Builder reportBuilder) {
+    private void iteration(int iteration, CTestConfiguration testCfg, IterationListener listner) {
         try {
             //Set strategy and initialize transformation in classes
-            ExecutionsStrandPool strandPool = new ExecutionsStrandPool(ExecutionsStrandPool.StrandType.THREAD);
+            ExecutionsStrandPool strandPool = new ExecutionsStrandPool(ExecutionsStrandPool.StrandType.FIBER);
             Driver driver = new StrandDriver(strandPool);
             EnumerationStrategy currentStrategy = new EnumerationStrategy(driver);
-            StrategyHolder.setCurrentStrategy(Thread.currentThread().getThreadGroup(), currentStrategy);
-            reportBuilder.strategy(currentStrategy.getClass().getSimpleName().replace("Strategy", ""));
+            StrategyHolder.setCurrentStrategy(currentStrategy);
             //Create loader, load and instantiate testInstance by this loader
             final ExecutionClassLoader loader = new ExecutionClassLoader(this.getClass().getClassLoader(), testClassName);
+//            final Object testInstance = loader.loadTestClass(testClassName).newInstance();
             final Object testInstance = loader.loadClass(testClassName).newInstance();
             currentStrategy.beforeStartIteration(testCfg.getThreads());
             currentStrategy.onStartIteration();
             //индекс потока, в котором делаем прерывание
-            reportBuilder.incIterations();
 
             List<List<Actor>> actorsPerThread = generateActors(testCfg);
             //        printIterationHeader(iteration, actorsPerThread);
@@ -336,7 +322,6 @@ public class LinChecker0 {
             // Run invocations
             for (int invocation = 1; invocation <= testCfg.getInvocationsPerIteration() && !currentStrategy.isNeedStopIteration(); invocation++) {
                 currentStrategy.onStartInvocation(iteration, invocation);
-                reportBuilder.incInvocations();
                 // Reset the state of test
                 invokeReset(testInstance);
 
@@ -358,16 +343,15 @@ public class LinChecker0 {
                 if (!possibleResultsSet.contains(results)) {
                     printExecutionResult(results);
                     printPossibleResults(possibleResultsSet);
-                    reportBuilder.result(TestReport.Result.FAILURE);
-                    throw new AssertionError("Non-linearizable execution detected, see log for details");
+                    listner.foundNonLinearizable(currentStrategy, iteration, invocation);
                 }
             }
             currentStrategy.onEndIteration();
+            listner.onEndIteration();
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
             throw new IllegalStateException(e);
         }
     }
-
 
 
     private void writeReportIfNeeded(TestReport.Builder reportBuilder) {

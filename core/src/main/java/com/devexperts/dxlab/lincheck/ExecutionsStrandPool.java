@@ -29,6 +29,7 @@ import co.paralleluniverse.strands.Strand;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
@@ -39,8 +40,10 @@ public class ExecutionsStrandPool {
     private final ArrayList<Strand> pool = new ArrayList<>();
     private final List<Future<Result[]>> futureTasks = new ArrayList<>();
     private final StrandType strandType;
-    private final CallableStrandFactory FACTORY;
+    private CallableStrandFactory FACTORY;
     private boolean isRuning = false;
+//    private FiberExecutorScheduler exe = new FiberExecutorScheduler("",Executors.newSingleThreadExecutor());
+    private FiberExecutorScheduler exe = new FiberExecutorScheduler("executions-pool", Runnable::run);
 
     public enum StrandType {
         THREAD,
@@ -58,10 +61,11 @@ public class ExecutionsStrandPool {
      */
     ExecutionsStrandPool(final StrandType type) {
         this.strandType = type;
-        FiberExecutorScheduler exe = new FiberExecutorScheduler("demo", Runnable::run);
-        if (type == StrandType.FIBER)
+        if (this.strandType == StrandType.FIBER)
             this.FACTORY = callable -> {
-                Fiber<Result[]> strand = new Fiber<>(exe, callable::call);
+//                Fiber<Result[]> strand = new Fiber<>(exe, callable);
+                Fiber<Result[]> strand = new Fiber<>(exe, callable);
+//                Fiber<Result[]> strand = new Fiber<>(callable::call);
                 String name = "LinCheckStrand";
                 strand.setName(name);
                 futureTasks.add(strand);
@@ -70,7 +74,7 @@ public class ExecutionsStrandPool {
             };
         else
             this.FACTORY = callable -> {
-                FutureTask<Result[]> futureTask = new FutureTask<>(callable);
+                FutureTask<Result[]> futureTask = new FutureTask<>(callable::run);
                 Strand strand = Strand.of(new Thread(futureTask));
                 String name = "LinCheckStrand";
                 strand.setName(name);
@@ -78,6 +82,7 @@ public class ExecutionsStrandPool {
                 pool.add(strand);
                 return strand;
             };
+
     }
 
     public ExecutionsStrandPool add(Collection<? extends TestThreadExecution> tasks) {
@@ -126,7 +131,6 @@ public class ExecutionsStrandPool {
         isRuning = true;
         for (Strand strand : pool) {
                 strand.start();
-//            if (!strand.isAlive())
         }
         return futureTasks;
     }
@@ -136,6 +140,7 @@ public class ExecutionsStrandPool {
         futureTasks.clear();
         isRuning = false;
     }
+
 
     public boolean isTerminated() {
         return pool.stream().allMatch(Strand::isTerminated);
@@ -154,6 +159,7 @@ public class ExecutionsStrandPool {
     public boolean isDone() {
         return pool.stream().allMatch(Strand::isDone);
     }
+
 
     private interface CallableStrandFactory {
         Strand newStrand(TestThreadExecution callable);

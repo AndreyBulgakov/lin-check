@@ -1,13 +1,38 @@
 package com.devexperts.dxlab.lincheck.tests.amino_cbbs;
 
+/*
+ * #%L
+ * libtest
+ * %%
+ * Copyright (C) 2015 - 2017 Devexperts, LLC
+ * %%
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-3.0.html>.
+ * #L%
+ */
+
+import amino_cbbs.LockFreeDeque;
 import com.devexperts.dxlab.lincheck.LinChecker;
-import com.devexperts.dxlab.lincheck.annotations.CTest;
-import com.devexperts.dxlab.lincheck.annotations.Operation;
-import com.devexperts.dxlab.lincheck.annotations.Param;
-import com.devexperts.dxlab.lincheck.annotations.Reset;
+import com.devexperts.dxlab.lincheck.annotations.*;
 import com.devexperts.dxlab.lincheck.generators.IntGen;
 import org.junit.Test;
-import amino_cbbs.LockFreeDeque;
+import org.openjdk.jmh.annotations.BenchmarkMode;
+import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
+
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Created by alexander on 18.02.17.
@@ -27,12 +52,12 @@ public class DequeTest {
     }
 
     @Operation
-    public boolean contains(@Param(gen = IntGen.class) int value) {
+    public Boolean contains(@Param(gen = IntGen.class) int value) {
         return lfdeque.contains(value);
     }
 
     @Operation
-    public boolean isEmpty(){
+    public Boolean isEmpty() {
         return lfdeque.isEmpty();
     }
 
@@ -42,7 +67,7 @@ public class DequeTest {
     }
 
     @Operation
-    public int size() {
+    public Integer size() {
         return lfdeque.size();
     }
 
@@ -53,6 +78,14 @@ public class DequeTest {
 
     @Test
     public void test() {
-        LinChecker.check(this);
+            LinChecker.check(this);
+//        int counts = 50;
+//        long[] times = new long[counts];
+//        for (int i = 0; i < counts; i++) {
+//            long instant = Instant.now().toEpochMilli();
+//            long end = Instant.now().toEpochMilli() - instant;
+//            times[i]=end;
+//        }
+//        System.out.println(Arrays.stream(times).sum() / counts);
     }
 }
