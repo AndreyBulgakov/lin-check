@@ -23,6 +23,8 @@ package com.devexperts.dxlab.lincheck.strategy;
  */
 
 import co.paralleluniverse.fibers.Suspendable;
+import com.devexperts.dxlab.lincheck.strategy.Driver;
+import com.devexperts.dxlab.lincheck.strategy.Strategy;
 import javafx.util.Pair;
 
 import java.io.IOException;
@@ -118,6 +120,7 @@ public class EnumerationStrategy implements Strategy {
             logger.println("\tEndOfThread " + th + "with interleavings:" + wasInterleavings);
             //В конце потока смотрим, если это поток, который не надо было прерывать - выполняем слеующий в расписании
             //иначе - выполняем некоторую логику.
+            int currentThreadIndex = helper.threadQueue.indexOf(currentThreadNum.get()) + 1;
             if (wasInterleavings == 0) {
                 if (currentThreadNum.get() == interleavingThreads.getKey()) {
                     openWindowPoint = null;
@@ -125,10 +128,8 @@ public class EnumerationStrategy implements Strategy {
                     needInterleave = false;
                     needChangeFirstThread = true;
                 }
-                int index = helper.threadQueue.indexOf(currentThreadNum.get()) + 1;
 
-                if (index < helper.threadQueue.size()) {
-
+                if (currentThreadIndex < helper.threadQueue.size()) {
                     currentThreadNum.set(helper.threadQueue.get(helper.threadQueue.indexOf(currentThreadNum.get()) + 1));
                     driver.switchOnEndOfThread(currentThreadNum);
                 }
@@ -143,23 +144,20 @@ public class EnumerationStrategy implements Strategy {
                     driver.switchOnEndOfThread(currentThreadNum);
                 }
                 else if (currentThreadNum.get() == interleavingThreads.getKey()) {
-                    int index = helper.threadQueue.indexOf(currentThreadNum.get()) + 1;
-                    if (index < helper.threadQueue.size() - 1) {
+                    if (currentThreadIndex < helper.threadQueue.size() - 1) {
                         currentThreadNum.set(helper.threadQueue.get(helper.threadQueue.indexOf(currentThreadNum.get()) + 2));
                         driver.switchOnEndOfThread(currentThreadNum);
                     }
                 }
                 else {
-                    int index = helper.threadQueue.indexOf(currentThreadNum.get()) + 1;
-                    if (index < helper.threadQueue.size()) {
+                    if (currentThreadIndex < helper.threadQueue.size()) {
                         currentThreadNum.set(helper.threadQueue.get(helper.threadQueue.indexOf(currentThreadNum.get()) + 1));
                         driver.switchOnEndOfThread(currentThreadNum);
                     }
                 }
             }
             else if (wasInterleavings == 2) {
-                int index = helper.threadQueue.indexOf(currentThreadNum.get()) + 1;
-                if (index < helper.threadQueue.size()) {
+                if (currentThreadIndex < helper.threadQueue.size()) {
                     currentThreadNum.set(helper.threadQueue.get(helper.threadQueue.indexOf(currentThreadNum.get()) + 1));
                     driver.switchOnEndOfThread(currentThreadNum);
                 }
@@ -183,7 +181,7 @@ public class EnumerationStrategy implements Strategy {
                     //если точка не задана
                     if (openWindowPoint == null){
                         //если ещё не было такой истории
-                        if (!passedPaths.containsKey(history)){
+                        if (!passedPaths.containsKey(history)) {
                             passedPaths.put(new ArrayList<>(history), new HashSet<>());
                             openWindowPoints = new ArrayList<>(history);
                             history.clear();
@@ -244,6 +242,7 @@ public class EnumerationStrategy implements Strategy {
      */
     public void printHeader(int iteration, int invocation) {
         logger.println("Iteration №" + iteration + " Invocation №" + invocation + " FirstCheckPoint" + openWindowPoints);
+        System.out.println("Iteration №" + iteration + " Invocation №" + invocation + " FirstCheckPoint" + openWindowPoints);
     }
 
     public static PrintStream getLogger() {
@@ -272,14 +271,12 @@ public class EnumerationStrategy implements Strategy {
     //region Helpers
     /**
      * Clear information about previous running
-     * @param firstThread
-     * @param needChangeFirstThread
      */
-    public void prepareInvocation(int firstThread, boolean needChangeFirstThread){
+    public void prepareInvocation(){
         history.clear();
         needInterleave = true;
         currentThreadNum = new AtomicInteger(helper.threadQueue.get(0));
-        this.needChangeFirstThread = needChangeFirstThread;
+        this.needChangeFirstThread = false;
         wasInterleavings = 0;
     }
 
@@ -295,7 +292,7 @@ public class EnumerationStrategy implements Strategy {
         openWindowPoint = null;
         openWindowPoints = null;
         passedPaths = new HashMap<>();
-        prepareInvocation(1, false);
+        prepareInvocation();
     }
 
     public void setExecutionParameters(List<Integer> queue, Pair<Integer, Integer> interleavedThreads) {
@@ -347,7 +344,7 @@ public class EnumerationStrategy implements Strategy {
             }
 
         }
-        prepareInvocation(0, false);
+        prepareInvocation();
     }
 
     @Override
@@ -419,9 +416,19 @@ public class EnumerationStrategy implements Strategy {
         //первый возможный запуск
         List<Integer> threadQueue;
 
+        //переменные для новой сратегии
+        ArrayList<ExecutionId> queueExecutions;
+        int executionIndex = 0;
+
         public EnumerationStrategyHelper(int threadNumber) {
             List<Integer> list = IntStream.range(0, threadNumber).boxed().collect(Collectors.toList());
             queueThreadExecutions = threadPermutations(list);
+            queueExecutions = new ArrayList<>();
+            for (List<Integer> queue : queueThreadExecutions){
+                for (int i = 0; i < queue.size() - 1; i++){
+                    queueExecutions.add(new ExecutionId(queue, new Pair<>(queue.get(i), queue.get(i + 1))));
+                }
+            }
         }
 
         public static List<List<Integer>> threadPermutations(List<Integer> list) {
@@ -443,6 +450,5 @@ public class EnumerationStrategy implements Strategy {
             }
             return returnMe;
         }
-
     }
 }
