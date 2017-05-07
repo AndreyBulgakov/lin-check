@@ -177,7 +177,6 @@ public class LinChecker0 {
 
                 //Create loader, load and instantiate testInstance by this loader
                 final ExecutionClassLoader loader = new ExecutionClassLoader(this.getClass().getClassLoader(), testClassName);
-//                final Object testInstance = loader.loadTestClass(testClassName).newInstance();
                 final Object testInstance = loader.loadClass(testClassName).newInstance();
 
                 List<List<Actor>> actorsPerThread = generateActors(testCfg);
@@ -232,8 +231,7 @@ public class LinChecker0 {
     @SuppressWarnings("Duplicates")
 //    @Suspendable
     private void checkImplFiber(CTestConfiguration testCfg) throws InterruptedException, ClassNotFoundException, IllegalAccessException, InstantiationException {
-        final int parallelism = ((FiberForkJoinScheduler) DefaultFiberScheduler.getInstance()).getForkJoinPool().getParallelism();
-        System.out.println("aaaaaaaaaaaaaaaaaaa"  + parallelism);
+//        final int parallelism = ((FiberForkJoinScheduler) DefaultFiberScheduler.getInstance()).getForkJoinPool().getParallelism();
         // Store start time for counting performance metrics
         long startTime = Instant.now().toEpochMilli();
         // Create report builder
@@ -266,8 +264,7 @@ public class LinChecker0 {
             };
             service.setThreadFactory(factory);
 
-            iteration(1,testCfg,listener);
-            for (int i = 2; i <= testCfg.getIterations(); i++) {
+            for (int i = 1; i <= testCfg.getIterations(); i++) {
                 int finalI = i;
                 service.execute(() -> iteration(finalI, testCfg, listener));
             }
@@ -299,7 +296,7 @@ public class LinChecker0 {
     private void iteration(int iteration, CTestConfiguration testCfg, IterationListener listner) {
         try {
             //Set strategy and initialize transformation in classes
-            ExecutionsStrandPool strandPool = new ExecutionsStrandPool(ExecutionsStrandPool.StrandType.FIBER);
+            ExecutionsStrandPool strandPool = new ExecutionsStrandPool(ExecutionsStrandPool.StrandType.THREAD);
             Driver driver = new StrandDriver(strandPool);
             EnumerationStrategy currentStrategy = new EnumerationStrategy(driver);
             StrategyHolder.setCurrentStrategy(currentStrategy);
