@@ -84,7 +84,7 @@ class TestThreadExecutionGenerator {
      * @param actors       the actors to be executed in the test.
      * @return {@link TestThreadExecution} instance with specified {@link TestThreadExecution#call()} implementation.
      */
-    static TestThreadExecution create(Object testInstance, Phaser phaser, List<Actor> actors, boolean waitsEnabled, ExecutionClassLoader loader) {
+    static TestThreadExecution create(Object testInstance, Phaser phaser, List<Actor> actors, boolean waitsEnabled, CleanClassLoader loader) {
         String className = TestThreadExecution.class.getCanonicalName() + generatedClassNumber++;
         String internalClassName = className.replace('.', '/');
         List<Object> objArgs = new ArrayList<>();
