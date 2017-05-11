@@ -24,6 +24,7 @@ package com.devexperts.dxlab.lincheck;
 
 import co.paralleluniverse.common.util.Exceptions;
 import co.paralleluniverse.fibers.DefaultFiberScheduler;
+import co.paralleluniverse.fibers.Fiber;
 import co.paralleluniverse.fibers.FiberForkJoinScheduler;
 import co.paralleluniverse.fibers.Suspendable;
 import co.paralleluniverse.fibers.instrument.SuspendableHelper;
@@ -130,7 +131,7 @@ public class LinChecker0 {
     }
 
     private Set<List<List<Result>>> generatePossibleResults(List<List<Actor>> actorsPerThread, Object testInstance,
-                                                            ExecutionClassLoader loader) {
+                                                            CleanClassLoader loader) {
         return generateAllLinearizableExecutions(actorsPerThread).stream()
                 .map(linEx -> { // For each permutation
                     List<Result> results = executeActors(linEx, testInstance, loader);
@@ -166,7 +167,11 @@ public class LinChecker0 {
             ExecutionsStrandPool strandPool = new ExecutionsStrandPool(ExecutionsStrandPool.StrandType.FIBER);
             Driver driver = new StrandDriver(strandPool);
             EnumerationStrategy currentStrategy = new EnumerationStrategy(driver);
-            StrategyHolder.setCurrentStrategy(currentStrategy);
+
+            DummyStrategy dummyStrategy = new DummyStrategy();
+            CleanClassLoader cleanClassLoader = new CleanClassLoader(getClass().getClassLoader());
+            Object cleanInstance = cleanClassLoader.loadClass(testClassName).newInstance();
+
             reportBuilder.strategy(currentStrategy.getClass().getSimpleName().replace("Strategy", ""));
 
             currentStrategy.beforeStartIteration(testCfg.getThreads());
@@ -176,8 +181,9 @@ public class LinChecker0 {
                 reportBuilder.incIterations();
 
                 //Create loader, load and instantiate testInstance by this loader
-                final ExecutionClassLoader loader = new ExecutionClassLoader(this.getClass().getClassLoader(), testClassName);
+                final ExecutionClassLoader loader = new ExecutionClassLoader(getClass().getClassLoader(), testClassName);
                 final Object testInstance = loader.loadClass(testClassName).newInstance();
+
 
                 List<List<Actor>> actorsPerThread = generateActors(testCfg);
                 printIterationHeader(iteration, actorsPerThread);
@@ -185,7 +191,11 @@ public class LinChecker0 {
                 List<TestThreadExecution> testThreadExecutions = actorsPerThread.stream()
                         .map(actors -> TestThreadExecutionGenerator.create(testInstance, new Phaser(1), actors, false, loader))
                         .collect(Collectors.toList());
-                Set<List<List<Result>>> possibleResultsSet = generatePossibleResults(actorsPerThread, testInstance, loader);
+
+                StrategyHolder.setCurrentStrategy(dummyStrategy);
+                //Generate possible results
+                Set<List<List<Result>>> possibleResultsSet = generatePossibleResults(actorsPerThread, cleanInstance, cleanClassLoader);
+                StrategyHolder.setCurrentStrategy(currentStrategy);
 
                 // Run invocations
                 for (int invocation = 1; invocation <= testCfg.getInvocationsPerIteration() && !currentStrategy.isNeedStopIteration(); invocation++) {
@@ -296,17 +306,16 @@ public class LinChecker0 {
     private void iteration(int iteration, CTestConfiguration testCfg, IterationListener listner) {
         try {
             //Set strategy and initialize transformation in classes
-            ExecutionsStrandPool strandPool = new ExecutionsStrandPool(ExecutionsStrandPool.StrandType.THREAD);
+            ExecutionsStrandPool strandPool = new ExecutionsStrandPool(ExecutionsStrandPool.StrandType.FIBER);
             Driver driver = new StrandDriver(strandPool);
             EnumerationStrategy currentStrategy = new EnumerationStrategy(driver);
-            StrategyHolder.setCurrentStrategy(currentStrategy);
             //Create loader, load and instantiate testInstance by this loader
             final ExecutionClassLoader loader = new ExecutionClassLoader(this.getClass().getClassLoader(), testClassName);
 //            final Object testInstance = loader.loadTestClass(testClassName).newInstance();
             final Object testInstance = loader.loadClass(testClassName).newInstance();
+            StrategyHolder.setCurrentStrategy(currentStrategy);
             currentStrategy.beforeStartIteration(testCfg.getThreads());
             currentStrategy.onStartIteration();
-            //индекс потока, в котором делаем прерывание
 
             List<List<Actor>> actorsPerThread = generateActors(testCfg);
             //        printIterationHeader(iteration, actorsPerThread);
@@ -396,7 +405,7 @@ public class LinChecker0 {
         }
     }
 
-    private List<Result> executeActors(List<Actor> actors, Object testInstance, ExecutionClassLoader loader) {
+    private List<Result> executeActors(List<Actor> actors, Object testInstance, CleanClassLoader loader) {
         invokeReset(testInstance);
         return Arrays.asList(TestThreadExecutionGenerator.create(testInstance, new Phaser(1), actors, false, loader).call());
     }

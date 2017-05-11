@@ -16,19 +16,19 @@
             <artifactId>asm-all</artifactId>
             <version>5.1</version>
         </dependency>
-        <dependency>
-            <groupId>co.paralleluniverse</groupId>
-            <artifactId>quasar-core</artifactId>
-            <version>0.7.8-SNAPSHOT</version>
-            <classifier>jdk8</classifier>
-            <scope>system</scope>
-            <systemPath>${basedir}/../libs/quasar-core-0.7.8-SNAPSHOT-jdk8.jar</systemPath>
-        </dependency>
         <!--<dependency>-->
             <!--<groupId>co.paralleluniverse</groupId>-->
             <!--<artifactId>quasar-core</artifactId>-->
-            <!--<version>0.7.6</version>-->
+            <!--<version>0.7.8-SNAPSHOT</version>-->
+            <!--<classifier>jdk8</classifier>-->
+            <!--<scope>system</scope>-->
+            <!--<systemPath>${basedir}/../libs/quasar-core-0.7.8-SNAPSHOT-jdk8.jar</systemPath>-->
         <!--</dependency>-->
+        <dependency>
+            <groupId>co.paralleluniverse</groupId>
+            <artifactId>quasar-core</artifactId>
+            <version>0.7.6</version>
+        </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>

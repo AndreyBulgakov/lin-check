@@ -27,9 +27,6 @@ package com.devexperts.dxlab.lincheck.strategy;
  */
 public class DummyStrategy implements Strategy {
 
-    public DummyStrategy(Driver driver) {
-
-    }
 
     @Override
     public void onSharedVariableRead(int location) {

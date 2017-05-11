@@ -33,6 +33,7 @@ import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -43,11 +44,13 @@ import java.util.logging.Logger;
  * Can delegate some classes to parent ClassLoader.
  */
 //TODO Make loading already transformed bytecode;
-class ExecutionClassLoader extends ClassLoader {
+class ExecutionClassLoader extends CleanClassLoader  {
     private final Map<String, Class<?>> cache = new ConcurrentHashMap<>();
     private final String testClassName; // TODO we should transform test class (it contains algorithm logic)
     private final QuasarInstrumentor instrumentor = new QuasarInstrumentor(); //TODO is instrumentor must be single?
     private final Logger LOG = Logger.getLogger(ExecutionClassLoader.class.getSimpleName());
+
+    
 
     ExecutionClassLoader(String testClassName) {
         this.testClassName = testClassName;
@@ -72,14 +75,11 @@ class ExecutionClassLoader extends ClassLoader {
      */
     @Override
     public Class<?> loadClass(String name) throws ClassNotFoundException {
+        if (shouldIgnoreClass(name)) return super.loadClass(name);
         // Load transformed class from cache if it exists
         Class result = cache.get(name);
         if (result != null) return result;
         // Do not transform some classes
-        if (shouldIgnoreClass(name)) {
-            LOG.log(Level.INFO,"Loaded by super:" + name);
-            return super.loadClass(name);
-        }
         LOG.log(Level.INFO,"Loaded by exec:" + name);
         // Get transformed bytecode or transform and save it
         byte[] resultBytecode = resourcesInstrumentedByQuasar.computeIfAbsent(name, k -> quasarInstrument(name, instrument(name)));
@@ -91,14 +91,18 @@ class ExecutionClassLoader extends ClassLoader {
         return result;
     }
 
-    private static final Map<String, String> names = new ConcurrentHashMap<>();
-    private static final Map<String, byte[]> resourcesInstrumentedByShared = new ConcurrentHashMap<>();
-    private static final Map<String, byte[]> resourcesInstrumentedByQuasar = new ConcurrentHashMap<>();
+//    private static final Map<String, String> names = new ConcurrentHashMap<>();
+//    private static final Map<String, byte[]> resourcesInstrumentedByShared = new ConcurrentHashMap<>();
+//    private static final Map<String, byte[]> resourcesInstrumentedByQuasar = new ConcurrentHashMap<>();
+    private static final Map<String, String> names = new HashMap<>();
+    private static final Map<String, byte[]> resourcesInstrumentedByShared = new HashMap<>();
+    private static final Map<String, byte[]> resourcesInstrumentedByQuasar = new HashMap<>();
 
     @Override
     public InputStream getResourceAsStream(String name) {
+        if (shouldIgnoreClassSlashes(name)) return super.getResourceAsStream(name);
         String className = names.computeIfAbsent(name, k -> name.replace("/", ".").substring(0, name.length()-6));
-        if (shouldIgnoreClass(className)) return super.getResourceAsStream(name);
+//        if (shouldIgnoreClass(className)) return super.getResourceAsStream(name);
         byte[] result = resourcesInstrumentedByShared.computeIfAbsent(className, k -> instrument(className));
         return new ByteArrayInputStream(result);
     }
@@ -118,7 +122,18 @@ class ExecutionClassLoader extends ClassLoader {
                         className.startsWith("sun.") ||
                         className.startsWith("co.paralleluniverse.") ||
                         className.startsWith("java.");
-        // TODO let's transform java.util.concurrent
+    }
+
+    private static boolean shouldIgnoreClassSlashes(String className) {
+        return
+                className == null ||
+                        className.startsWith("com/devexperts/dxlab/lincheck/") &&
+                                !className.startsWith("com/devexperts/dxlab/lincheck/tests/") &&
+                                !className.startsWith("com/devexperts/dxlab/lincheck/libtest/")
+                        ||
+                        className.startsWith("sun/") ||
+                        className.startsWith("co/paralleluniverse/") ||
+                        className.startsWith("java/");
     }
 
     Class<? extends TestThreadExecution> defineTestThreadExecution(String className, byte[] bytecode) {
@@ -144,7 +159,7 @@ class ExecutionClassLoader extends ClassLoader {
 
     private byte[] quasarInstrument(String className, byte[] bytecode) {
         try {
-            bytecode = instrumentor.instrumentClass(this, className, bytecode);
+        bytecode = instrumentor.instrumentClass(this, className, bytecode);
 //        bytecode = Retransform.getInstrumentor().instrumentClass(this, className, bytecode);
 //        bytecode = instrumentor.instrumentClass(getParent(), className, bytecode);
 //        bytecode = instrumentor.instrumentClass(className, bytecode);

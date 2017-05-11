@@ -42,26 +42,26 @@ public class LinChecker {
      */
     //=v -Dco.paralleluniverse.fibers.verifyInstrumentation=true
     public static void check(Object testInstance) throws AssertionError {
-        LinChecker0.check(testInstance);
+//        LinChecker0.check(testInstance);
 
-//        try {
-//            // Get current URLs from parrent classLoader
-//            Field ucp = URLClassLoader.class.getDeclaredField("ucp");
-//            ucp.setAccessible(true);
-//            URL[] classLoaderUrls = ((URLClassPath) ucp.get(LinChecker.class.getClassLoader())).getURLs();
-//            // Loading instruments
-//            QuasarLoader urlClassLoader = new QuasarLoader(classLoaderUrls);
-//            Thread.currentThread().setContextClassLoader(urlClassLoader);
-//            // Log
-////          helper.setLog(true, true);
-//            Class<?> instrumentedLincheckClass = urlClassLoader.loadClass("com.devexperts.dxlab.lincheck.LinChecker0");
-//            Class<?> instrumentedTestInstance = urlClassLoader.loadClass(testInstance.getClass().getName());
-//            Object newInstance = instrumentedTestInstance.newInstance();
-//            Method m = instrumentedLincheckClass.getMethod("check", Object.class);
-//            m.invoke(null, newInstance);
-//        } catch (NoSuchMethodException | InstantiationException | InvocationTargetException | NoSuchFieldException | ClassNotFoundException | IllegalAccessException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            // Get current URLs from parrent classLoader
+            Field ucp = URLClassLoader.class.getDeclaredField("ucp");
+            ucp.setAccessible(true);
+            URL[] classLoaderUrls = ((URLClassPath) ucp.get(LinChecker.class.getClassLoader())).getURLs();
+            // Loading instruments
+            QuasarLoader urlClassLoader = new QuasarLoader(classLoaderUrls);
+            Thread.currentThread().setContextClassLoader(urlClassLoader);
+            // Log
+//          helper.setLog(true, true);
+            Class<?> instrumentedLincheckClass = urlClassLoader.loadClass("com.devexperts.dxlab.lincheck.LinChecker0");
+            Class<?> instrumentedTestInstance = urlClassLoader.loadClass(testInstance.getClass().getName());
+            Object newInstance = instrumentedTestInstance.newInstance();
+            Method m = instrumentedLincheckClass.getMethod("check", Object.class);
+            m.invoke(null, newInstance);
+        } catch (NoSuchMethodException | InstantiationException | InvocationTargetException | NoSuchFieldException | ClassNotFoundException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
 
     }
 
