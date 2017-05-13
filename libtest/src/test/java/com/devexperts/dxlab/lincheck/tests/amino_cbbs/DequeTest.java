@@ -39,7 +39,9 @@ import java.util.Arrays;
 /**
  * Created by alexander on 18.02.17.
  */
-@CTest(iterations = 10, actorsPerThread = {"4:4", "4:4", "4:4"}, invocationsPerIteration = 100_000)
+//@CTest(iterations = 9_000, actorsPerThread = {"1:4", "1:4"}, invocationsPerIteration = 100_000)
+@CTest(iterations = 100, actorsPerThread = {"1:4", "1:4", "1:4"}, invocationsPerIteration = 100_000)
+//@CTest(iterations = 10, actorsPerThread = {"4:4", "4:4", "4:4"}, invocationsPerIteration = 100_000)
 public class DequeTest {
     private LockFreeDeque<Integer> lfdeque;
 

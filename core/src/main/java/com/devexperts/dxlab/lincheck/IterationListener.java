@@ -60,6 +60,7 @@ public class IterationListener {
         synchronized (LOCK){
             LOCK.notify();
         }
+        throw new AssertionError("Non-linearizable");
     }
     public void registerReport(Strategy strategy, int iteration, int invocation){
         TestReport report = new TestReport.Builder(cfg)
