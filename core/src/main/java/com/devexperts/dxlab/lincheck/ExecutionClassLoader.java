@@ -33,7 +33,6 @@ import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -43,63 +42,25 @@ import java.util.logging.Logger;
  * Loader to load and transform classes.
  * Can delegate some classes to parent ClassLoader.
  */
-class ExecutionClassLoader extends CleanClassLoader  {
-    private final Map<String, Class<?>> cache = new ConcurrentHashMap<>();
-    private final QuasarInstrumentor instrumentor = new QuasarInstrumentor(); //TODO is instrumentor must be single?
-    private final Logger LOG = Logger.getLogger(ExecutionClassLoader.class.getSimpleName());
-
-    
-
-    ExecutionClassLoader(String testClassName) {
-
-    }
-
-    ExecutionClassLoader(ClassLoader parent, String testClassName) {
-        super(parent);
-        this.instrumentor.setVerbose(true);
-        this.instrumentor.setDebug(true);
-        LOG.setLevel(Level.OFF);
-    }
-
-    /**
-     * Transform class if it is not in excluded list and load it by this Loader
-     * else delegate load to parent loader
-     *
-     * @param name name of class
-     * @return transformed class loaded by this loader or by parent loader
-     * @throws ClassNotFoundException if IOException
-     */
-    @Override
-    public Class<?> loadClass(String name) throws ClassNotFoundException {
-        if (shouldIgnoreClass(name)) return super.loadClass(name);
-        // Load transformed class from cache if it exists
-        Class result = cache.get(name);
-        if (result != null) return result;
-        // Do not transform some classes
-        LOG.log(Level.INFO,"Loaded by exec:" + name);
-        // Get transformed bytecode or transform and save it
-        byte[] resultBytecode = resourcesInstrumentedByQuasar.computeIfAbsent(name, k -> quasarInstrument(name, instrument(name)));
-        if (resultBytecode == null) throw new ClassNotFoundException(name);
-        writeToFile(name, resultBytecode);
-        result = defineClass(name, resultBytecode, 0, resultBytecode.length);
-        // Save it to cache and resourcesInstrumentedByShared
-        cache.put(name, result);
-        return result;
-    }
-
+class ExecutionClassLoader extends CleanClassLoader {
     private static final Map<String, String> names = new ConcurrentHashMap<>();
     private static final Map<String, byte[]> resourcesInstrumentedByShared = new ConcurrentHashMap<>();
     private static final Map<String, byte[]> resourcesInstrumentedByQuasar = new ConcurrentHashMap<>();
-//    private static final Map<String, String> names = new HashMap<>();
-//    private static final Map<String, byte[]> resourcesInstrumentedByShared = new HashMap<>();
-//    private static final Map<String, byte[]> resourcesInstrumentedByQuasar = new HashMap<>();
+    private final Map<String, Class<?>> cache = new ConcurrentHashMap<>();
+    private final QuasarInstrumentor instrumentor = new QuasarInstrumentor(); //TODO is instrumentor must be single?
+    private final Logger LOG = Logger.getLogger(ExecutionClassLoader.class.getSimpleName());
+    private final boolean fibersAllow;
 
-    @Override
-    public InputStream getResourceAsStream(String name) {
-        if (shouldIgnoreClassSlashes(name)) return super.getResourceAsStream(name);
-        String className = names.computeIfAbsent(name, k -> name.replace("/", ".").substring(0, name.length()-6));
-        byte[] result = resourcesInstrumentedByShared.computeIfAbsent(className, k -> instrument(className));
-        return new ByteArrayInputStream(result);
+    ExecutionClassLoader(String name){
+        fibersAllow = false;
+    }
+
+    ExecutionClassLoader(ClassLoader parent) {
+        super(parent);
+        this.instrumentor.setVerbose(true);
+        this.instrumentor.setDebug(true);
+        fibersAllow = CTestConfiguration.getThreadType().equals(ExecutionsStrandPool.StrandType.FIBER);
+        LOG.setLevel(Level.OFF);
     }
 
     /***
@@ -131,6 +92,41 @@ class ExecutionClassLoader extends CleanClassLoader  {
                         className.startsWith("java/");
     }
 
+    /**
+     * Transform class if it is not in excluded list and load it by this Loader
+     * else delegate load to parent loader
+     *
+     * @param name name of class
+     * @return transformed class loaded by this loader or by parent loader
+     * @throws ClassNotFoundException if IOException
+     */
+    @Override
+    public Class<?> loadClass(String name) throws ClassNotFoundException {
+        if (shouldIgnoreClass(name)) return super.loadClass(name);
+        // Load transformed class from cache if it exists
+        Class result = cache.get(name);
+        if (result != null) return result;
+        // Do not transform some classes
+        LOG.log(Level.INFO, "Loaded by exec:" + name);
+        // Get transformed bytecode or transform and save it
+        byte[] resultBytecode = resourcesInstrumentedByQuasar.computeIfAbsent(name, k -> quasarInstrument(name, instrument(name)));
+        if (resultBytecode == null) throw new ClassNotFoundException(name);
+        writeToFile(name, resultBytecode);
+        result = defineClass(name, resultBytecode, 0, resultBytecode.length);
+        // Save it to cache and resourcesInstrumentedByShared
+        cache.put(name, result);
+        return result;
+    }
+
+    @Override
+    public InputStream getResourceAsStream(String name) {
+        if (shouldIgnoreClassSlashes(name)) return super.getResourceAsStream(name);
+        String className = names.computeIfAbsent(name, k -> name.replace("/", ".")
+                .substring(0, name.length() - 6));
+        byte[] result = resourcesInstrumentedByShared.computeIfAbsent(className, k -> instrument(className));
+        return new ByteArrayInputStream(result);
+    }
+
     Class<? extends TestThreadExecution> defineTestThreadExecution(String className, byte[] bytecode) {
         bytecode = quasarInstrument(className, bytecode);
 //        writeToFile(className, bytecode);
@@ -153,7 +149,9 @@ class ExecutionClassLoader extends CleanClassLoader  {
 
 
     private byte[] quasarInstrument(String className, byte[] bytecode) {
-//        bytecode = instrumentor.instrumentClass(this, className, bytecode);
+        if (fibersAllow) {
+            bytecode = instrumentor.instrumentClass(this, className, bytecode);
+        }
         return bytecode;
     }
 

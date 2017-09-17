@@ -22,15 +22,13 @@ package com.devexperts.dxlab.lincheck;
  * #L%
  */
 
-/**
- * Created by andrey on 5/9/17.
- */
-public class CleanClassLoader extends ClassLoader {
-    public CleanClassLoader(ClassLoader parent) {
+
+class CleanClassLoader extends ClassLoader {
+    CleanClassLoader(ClassLoader parent) {
         super(parent);
     }
 
-    public CleanClassLoader() {
+    CleanClassLoader() {
     }
 
     Class<? extends TestThreadExecution> defineTestThreadExecution(String className, byte[] bytecode) {

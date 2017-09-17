@@ -27,15 +27,11 @@ import com.devexperts.dxlab.lincheck.report.TestReport;
 import com.devexperts.dxlab.lincheck.strategy.Strategy;
 
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Queue;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class IterationListener {
+class IterationListener {
 
     private Queue<TestReport> reports = new ConcurrentLinkedQueue<TestReport>();
     private final long START_TIME;
@@ -71,27 +67,11 @@ public class IterationListener {
         reports.add(report);
     }
 
-    private long startTime;
-    private long[] time;
 
-    void startTotalTime() {
-        startTime = Instant.now().toEpochMilli();
-//        time = new long[(maxIterations / 100) + 1];
-        time = new long[maxIterations  + 1];
-    }
-
-    public long[] getTime() {
-        return time;
-    }
-
-    private volatile int currentIteration = 0;
-//    private AtomicInteger currentIteration = new AtomicInteger(0);
+    private AtomicInteger currentIteration = new AtomicInteger(0);
     void onEndIteration(){
-        int i = ++currentIteration;
-//        int i = currentIteration.incrementAndGet();
-//        System.out.println(i +"/" +maxIterations);
-//        if (i % 100 == 0) time[i / 100] = Instant.now().toEpochMilli() - startTime;
-        time[i] = Instant.now().toEpochMilli() - startTime;
+        int i = currentIteration.incrementAndGet();
+        System.out.println(i + "/" + maxIterations);
         if (i >= maxIterations){
             synchronized (LOCK){
                 LOCK.notify();

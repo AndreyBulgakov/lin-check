@@ -41,7 +41,7 @@ public class ExecutionClassLoaderTestReal {
 
     @BeforeClass
     public static void initialize() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
-        cl = new ExecutionClassLoader(FakeTestClass.class.getCanonicalName());
+        cl = new ExecutionClassLoader(null, null);
         Class<? extends FakeTestAbstract> fake = (Class<? extends FakeTestAbstract>)
                 cl.loadClass(FakeTestClass.class.getCanonicalName());
         fakeTestClass = fake.newInstance();
