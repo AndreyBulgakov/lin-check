@@ -33,6 +33,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class IterationListener {
 
@@ -44,9 +45,8 @@ public class IterationListener {
     private final int maxIterations;
 
     private boolean isNonLinearizable = false;
-    private volatile int currentIteration = 0;
 
-    public IterationListener(Object lock, CTestConfiguration cfg, String testClassName, long START_TIME) {
+    IterationListener(Object lock, CTestConfiguration cfg, String testClassName, long START_TIME) {
         this.START_TIME = START_TIME;
         this.LOCK = lock;
         this.cfg = cfg;
@@ -54,15 +54,12 @@ public class IterationListener {
         this.maxIterations = cfg.getIterations();
     }
 
-    public void foundNonLinearizable(Strategy strategy, int iteration, int invocation){
+    void foundNonLinearizable(Strategy strategy, int iteration, int invocation){
         registerReport(strategy,iteration,invocation);
         isNonLinearizable = true;
-        synchronized (LOCK){
-            LOCK.notify();
-        }
         throw new AssertionError("Non-linearizable");
     }
-    public void registerReport(Strategy strategy, int iteration, int invocation){
+    private void registerReport(Strategy strategy, int iteration, int invocation){
         TestReport report = new TestReport.Builder(cfg)
                 .name(testClassName)
                 .strategy(strategy.getClass().getSimpleName())
@@ -74,16 +71,35 @@ public class IterationListener {
         reports.add(report);
     }
 
-    public void onEndIteration(){
-        currentIteration++;
-        if (currentIteration >= maxIterations){
+    private long startTime;
+    private long[] time;
+
+    void startTotalTime() {
+        startTime = Instant.now().toEpochMilli();
+//        time = new long[(maxIterations / 100) + 1];
+        time = new long[maxIterations  + 1];
+    }
+
+    public long[] getTime() {
+        return time;
+    }
+
+    private volatile int currentIteration = 0;
+//    private AtomicInteger currentIteration = new AtomicInteger(0);
+    void onEndIteration(){
+        int i = ++currentIteration;
+//        int i = currentIteration.incrementAndGet();
+//        System.out.println(i +"/" +maxIterations);
+//        if (i % 100 == 0) time[i / 100] = Instant.now().toEpochMilli() - startTime;
+        time[i] = Instant.now().toEpochMilli() - startTime;
+        if (i >= maxIterations){
             synchronized (LOCK){
                 LOCK.notify();
             }
         }
     }
 
-    public boolean isNonLinearizable() {
+    boolean isNonLinearizable() {
         return isNonLinearizable;
     }
 }

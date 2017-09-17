@@ -66,8 +66,6 @@ class BeforeSharedVariableMethodTransformer extends GeneratorAdapter {
 
     @Override
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-        if (desc.equals("Lcom/devexperts/dxlab/lincheck/annotations/Reset;"))
-            this.isReset = true;
         return super.visitAnnotation(desc, visible);
     }
 

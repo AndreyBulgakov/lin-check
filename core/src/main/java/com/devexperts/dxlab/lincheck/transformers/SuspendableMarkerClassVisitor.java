@@ -36,9 +36,7 @@ import org.objectweb.asm.tree.MethodNode;
 import java.lang.reflect.Modifier;
 import java.util.HashSet;
 
-/**
- * Created by andrey on 5/4/17.
- */
+
 public class SuspendableMarkerClassVisitor extends ClassVisitor {
 
     private String className;
@@ -64,7 +62,7 @@ public class SuspendableMarkerClassVisitor extends ClassVisitor {
             insertSuspenable.visitEnd();
 
             //Skip other @Suspendables
-            //May be allow @Suspendable repeat? (nedd quasar patch)
+            //May be allow @Suspendable repeat? (need Quasar patch)
             return new MethodVisitor(Utils.ASM_VERSION, outMV) {
                 private  boolean isSuspendable = false;
                 @Override

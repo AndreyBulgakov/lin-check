@@ -33,6 +33,7 @@ import org.objectweb.asm.util.CheckClassAdapter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Phaser;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.objectweb.asm.Opcodes.*;
 
@@ -66,7 +67,7 @@ class TestThreadExecutionGenerator {
     private static final Method RESULT_CREATE_VALUE_RESULT = new Method("createValueResult", RESULT_TYPE, new Type[]{OBJECT_TYPE});
     private static final Method RESULT_CREATE_EXCEPTION_RESULT = new Method("createExceptionResult", RESULT_TYPE, new Type[]{CLASS_TYPE});
 
-    private static volatile int generatedClassNumber = 0;
+    private static AtomicInteger generatedClassNumber = new AtomicInteger(0);
 
     static {
         try {
@@ -85,7 +86,7 @@ class TestThreadExecutionGenerator {
      * @return {@link TestThreadExecution} instance with specified {@link TestThreadExecution#call()} implementation.
      */
     static TestThreadExecution create(Object testInstance, Phaser phaser, List<Actor> actors, boolean waitsEnabled, CleanClassLoader loader) {
-        String className = TestThreadExecution.class.getCanonicalName() + generatedClassNumber++;
+        String className = TestThreadExecution.class.getCanonicalName() + generatedClassNumber.getAndIncrement();
         String internalClassName = className.replace('.', '/');
         List<Object> objArgs = new ArrayList<>();
         Class<? extends TestThreadExecution> clz = loader.defineTestThreadExecution(
@@ -142,14 +143,13 @@ class TestThreadExecutionGenerator {
         // Create Result[] array and store it to a local variable
         int resLocal = createResultArray(mv, actors.size());
         // Wait for other threads
-//        arriveAndAwaitAdvance(mv);
+        arriveAndAwaitAdvance(mv);
         // Number of current operation (starts with 0)
         int iLocal = mv.newLocal(Type.INT_TYPE);
         mv.push(0);
         mv.storeLocal(iLocal);
         // Invoke actors
         for (int i = 0; i < actors.size(); i++) {
-//        for (int i = 0; i < actors.size(); i++) {
             Actor actor = actors.get(i);
             // Add busy-wait before operation execution (for non-first operations only)
             if (waitsEnabled && i > 0) {

@@ -43,23 +43,19 @@ import java.util.logging.Logger;
  * Loader to load and transform classes.
  * Can delegate some classes to parent ClassLoader.
  */
-//TODO Make loading already transformed bytecode;
 class ExecutionClassLoader extends CleanClassLoader  {
     private final Map<String, Class<?>> cache = new ConcurrentHashMap<>();
-    private final String testClassName; // TODO we should transform test class (it contains algorithm logic)
     private final QuasarInstrumentor instrumentor = new QuasarInstrumentor(); //TODO is instrumentor must be single?
     private final Logger LOG = Logger.getLogger(ExecutionClassLoader.class.getSimpleName());
 
     
 
     ExecutionClassLoader(String testClassName) {
-        this.testClassName = testClassName;
 
     }
 
     ExecutionClassLoader(ClassLoader parent, String testClassName) {
         super(parent);
-        this.testClassName = testClassName;
         this.instrumentor.setVerbose(true);
         this.instrumentor.setDebug(true);
         LOG.setLevel(Level.OFF);
@@ -91,18 +87,17 @@ class ExecutionClassLoader extends CleanClassLoader  {
         return result;
     }
 
-//    private static final Map<String, String> names = new ConcurrentHashMap<>();
-//    private static final Map<String, byte[]> resourcesInstrumentedByShared = new ConcurrentHashMap<>();
-//    private static final Map<String, byte[]> resourcesInstrumentedByQuasar = new ConcurrentHashMap<>();
-    private static final Map<String, String> names = new HashMap<>();
-    private static final Map<String, byte[]> resourcesInstrumentedByShared = new HashMap<>();
-    private static final Map<String, byte[]> resourcesInstrumentedByQuasar = new HashMap<>();
+    private static final Map<String, String> names = new ConcurrentHashMap<>();
+    private static final Map<String, byte[]> resourcesInstrumentedByShared = new ConcurrentHashMap<>();
+    private static final Map<String, byte[]> resourcesInstrumentedByQuasar = new ConcurrentHashMap<>();
+//    private static final Map<String, String> names = new HashMap<>();
+//    private static final Map<String, byte[]> resourcesInstrumentedByShared = new HashMap<>();
+//    private static final Map<String, byte[]> resourcesInstrumentedByQuasar = new HashMap<>();
 
     @Override
     public InputStream getResourceAsStream(String name) {
         if (shouldIgnoreClassSlashes(name)) return super.getResourceAsStream(name);
         String className = names.computeIfAbsent(name, k -> name.replace("/", ".").substring(0, name.length()-6));
-//        if (shouldIgnoreClass(className)) return super.getResourceAsStream(name);
         byte[] result = resourcesInstrumentedByShared.computeIfAbsent(className, k -> instrument(className));
         return new ByteArrayInputStream(result);
     }
@@ -158,23 +153,16 @@ class ExecutionClassLoader extends CleanClassLoader  {
 
 
     private byte[] quasarInstrument(String className, byte[] bytecode) {
-        try {
-        bytecode = instrumentor.instrumentClass(this, className, bytecode);
-//        bytecode = Retransform.getInstrumentor().instrumentClass(this, className, bytecode);
-//        bytecode = instrumentor.instrumentClass(getParent(), className, bytecode);
-//        bytecode = instrumentor.instrumentClass(className, bytecode);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+//        bytecode = instrumentor.instrumentClass(this, className, bytecode);
         return bytecode;
     }
 
     private void writeToFile(String className, byte[] bytecode) {
-//        try {
-//            FileOutputStream stream = new FileOutputStream("out/" + className + ".class");
-//            stream.write(bytecode);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        try {
+            FileOutputStream stream = new FileOutputStream("out/" + className + ".class");
+            stream.write(bytecode);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

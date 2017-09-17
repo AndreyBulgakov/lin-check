@@ -40,10 +40,15 @@ public class LinChecker {
      * @param testInstance object that contains CTest
      * @throws AssertionError if find Non-linearizable executions
      */
-    //=v -Dco.paralleluniverse.fibers.verifyInstrumentation=true
     public static void check(Object testInstance) throws AssertionError {
-//        LinChecker0.check(testInstance);
+        checkNormal(testInstance);
+//        checkQuasar(testInstance);
+    }
+    private static void checkNormal(Object testInstance){
+        LinChecker0.check(testInstance);
+    }
 
+    private static void checkQuasar(Object testInstance){
         try {
             // Get current URLs from parrent classLoader
             Field ucp = URLClassLoader.class.getDeclaredField("ucp");
@@ -62,9 +67,6 @@ public class LinChecker {
         } catch (NoSuchMethodException | InstantiationException | InvocationTargetException | NoSuchFieldException | ClassNotFoundException | IllegalAccessException e) {
             e.printStackTrace();
         }
-
     }
-
-
 
 }

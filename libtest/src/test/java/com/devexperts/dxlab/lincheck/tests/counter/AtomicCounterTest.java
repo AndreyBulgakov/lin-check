@@ -33,7 +33,7 @@ import org.junit.Test;
 /**
  * Created by alexander on 26.02.17.
  */
-@CTest(iterations = 50, actorsPerThread = {"2:5", "2:5"})
+@CTest(iterations = 50, actorsPerThread = {"2:5", "2:5", "2:5"})
 public class AtomicCounterTest {
     private Counter counter;
 
