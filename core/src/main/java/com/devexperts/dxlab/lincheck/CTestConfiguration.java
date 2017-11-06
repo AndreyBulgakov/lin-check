@@ -34,6 +34,9 @@ import java.util.stream.Collectors;
 public class CTestConfiguration {
     private final int iterations;
     private final int invocationsPerIteration;
+    private final static ExecutionsStrandPool.StrandType THREAD_TYPE = ExecutionsStrandPool.StrandType.FIBER;
+    private final static boolean parallelEnabled = false;
+
     private final List<TestThreadConfiguration> threadConfigurations;
 
     private CTestConfiguration(int iterations, int invocationsPerIteration, List<TestThreadConfiguration> threadConfigurations) {
@@ -65,7 +68,7 @@ public class CTestConfiguration {
         return iterations;
     }
 
-    public int getThreads() {
+    int getThreads() {
         return threadConfigurations.size();
     }
 
@@ -75,6 +78,14 @@ public class CTestConfiguration {
 
     public List<TestThreadConfiguration> getThreadConfigurations() {
         return threadConfigurations;
+    }
+
+    static ExecutionsStrandPool.StrandType getThreadType() {
+        return THREAD_TYPE;
+    }
+
+    static boolean isParallelEnabled() {
+        return parallelEnabled;
     }
 
     public static class TestThreadConfiguration {

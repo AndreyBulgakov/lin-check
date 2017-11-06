@@ -15,8 +15,8 @@
                 <configuration>
                     <argLine>
                         <!-- -Dlincheck.writeReport=true-->
+                        <!-- -javaagent:${basedir}/../libs/quasar-core-0.7.8-SNAPSHOT-jdk8.jar=bm-->
                         <!-- -javaagent:${basedir}/libs/quasar-core-0.7.7.jar-->
-                        -javaagent:${basedir}/../libs/quasar-core-0.7.8-SNAPSHOT-jdk8.jar=bm
                         <!-- -javaagent:${basedir}/libs/quasar-core-0.7.8-SNAPSHOT-jdk8.jar-->
                         <!-- -javaagent:${basedir}/libs/quasar-core-0.7.8-SNAPSHOT.jar-->
                           <!-- -Dco.paralleluniverse.fibers.verifyInstrumentation=true-->

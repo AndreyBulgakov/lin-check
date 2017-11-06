@@ -24,12 +24,13 @@ package com.devexperts.dxlab.lincheck;
 
 import co.paralleluniverse.fibers.Fiber;
 import co.paralleluniverse.fibers.FiberExecutorScheduler;
+import co.paralleluniverse.fibers.FiberScheduler;
 import co.paralleluniverse.strands.Strand;
+import co.paralleluniverse.strands.SuspendableCallable;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 
@@ -42,8 +43,7 @@ public class ExecutionsStrandPool {
     private final StrandType strandType;
     private CallableStrandFactory FACTORY;
     private boolean isRuning = false;
-//    private FiberExecutorScheduler exe = new FiberExecutorScheduler("",Executors.newSingleThreadExecutor());
-    private FiberExecutorScheduler exe = new FiberExecutorScheduler("executions-pool", Runnable::run);
+    private static final FiberExecutorScheduler exe = new FiberExecutorScheduler("executions-pool", Runnable::run);
 
     public enum StrandType {
         THREAD,
@@ -59,13 +59,11 @@ public class ExecutionsStrandPool {
      *
      * @param type type of Strand can be Fiber or Thread
      */
-    ExecutionsStrandPool(final StrandType type) {
+    ExecutionsStrandPool(final StrandType type, int iteration) {
         this.strandType = type;
         if (this.strandType == StrandType.FIBER)
             this.FACTORY = callable -> {
-//                Fiber<Result[]> strand = new Fiber<>(exe, callable);
-                Fiber<Result[]> strand = new Fiber<>(exe, callable);
-//                Fiber<Result[]> strand = new Fiber<>(callable::call);
+                Fiber<Result[]> strand = new ExecutionFiber<>(exe, callable, iteration);
                 String name = "LinCheckStrand";
                 strand.setName(name);
                 futureTasks.add(strand);
@@ -75,7 +73,7 @@ public class ExecutionsStrandPool {
         else
             this.FACTORY = callable -> {
                 FutureTask<Result[]> futureTask = new FutureTask<>(callable::run);
-                Strand strand = Strand.of(new Thread(futureTask));
+                Strand strand = Strand.of(new ExecutionThread(futureTask, iteration));
                 String name = "LinCheckStrand";
                 strand.setName(name);
                 futureTasks.add(futureTask);
@@ -165,4 +163,30 @@ public class ExecutionsStrandPool {
         Strand newStrand(TestThreadExecution callable);
     }
 
+    public static class ExecutionThread extends Thread{
+        private final int iteration;
+
+        public ExecutionThread(Runnable target, int iteration) {
+            super(target);
+            this.iteration = iteration;
+        }
+
+
+        public int getIteration() {
+            return iteration;
+        }
+    }
+
+    public static class ExecutionFiber<T> extends Fiber<T>{
+        private final int iteration;
+
+        public ExecutionFiber(FiberScheduler scheduler, SuspendableCallable<T> target, int iteration) {
+            super(scheduler, target);
+            this.iteration = iteration;
+        }
+
+        public int getIteration() {
+            return iteration;
+        }
+    }
 }

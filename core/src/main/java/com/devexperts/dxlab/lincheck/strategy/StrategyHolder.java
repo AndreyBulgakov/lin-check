@@ -23,6 +23,9 @@ package com.devexperts.dxlab.lincheck.strategy;
  */
 
 
+import co.paralleluniverse.strands.Strand;
+import com.devexperts.dxlab.lincheck.ExecutionsStrandPool;
+
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,41 +36,54 @@ import java.util.concurrent.ConcurrentHashMap;
 public abstract class StrategyHolder {
     private static Strategy currentStrategy;
 
-    public static Map<ThreadGroup, Strategy> strategyMap = new ConcurrentHashMap<>();
-    private static Map<Integer, Strategy> strategyIntMap = new ConcurrentHashMap<>();
+    public static final Map<ThreadGroup, Strategy> strategyMap = new ConcurrentHashMap<>();
+    private static final Map<Integer, Strategy> strategyIntMap = new ConcurrentHashMap<>();
+    private static final Strategy dummy = new DummyStrategy();
 
-    public static void setCurrentStrategy(Strategy curentStrategy) {
-        strategyMap.put(Thread.currentThread().getThreadGroup(), curentStrategy);
+
+
+    public static void setCurrentStrategy(int iteration, Strategy curentStrategy) {
+        strategyIntMap.put(iteration, curentStrategy);
     }
-
-    public static void setCurrentStrategy(ThreadGroup group, Strategy curentStrategy) {
-        strategyMap.put(group, curentStrategy);
-    }
-
 
     @SuppressWarnings("unused") // invoked from transformed code
-    public static Strategy getCurrentStrategy() {
-        final ThreadGroup currentGroup = Thread.currentThread().getThreadGroup();
-        return strategyMap.keySet().stream()
-                .filter(group -> group.parentOf(currentGroup))
-                .findFirst()
-                .map(group -> strategyMap.get(group))
-                .orElse(null);
-
-    }
-
-    //Maybe it works faster
-    private static Strategy getThreadGroupsStrategyOrNull() {
-        ThreadGroup currentGroup = Thread.currentThread().getThreadGroup();
-        Strategy currentStrategy = null;
-        for (ThreadGroup parrent = Thread.currentThread().getThreadGroup();
-             currentStrategy == null || parrent != null;
-             parrent = parrent.getParent()) {
-            if (currentGroup.getName().equals("LinCheckGroup")) {
-                currentStrategy = strategyMap.get(currentGroup);
-            }
-            currentGroup = parrent;
+    public static Strategy getCurrentStrategy(){
+        Strand currentStrand = Strand.currentStrand();
+        if (currentStrand instanceof ExecutionsStrandPool.ExecutionFiber){
+            ExecutionsStrandPool.ExecutionFiber fiber = (ExecutionsStrandPool.ExecutionFiber) currentStrand;
+            return strategyIntMap.get(fiber.getIteration());
         }
-        return currentStrategy;
+        Thread currentThread = Thread.currentThread();
+        if (currentThread instanceof ExecutionsStrandPool.ExecutionThread){
+            ExecutionsStrandPool.ExecutionThread thread = (ExecutionsStrandPool.ExecutionThread) currentThread;
+            return strategyIntMap.get(thread.getIteration());
+        }
+        return dummy;
     }
+//
+//    @SuppressWarnings("unused") // invoked from transformed code
+//    public static Strategy getCurrentStrategy() {
+//        final ThreadGroup currentGroup = Thread.currentThread().getThreadGroup();
+//        return strategyMap.keySet().stream()
+//                .filter(group -> group.parentOf(currentGroup))
+//                .findFirst()
+//                .map(group -> strategyMap.get(group))
+//                .orElse(null);
+//
+//    }
+
+//    //Maybe it works faster
+//    private static Strategy getThreadGroupsStrategyOrNull() {
+//        ThreadGroup currentGroup = Thread.currentThread().getThreadGroup();
+//        Strategy currentStrategy = null;
+//        for (ThreadGroup parrent = Thread.currentThread().getThreadGroup();
+//             currentStrategy == null || parrent != null;
+//             parrent = parrent.getParent()) {
+//            if (currentGroup.getName().equals("LinCheckGroup")) {
+//                currentStrategy = strategyMap.get(currentGroup);
+//            }
+//            currentGroup = parrent;
+//        }
+//        return currentStrategy;
+//    }
 }

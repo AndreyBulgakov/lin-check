@@ -1,4 +1,4 @@
-package com.devexperts.dxlab.lincheck.strategy;
+package com.devexperts.dxlab.lincheck;
 
 /*
  * #%L
@@ -22,19 +22,17 @@ package com.devexperts.dxlab.lincheck.strategy;
  * #L%
  */
 
-/**
- * Created by andrey on 4/20/17.
- */
-public class DummyStrategy implements Strategy {
 
-
-    @Override
-    public void onSharedVariableRead(int location) {
-
+class CleanClassLoader extends ClassLoader {
+    CleanClassLoader(ClassLoader parent) {
+        super(parent);
     }
 
-    @Override
-    public void onSharedVariableWrite(int location) {
-
+    CleanClassLoader() {
     }
+
+    Class<? extends TestThreadExecution> defineTestThreadExecution(String className, byte[] bytecode) {
+        return (Class<? extends TestThreadExecution>) super.defineClass(className, bytecode, 0, bytecode.length);
+    }
+
 }

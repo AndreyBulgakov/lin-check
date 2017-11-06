@@ -45,18 +45,18 @@ public class ListTest {
         lflist.add(value);
     }
 
-    @Operation
+//    @Operation
     public Boolean contains(@Param(gen = IntGen.class) int value) {
         return lflist.contains(value);
     }
 
-    @Operation
+//    @Operation
     public Integer indexOf(@Param(gen = IntGen.class) int value) {
         return lflist.indexOf(value);
     }
 
     @Operation
-    @HandleExceptionAsResult(NullPointerException.class)
+    @HandleExceptionAsResult({NullPointerException.class, IndexOutOfBoundsException.class})
     public Integer get(@Param(gen = IntGen.class) int index) {
         return lflist.get(index);
     }

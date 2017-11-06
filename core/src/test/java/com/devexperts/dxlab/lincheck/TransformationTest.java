@@ -41,7 +41,7 @@ public class TransformationTest {
     @Test
     public void TestOnSharedVariableInsertion() throws IOException {
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
-        StrategyHolder.setCurrentStrategy(new ConsumeCPUStrategy(100));
+        StrategyHolder.setCurrentStrategy(0,new ConsumeCPUStrategy(100));
         ClassVisitor cv = new BeforeSharedVariableClassVisitor(cw);
         ClassReader cr = new ClassReader(A.class.getCanonicalName());
         cr.accept(cv, ClassReader.EXPAND_FRAMES);

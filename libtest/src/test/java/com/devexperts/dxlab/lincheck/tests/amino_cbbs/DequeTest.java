@@ -30,6 +30,8 @@ import org.junit.Test;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.GenerateMicroBenchmark;
 
+import java.io.*;
+import java.nio.file.Files;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,7 +39,14 @@ import java.util.Arrays;
 /**
  * Created by alexander on 18.02.17.
  */
-@CTest(iterations = 10, actorsPerThread = {"1:4", "1:4"}, invocationsPerIteration = 100_000)
+@CTest(iterations = 9_000, actorsPerThread = {"1:4", "1:4"}, invocationsPerIteration = 100_000)
+//@CTest(iterations = 100, actorsPerThread = {"1:4", "1:4", "1:4"}, invocationsPerIteration = 100_000)
+//@CTest(iterations = 9_000, actorsPerThread = {"1:1", "1:4"}, invocationsPerIteration = 100_000)
+//@CTest(iterations = 10, actorsPerThread = {"4:4", "4:4", "4:4"}, invocationsPerIteration = 100_000)
+//@CTest(iterations = 100, actorsPerThread = {"1:2", "1:2"}, invocationsPerIteration = 100_000)
+//@CTest(iterations = 100, actorsPerThread = {"1:2", "1:2", "1:2"}, invocationsPerIteration = 100_000)
+//@CTest(iterations = 100, actorsPerThread = {"1:2", "1:2", "1:2", "1:2"}, invocationsPerIteration = 100_000)
+//@CTest(iterations = 100, actorsPerThread = {"1:2", "1:2", "1:2", "1:2", "1:2"}, invocationsPerIteration = 100_000)
 public class DequeTest {
     private LockFreeDeque<Integer> lfdeque;
 
@@ -77,8 +86,17 @@ public class DequeTest {
     }
 
     @Test
-    public void test() {
+    public void test() throws IOException {
+        long instant = Instant.now().toEpochMilli();
+        FileWriter writer = new FileWriter("time", true);
+        try {
             LinChecker.check(this);
+        } finally {
+            long end = Instant.now().toEpochMilli()-instant;
+            System.out.println("Time:" + end);
+            writer.write(""+end+"\n");
+            writer.flush();
+        }
 //        int counts = 50;
 //        long[] times = new long[counts];
 //        for (int i = 0; i < counts; i++) {

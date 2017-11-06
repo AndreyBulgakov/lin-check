@@ -28,6 +28,7 @@ import com.devexperts.dxlab.lincheck.strategy.Strategy;
 import javafx.util.Pair;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -248,18 +249,24 @@ public class EnumerationStrategy implements Strategy {
     }
 
     public static PrintStream getLogger() {
-        try {
-            Path p = Paths.get(System.getProperty("user.dir"), "log");
-            if (Files.exists(p)) {
-                return new PrintStream(Files.newOutputStream(p, APPEND));
-            } else {
-                return new PrintStream(Files.newOutputStream(p));
+//        try {
+//            Path p = Paths.get(System.getProperty("user.dir"), "log");
+//            if (Files.exists(p)) {
+//                return new PrintStream(Files.newOutputStream(p, APPEND));
+//            } else {
+//                return new PrintStream(Files.newOutputStream(p));
+//            }
+//        }
+//        catch (IOException e){
+//            e.printStackTrace();
+//        }
+//        return null;
+        return new PrintStream(new OutputStream() {
+            @Override
+            public void write(int b) throws IOException {
+
             }
-        }
-        catch (IOException e){
-            e.printStackTrace();
-        }
-        return null;
+        });
     }
 
     /**

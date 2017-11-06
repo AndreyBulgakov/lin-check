@@ -27,14 +27,11 @@ import com.devexperts.dxlab.lincheck.report.TestReport;
 import com.devexperts.dxlab.lincheck.strategy.Strategy;
 
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Queue;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class IterationListener {
+class IterationListener {
 
     private Queue<TestReport> reports = new ConcurrentLinkedQueue<TestReport>();
     private final long START_TIME;
@@ -44,9 +41,8 @@ public class IterationListener {
     private final int maxIterations;
 
     private boolean isNonLinearizable = false;
-    private volatile int currentIteration = 0;
 
-    public IterationListener(Object lock, CTestConfiguration cfg, String testClassName, long START_TIME) {
+    IterationListener(Object lock, CTestConfiguration cfg, String testClassName, long START_TIME) {
         this.START_TIME = START_TIME;
         this.LOCK = lock;
         this.cfg = cfg;
@@ -54,14 +50,12 @@ public class IterationListener {
         this.maxIterations = cfg.getIterations();
     }
 
-    public void foundNonLinearizable(Strategy strategy, int iteration, int invocation){
+    void foundNonLinearizable(Strategy strategy, int iteration, int invocation){
         registerReport(strategy,iteration,invocation);
         isNonLinearizable = true;
-        synchronized (LOCK){
-            LOCK.notify();
-        }
+        throw new AssertionError("Non-linearizable");
     }
-    public void registerReport(Strategy strategy, int iteration, int invocation){
+    private void registerReport(Strategy strategy, int iteration, int invocation){
         TestReport report = new TestReport.Builder(cfg)
                 .name(testClassName)
                 .strategy(strategy.getClass().getSimpleName())
@@ -73,16 +67,19 @@ public class IterationListener {
         reports.add(report);
     }
 
-    public void onEndIteration(){
-        currentIteration++;
-        if (currentIteration >= maxIterations){
+
+    private AtomicInteger currentIteration = new AtomicInteger(0);
+    void onEndIteration(){
+        int i = currentIteration.incrementAndGet();
+        System.out.println(i + "/" + maxIterations);
+        if (i >= maxIterations){
             synchronized (LOCK){
                 LOCK.notify();
             }
         }
     }
 
-    public boolean isNonLinearizable() {
+    boolean isNonLinearizable() {
         return isNonLinearizable;
     }
 }
